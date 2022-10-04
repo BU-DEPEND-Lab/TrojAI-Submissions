@@ -1,3 +1,10 @@
+# About Round 10
+This branch contains the code that generated the submission for round 10.
+
+The `model` folder and the datasets are not included in this branch. Please download the `model` folder by referring to `Submission Instructions` below; and find datasets in `/mnt/md0/shared/trojai_datasets_round10` folder in Lambda server.
+
+
+# Submission Instructions
 This repo contains a minimal working example for a submission to the [TrojAI leaderboard](https://pages.nist.gov/trojai/). This minimal ‘solution’ loads the model file, inferences the example text sequences, and then writes a random number to the output file. You can use this as your base to build your own solution. 
 
 Every solution submitted for evaluation must be containerized via [Singularity](https://singularity.hpcng.org/) (see this [Singularity tutorial](https://pawseysc.github.io/sc19-containers/)). 
