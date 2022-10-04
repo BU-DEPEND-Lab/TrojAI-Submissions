@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Algorithm Meta-Parameters",
+  "technique": "SRI weight analysis",
+  "technique_description": "Using histograms of weight matrices and their eigenvalues as features for Trojan detection.",
+  "technique_changes": "Same as weight analysis technique applied to R5~R9 models",
+  "commit_id": "4a74a0fd367546dfa06897edcd2e1b827e5309eb",
+  "repo_name": "https://github.com/frkl/trojai-fuzzing-vision",
+  "required": [ "nbins", "szcap"],
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "nbins": {
+      "description": "Number of histogram bins in feature. Default 100.",
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 10000000
+    },
+    "szcap": {
+      "description": "Matrix size cap in feature extraction. So it doesn't consume all memory. Default 4096.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000000
+    }
+  }
+}
