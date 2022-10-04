@@ -1,7 +1,7 @@
 # About Round 10
 This branch contains the code that generated the submission for round 10.
 
-The `model` folder and the datasets are not included in this branch. Please download the `model` folder by referring to `Submission Instructions` below; and find datasets in `/mnt/md0/shared/trojai_datasets_round10` folder in Lambda server.
+The `model` folder and the datasets are not included in this branch but saved in `/mnt/md0/shared/TrojAI-Submissions/round10` folder in the Lambda server.
 
 
 # Submission Instructions
