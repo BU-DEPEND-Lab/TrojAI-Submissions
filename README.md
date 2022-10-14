@@ -1,7 +1,27 @@
-# About Round 10
-This branch contains the code that generated the submission for round 10.
+# About Round 11
+This branch contains the code that generated the submission for **round 10**.
+
+The submission for round 11 will be based on round 10
 
 The `model` folder and the datasets are not included in this branch but saved in `/mnt/md0/shared/TrojAI-Submissions/round10` folder in the Lambda server.
+
+
+## Install Anaconda Python
+
+[https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)
+
+## Setup the Conda Environment
+
+Run `conda env create -f trojai_conda.yml`
+
+Or craft the environment by hand:
+
+1. `conda create --name trojai python=3.6.9 -y` ([help](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html))
+2. `conda activate trojai`
+3. Install required packages into this conda environment
+
+    1. `pip install torch==1.10.1+cu102 torchvision=0.11.2+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
+    3. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets`
 
 
 # Submission Instructions
@@ -69,19 +89,6 @@ A small toy set of clean & poisioned data is also provided in this repository un
 
 --------------
 # How to Build this Minimal Example
-
-## Install Anaconda Python
-
-[https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)
-
-## Setup the Conda Environment
-
-1. `conda create --name trojai-example python=3.8 -y` ([help](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html))
-2. `conda activate trojai-example`
-3. Install required packages into this conda environment
-
-    1. `conda install pytorch=1.11 torchvision=0.12 cudatoolkit=11.3 -c pytorch`
-    3. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy`
 
 ## Test Fake Detector Without Containerization
 
