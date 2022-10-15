@@ -138,7 +138,8 @@ if __name__ == "__main__":
     default_params.szcap=4096;
     default_params.fname='data_r10_weight.pt'
     params=smartparse.parse(default_params);
-    params.argv=sys.argv;
+    params.argv=sys.argv
+    print(sys.argv)
     data.d['params']=db.Table.from_rows([vars(params)]);
 
     model_ids=list(range(0,144))
