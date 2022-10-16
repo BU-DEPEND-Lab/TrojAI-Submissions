@@ -14,7 +14,7 @@ import torchvision.datasets.folder
 
 warnings.filterwarnings("ignore")
 
-def get_paths(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round10/trojai-datasets/round10-train-dataset'):
+def get_paths(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/trojai-datasets/round10-train-dataset'):
     id='id-%08d'%id;
     model_filepath=os.path.join(root,'models',id,'model.pt');
     examples_dirpath=os.path.join(root,'models',id,'clean-example-data');

@@ -119,7 +119,7 @@ def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirp
     params = smartparse.merge(params,default_params);
 
     if not id is None:
-        model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id);
+        model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id, root = '/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/');
 
     interface=engine.new(model_filepath);
     fvs=run(interface,nbins=params.nbins,szcap=params.szcap)
@@ -139,7 +139,6 @@ if __name__ == "__main__":
     default_params.fname='data_r10_weight.pt'
     params=smartparse.parse(default_params);
     params.argv=sys.argv
-    print(sys.argv)
     data.d['params']=db.Table.from_rows([vars(params)]);
 
     model_ids=list(range(0,144))
