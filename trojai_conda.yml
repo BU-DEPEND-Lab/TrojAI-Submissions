@@ -306,13 +306,13 @@ dependencies:
     - sacremoses==0.0.53
     - scikit-learn==0.24.2
     - threadpoolctl==3.1.0
+    - timm==0.6.11
     - tokenizers==0.12.1
     - torch==1.10.1+cu102
     - torchvision==0.11.2+cu102
     - tqdm==4.64.1
     - transformers==4.18.0
     - typing-extensions==4.1.1
-    - urllib3==1.25.10
+    - urllib3==1.23
     - xxhash==0.0.0
     - yarl==1.7.2
-prefix: /home/zwc662/miniconda3/envs/trojai
