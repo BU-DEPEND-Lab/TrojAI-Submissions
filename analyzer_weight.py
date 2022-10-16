@@ -169,7 +169,7 @@ if __name__ == "__main__":
             if i%1==0:
                 data.save(params.fname);
         except AttributeError as e:
-            print(f"{e}: failed to load Model-{id}. Skip.")
+            print(f"Skip loading Model-{id}: {e}")
 
     data.save(params.fname);
 
