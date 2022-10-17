@@ -16,12 +16,14 @@ Run `conda env create -f trojai_conda.yml`
 
 Or craft the environment by hand:
 
-1. `conda create --name trojai python=3.6.9 -y` ([help](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html))
+1. `conda create --name trojai python=3.8 -y` ([help](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html))
 2. `conda activate trojai`
 3. Install required packages into this conda environment
 
-    1. `pip install torch==1.10.1+cu102 torchvision=0.11.2+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
-    3. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets`
+    3.1. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets sklearn timm`
+    3.2. `pip install torch==1.10.1+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
+    3.3. `conda install torchvision`
+    > If seeing CUDA error, repeat 3.2 and try again.
 
 
 # Submission Instructions
