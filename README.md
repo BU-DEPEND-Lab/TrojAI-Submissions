@@ -3,7 +3,7 @@ This branch contains the code that generated the submission for **round 10**.
 
 The submission for round 11 will be based on round 10
 
-The `model` folder and the datasets are not included in this branch but saved in `/mnt/md0/shared/TrojAI-Submissions/round10` folder in the Lambda server.
+The `model` folder and the datasets are not included in this branch but saved in `/mnt/md0/shared/TrojAI-Submissions/round11` folder in the Lambda server.
 
 
 ## Install Anaconda Python
@@ -23,7 +23,7 @@ Or craft the environment by hand:
     1. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets sklearn timm`
     2. `pip install torch==1.10.1+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
     3. `conda install torchvision`
-    > If seeing CUDA error, repeat 3.2 and try again.
+    > If seeing CUDA error, repeat ii and try again.
 
 
 # Submission Instructions
