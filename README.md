@@ -22,9 +22,8 @@ Or craft the environment by hand:
 
     1. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets sklearn timm`
     2. `pip install torch==1.10.1+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
-    3. `conda install torchvision`
-    > If seeing CUDA error, repeat ii and try again.
-
+    3. `pip install torchvision==0.13.0`
+    
 
 # Submission Instructions
 This repo contains a minimal working example for a submission to the [TrojAI leaderboard](https://pages.nist.gov/trojai/). This minimal ‘solution’ loads the model file, inferences the example text sequences, and then writes a random number to the output file. You can use this as your base to build your own solution. 
