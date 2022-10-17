@@ -20,9 +20,9 @@ Or craft the environment by hand:
 2. `conda activate trojai`
 3. Install required packages into this conda environment
 
-    3.1. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets sklearn timm`
-    3.2. `pip install torch==1.10.1+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
-    3.3. `conda install torchvision`
+    1. `pip install pycocotools transformers opencv-python jsonschema jsonargparse jsonpickle scipy datasets sklearn timm`
+    2. `pip install torch==1.10.1+cu102 --extra-index-url https://download.pytorch.org/whl/cu102`
+    3. `conda install torchvision`
     > If seeing CUDA error, repeat 3.2 and try again.
 
 
