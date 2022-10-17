@@ -67,7 +67,7 @@ data.cuda();
 params.stuff=data.preprocess();
 
 import pandas
-meta=pandas.read_csv('../trojai-datasets/round10-train-dataset/METADATA.csv');
+meta=pandas.read_csv('/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/METADATA.csv');
 meta_table={};
 meta_table['model_name']=list(meta['model_name']);
 meta_table['label']=[int(x) for x in list(meta['poisoned'])];
