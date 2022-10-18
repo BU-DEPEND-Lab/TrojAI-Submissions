@@ -333,7 +333,8 @@ def run_crossval(p):
 
 #Get results from hyper parameter search
 best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
-#best=util.macro.obj(best);
+if len(best) == 0:
+    best=util.macro.obj(best);
 params_=configure_pipeline(**best);
 hyper_params_str=json.dumps(best);
 session.log('Best hyperparam (%s)'%(hyper_params_str));
