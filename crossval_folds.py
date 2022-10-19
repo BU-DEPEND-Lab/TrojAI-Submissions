@@ -44,7 +44,7 @@ def default_params():
     params.tag='';
     #MISC
     params.session_dir=None;
-    params.budget=100;
+    params.budget=10;
     return params
 
 def create_session(params):
@@ -335,7 +335,7 @@ def run_crossval(p):
 best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
 if len(best) == 0:
     best=util.macro.obj(best);
-params_=configure_pipeline(**best);
+params_=configure_pipeline(params, **best);
 hyper_params_str=json.dumps(best);
 session.log('Best hyperparam (%s)'%(hyper_params_str));
 
