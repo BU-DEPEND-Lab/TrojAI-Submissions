@@ -5,8 +5,6 @@ From: pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
     ./arch /
     ./util /
     ./learned_parameters /
-    ./learned_parameters_first_5_layers /
-    ./learned_parameters_first_2_layers /
     ./*.py /
 	./*.json /
 
@@ -29,4 +27,4 @@ From: pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
     /opt/conda/bin/pip install scikit-learn
 
 %runscript
-    exec /opt/conda/bin/python3.8 /trojan_detector.py "$@"
+    exec python3 /trojan_detector.py "$@"
