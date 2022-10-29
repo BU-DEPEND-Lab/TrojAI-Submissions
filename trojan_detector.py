@@ -52,7 +52,7 @@ def example_trojan_detector(model_filepath,
                             result_filepath,
                             scratch_dirpath,
                             examples_dirpath,
-                            source_dataset_dirpath,
+                            #source_dataset_dirpath,
                             round_training_dataset_dirpath,
                             parameters_dirpath,
                             config):
@@ -60,7 +60,7 @@ def example_trojan_detector(model_filepath,
     logging.info('result_filepath = {}'.format(result_filepath))
     logging.info('scratch_dirpath = {}'.format(scratch_dirpath))
     logging.info('examples_dirpath = {}'.format(examples_dirpath))
-    logging.info('source_dataset_dirpath = {}'.format(source_dataset_dirpath))
+    #logging.info('source_dataset_dirpath = {}'.format(source_dataset_dirpath))
     logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
     logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
     
@@ -185,7 +185,7 @@ if __name__ == "__main__":
             args.result_filepath is not None and
             args.scratch_dirpath is not None and
             args.examples_dirpath is not None and
-            args.source_dataset_dirpath is not None and
+            #args.source_dataset_dirpath is not None and
             args.round_training_dataset_dirpath is not None and
             args.learned_parameters_dirpath is not None):
             print(vars(args))
@@ -194,7 +194,7 @@ if __name__ == "__main__":
                                     args.result_filepath,
                                     args.scratch_dirpath,
                                     args.examples_dirpath,
-                                    args.source_dataset_dirpath,
+                                    #args.source_dataset_dirpath,
                                     args.round_training_dataset_dirpath,
                                     args.learned_parameters_dirpath,args)
         else:

@@ -2,8 +2,7 @@ python trojan_detector.py --learned_parameters_dirpath=./learned_parameters  --m
 
 #python trojan_detector.py  --model_filepath=./data/round9-train-dataset/models/id-00000105/model.pt  --tokenizer_filepath=./data/round9-train-dataset/tokenizers/google-electra-small-discriminator.pt  --features_filepath=./features.csv  --result_filepath=./output.txt  --scratch_dirpath=./scratch/  --examples_dirpath=./data/round9-train-dataset/models/id-00000105/clean-example-data.json  --round_training_dataset_dirpath=/path/to/training/dataset/  --metaparameters_filepath=./metaparameters.json  --schema_filepath=./metaparameters_schema.json  --learned_parameters_dirpath=./learned_parameters
 
-echo "penny"
-
+ 
 sudo singularity build test-trojai-r10-weight-v2.simg trojan_detector.def 
 
 
