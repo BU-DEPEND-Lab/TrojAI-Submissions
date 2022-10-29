@@ -199,6 +199,7 @@ if __name__ == "__main__":
                                     args.learned_parameters_dirpath,args)
         else:
             logging.info("Required Evaluation-Mode parameters missing!")
+            logging.info(f"Arguments: {vars(args)}")
     else:
         if (args.source_dataset_dirpath is not None and
             args.learned_parameters_dirpath is not None and
