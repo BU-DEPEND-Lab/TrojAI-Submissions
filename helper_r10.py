@@ -14,7 +14,7 @@ import torchvision.datasets.folder
 
 warnings.filterwarnings("ignore")
 
-def get_paths(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/trojai-datasets/round10-train-dataset'):
+def get_paths(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/'):
     id='id-%08d'%id;
     model_filepath=os.path.join(root,'models',id,'model.pt');
     examples_dirpath=os.path.join(root,'models',id,'clean-example-data');
@@ -22,11 +22,11 @@ def get_paths(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round1
     
     return model_filepath, scratch_dirpath, examples_dirpath;
 
-def get_root(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round10/trojai-datasets/round10-train-dataset'):
+def get_root(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/'):
     id='id-%08d'%id;
     return os.path.join(root,'models',id);
 
-def load_trigger(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round10/trojai-datasets/round10-train-dataset'):
+def load_trigger(id,root='/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/'):
     id='id-%08d'%id;
     imname=os.path.join(root,'models',id,'trigger_0.png');
     im=torchvision.datasets.folder.default_loader(imname);
