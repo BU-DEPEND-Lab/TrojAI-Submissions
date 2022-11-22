@@ -1,0 +1,601 @@
+Split 0, loss 0.6935 (0.7005), auc 0.2500, time 0.887175
+Split 1, loss 0.6932 (0.6941), auc 1.0000, time 1.672147
+Split 2, loss 0.6199 (0.6826), auc 0.8333, time 2.486544
+Split 3, loss 0.6917 (0.6922), auc 0.5000, time 3.334967
+Mistakes: 0,12,14
+AUC: 0.645833 + 0.671855, CE: 0.674577 + 0.072955, CEpre: 0.692340 + 0.014888 (arch.mlp_set_eig (2,4,236), epochs 11, batch 33, lr 0.000002, decay 0.000000)
+Split 0, loss 0.7080 (1.0505), auc 0.5000, time 7.419532
+Split 1, loss 0.7261 (1.3759), auc 0.5000, time 14.888431
+Split 2, loss 0.7140 (1.2417), auc 0.2500, time 22.146617
+Split 3, loss 0.6949 (0.7269), auc 0.5000, time 29.515613
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.437500 + 0.250000, CE: 0.710742 + 0.025948, CEpre: 1.098741 + 0.563080 (arch.mlp_set_eig (3,9,95), epochs 123, batch 11, lr 0.000001, decay 0.000252)
+Split 0, loss 0.6696 (0.6740), auc 0.7500, time 8.788262
+Split 1, loss 0.3690 (0.5900), auc 1.0000, time 17.231242
+Split 2, loss 0.6726 (0.7735), auc 0.6667, time 26.023251
+Split 3, loss 0.5693 (0.6277), auc 0.7500, time 34.681446
+Mistakes: 0,5,8,12,18,22
+AUC: 0.791667 + 0.288675, CE: 0.570132 + 0.284842, CEpre: 0.666321 + 0.158614 (arch.mlp_set_eig (3,3,415), epochs 191, batch 27, lr 0.001031, decay 0.000313)
+Split 0, loss 0.4686 (0.6198), auc 0.9167, time 48.343140
+Split 1, loss 0.6937 (0.7048), auc 1.0000, time 96.718214
+Split 2, loss 0.5988 (0.7641), auc 0.9167, time 145.497255
+Split 3, loss 0.6954 (0.7372), auc 1.0000, time 194.241562
+Mistakes: 3,11,14,19,27
+AUC: 0.958333 + 0.096225, CE: 0.614130 + 0.214028, CEpre: 0.706462 + 0.125285 (arch.mlp_set_eig (1,12,137), epochs 846, batch 16, lr 0.001926, decay 0.000000)
+Split 0, loss 0.6937 (0.7033), auc 0.9167, time 11.256802
+Split 1, loss 0.6939 (0.7083), auc 0.7000, time 22.612559
+Split 2, loss 0.6933 (0.6963), auc 0.4167, time 33.834531
+Split 3, loss 0.6937 (0.7048), auc 0.5000, time 45.192568
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.633333 + 0.446385, CE: 0.693643 + 0.000490, CEpre: 0.703171 + 0.010099 (arch.mlp_set_eig (6,8,318), epochs 141, batch 13, lr 0.000016, decay 0.000000)
+Split 0, loss 0.6938 (0.7062), auc 0.9167, time 37.607129
+Split 1, loss 0.5983 (0.6618), auc 1.0000, time 75.342201
+Split 2, loss 0.6946 (0.7219), auc 0.9167, time 114.132827
+Split 3, loss 0.6948 (0.7258), auc 0.9167, time 153.393605
+Mistakes: 3,5,10,11,14,18,19,21,22,27
+AUC: 0.937500 + 0.083333, CE: 0.670394 + 0.096178, CEpre: 0.703933 + 0.058657 (arch.mlp_set_eig (10,4,505), epochs 390, batch 13, lr 0.000025, decay 0.000134)
+Split 0, loss 0.7079 (1.0497), auc 0.9167, time 1.006205
+Split 1, loss 0.6771 (0.6891), auc 0.8000, time 1.963265
+Split 2, loss 0.6978 (0.7847), auc 0.5000, time 2.937721
+Split 3, loss 0.6780 (0.6925), auc 0.6667, time 3.873651
+Mistakes: 10,14,18,22
+AUC: 0.720833 + 0.358366, CE: 0.690202 + 0.030347, CEpre: 0.804006 + 0.339382 (arch.mlp_set_eig (1,8,26), epochs 15, batch 33, lr 0.000743, decay 0.000017)
+Split 0, loss 0.6977 (0.7835), auc 0.7500, time 71.240991
+Split 1, loss 0.7038 (0.8991), auc 1.0000, time 142.603135
+Split 2, loss 0.6829 (0.6850), auc 0.5000, time 213.945710
+Split 3, loss 0.6828 (0.6924), auc 0.8333, time 285.173651
+Mistakes: 
+AUC: 0.770833 + 0.416667, CE: 0.691795 + 0.021208, CEpre: 0.765014 + 0.199917 (arch.mlp_set_eig (10,2,31), epochs 995, batch 27, lr 0.000002, decay 0.000002)
+Split 0, loss 0.7045 (1.0004), auc 0.5833, time 1.336527
+Split 1, loss 0.6949 (0.7282), auc 1.0000, time 2.745580
+Split 2, loss 0.6938 (0.7057), auc 0.5000, time 4.154155
+Split 3, loss 0.6943 (0.7162), auc 0.5833, time 5.585677
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.666667 + 0.451335, CE: 0.696875 + 0.010213, CEpre: 0.787650 + 0.284295 (arch.mlp_set_eig (4,4,192), epochs 18, batch 11, lr 0.000449, decay 0.000000)
+Split 0, loss 0.6830 (0.6872), auc 0.2500, time 7.590657
+Split 1, loss 0.6940 (0.7111), auc 0.7000, time 15.260639
+Split 2, loss 0.6946 (0.7204), auc 0.7500, time 23.020451
+Split 3, loss 0.6948 (0.7248), auc 1.0000, time 30.779422
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.675000 + 0.624500, CE: 0.691599 + 0.011454, CEpre: 0.710878 + 0.033583 (arch.mlp_set_eig (7,3,16), epochs 101, batch 12, lr 0.000050, decay 0.000038)
+Split 0, loss 0.6932 (0.6934), auc 0.6667, time 13.264746
+Split 1, loss 0.5979 (0.6081), auc 0.9000, time 26.530911
+Split 2, loss 0.7026 (0.9043), auc 0.8333, time 39.463487
+Split 3, loss 0.3579 (0.4307), auc 0.9167, time 52.789677
+Mistakes: 5,10,14,18,21,22
+AUC: 0.829167 + 0.228319, CE: 0.587895 + 0.320910, CEpre: 0.659118 + 0.393426 (arch.mlp_set_eig (4,6,167), epochs 298, batch 21, lr 0.000029, decay 0.000394)
+Split 0, loss 0.7136 (1.3803), auc 0.6667, time 2.654113
+Split 1, loss 0.5194 (0.6465), auc 1.0000, time 5.315756
+Split 2, loss 0.7091 (1.1898), auc 0.5833, time 7.978961
+Split 3, loss 0.5860 (0.6115), auc 0.8333, time 10.606374
+Mistakes: 0,5,8,11,12,18,21,22,27
+AUC: 0.770833 + 0.369559, CE: 0.632004 + 0.191171, CEpre: 0.957009 + 0.773843 (arch.mlp_set_eig (1,5,38), epochs 54, batch 48, lr 0.003859, decay 0.000000)
+Split 0, loss 0.6829 (0.6843), auc 0.3333, time 4.065120
+Split 1, loss 0.6985 (0.7987), auc 0.8000, time 8.103493
+Split 2, loss 0.6829 (0.6864), auc 0.7500, time 12.091136
+Split 3, loss 0.6949 (0.7272), auc 1.0000, time 16.075590
+Mistakes: 0,3,8,11,12,19,27
+AUC: 0.720833 + 0.560010, CE: 0.689814 + 0.016216, CEpre: 0.724155 + 0.106966 (arch.mlp_set_eig (12,4,81), epochs 30, batch 19, lr 0.000230, decay 0.000000)
+Split 0, loss 0.6829 (0.6831), auc 0.4167, time 1.876877
+Split 1, loss 0.5983 (0.6164), auc 0.6000, time 3.759332
+Split 2, loss 0.6958 (0.7443), auc 0.5833, time 5.659375
+Split 3, loss 0.6830 (0.6884), auc 0.5000, time 7.571815
+Mistakes: 0,5,8,10,12,14,18,21,22
+AUC: 0.525000 + 0.168874, CE: 0.664990 + 0.089765, CEpre: 0.683024 + 0.104697 (arch.mlp_set_eig (2,11,395), epochs 19, batch 10, lr 0.000004, decay 0.000005)
+Split 0, loss 0.6987 (0.8074), auc 0.9167, time 5.764648
+Split 1, loss 0.7037 (0.8976), auc 0.7500, time 11.497910
+Split 2, loss 0.6830 (0.8032), auc 0.4583, time 17.288375
+Split 3, loss 0.6959 (0.7470), auc 0.6667, time 23.051455
+Mistakes: 3,11,19,27
+AUC: 0.697917 + 0.381123, CE: 0.695343 + 0.017659, CEpre: 0.813812 + 0.124535 (arch.mlp_set_eig (10,10,74), epochs 82, batch 21, lr 0.000042, decay 0.000001)
+Split 0, loss 0.6652 (0.6652), auc 0.8333, time 1.867067
+Split 1, loss 0.5908 (0.6202), auc 0.9000, time 3.721139
+Split 2, loss 0.6815 (0.6815), auc 0.7500, time 5.605245
+Split 3, loss 0.5112 (0.6029), auc 1.0000, time 7.482690
+Mistakes: 0,5,8,10,12,14,18,21,22
+AUC: 0.870833 + 0.211476, CE: 0.612160 + 0.156045, CEpre: 0.642452 + 0.073944 (arch.mlp_set_eig (2,3,26), epochs 31, batch 57, lr 0.009289, decay 0.000021)
+Split 0, loss 0.6940 (0.7105), auc 0.8333, time 8.219382
+Split 1, loss 0.6940 (0.7112), auc 1.0000, time 16.551353
+Split 2, loss 0.7071 (1.0328), auc 0.5833, time 24.827506
+Split 3, loss 0.5040 (0.5367), auc 0.8333, time 33.240899
+Mistakes: 18,22,27
+AUC: 0.812500 + 0.343592, CE: 0.649805 + 0.194742, CEpre: 0.747801 + 0.413934 (arch.mlp_set_eig (3,7,50), epochs 140, batch 42, lr 0.000188, decay 0.000001)
+Split 0, loss 0.6828 (0.6833), auc 0.4167, time 1.781592
+Split 1, loss 0.5979 (0.6899), auc 0.7000, time 3.387944
+Split 2, loss 0.6829 (0.6865), auc 0.5833, time 5.106503
+Split 3, loss 0.6946 (0.7208), auc 0.8333, time 6.915635
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.633333 + 0.353815, CE: 0.664560 + 0.089540, CEpre: 0.695106 + 0.034679 (arch.mlp_set_eig (5,5,17), epochs 21, batch 56, lr 0.000423, decay 0.000127)
+Split 0, loss 0.6829 (0.6889), auc 0.9583, time 4.531220
+Split 1, loss 0.5983 (0.6134), auc 0.8500, time 9.068505
+Split 2, loss 0.6829 (0.7095), auc 0.8750, time 13.625281
+Split 3, loss 0.6829 (0.7253), auc 0.5417, time 18.147049
+Mistakes: 0,5,8,12,21
+AUC: 0.806250 + 0.364736, CE: 0.661749 + 0.084639, CEpre: 0.684268 + 0.099129 (arch.mlp_set_eig (11,9,27), epochs 49, batch 29, lr 0.000063, decay 0.000000)
+Split 0, loss 0.6799 (0.6931), auc 0.6667, time 0.916829
+Split 1, loss 0.4382 (0.5201), auc 1.0000, time 1.824289
+Split 2, loss 0.6276 (0.6276), auc 0.6667, time 2.739177
+Split 3, loss 0.6755 (0.6767), auc 0.7500, time 3.643312
+Mistakes: 0,5,8,12,14,21
+AUC: 0.770833 + 0.315495, CE: 0.605284 + 0.227817, CEpre: 0.629388 + 0.156010 (arch.mlp_set_eig (2,4,358), epochs 16, batch 21, lr 0.004286, decay 0.000009)
+Split 0, loss 0.6818 (0.6857), auc 0.7500, time 1.293322
+Split 1, loss 0.6940 (0.7100), auc 0.9000, time 2.599004
+Split 2, loss 0.7000 (0.8382), auc 0.5000, time 3.905738
+Split 3, loss 0.6933 (0.6960), auc 0.8333, time 5.204097
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.745833 + 0.350000, CE: 0.692255 + 0.015235, CEpre: 0.732454 + 0.142337 (arch.mlp_set_eig (8,1,51), epochs 10, batch 17, lr 0.009556, decay 0.000010)
+Split 0, loss 0.6465 (0.6505), auc 0.9167, time 2.553488
+Split 1, loss 0.5791 (0.5838), auc 1.0000, time 5.058062
+Split 2, loss 0.6819 (0.6854), auc 0.7500, time 7.556393
+Split 3, loss 0.6942 (0.7133), auc 0.5833, time 10.064436
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.812500 + 0.369559, CE: 0.650445 + 0.103312, CEpre: 0.658265 + 0.111815 (arch.mlp_set_eig (5,2,109), epochs 34, batch 39, lr 0.009183, decay 0.000038)
+Split 0, loss 0.7102 (1.1885), auc 0.8333, time 2.020545
+Split 1, loss 0.6364 (0.9414), auc 0.9000, time 4.062578
+Split 2, loss 0.6610 (0.8832), auc 0.7500, time 6.213172
+Split 3, loss 0.5975 (0.6307), auc 0.8333, time 8.326880
+Mistakes: 
+AUC: 0.829167 + 0.122852, CE: 0.651262 + 0.094345, CEpre: 0.910938 + 0.457917 (arch.mlp_set_eig (2,1,19), epochs 37, batch 58, lr 0.004155, decay 0.000002)
+Split 0, loss 0.6953 (0.7347), auc 0.8750, time 6.662816
+Split 1, loss 0.6940 (0.7114), auc 0.7500, time 13.333735
+Split 2, loss 0.6946 (0.7208), auc 0.5833, time 20.031152
+Split 3, loss 0.6944 (0.7174), auc 0.9167, time 26.622235
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.781250 + 0.299498, CE: 0.694583 + 0.001080, CEpre: 0.721099 + 0.019777 (arch.mlp_set_eig (7,6,280), epochs 67, batch 8, lr 0.003890, decay 0.000036)
+Split 0, loss 0.6940 (0.7106), auc 0.6667, time 1.529786
+Split 1, loss 0.5070 (0.6218), auc 1.0000, time 3.073543
+Split 2, loss 0.6448 (0.6970), auc 0.7500, time 4.606024
+Split 3, loss 0.6575 (0.6737), auc 0.8333, time 6.132708
+Mistakes: 5,21
+AUC: 0.812500 + 0.284638, CE: 0.625833 + 0.163885, CEpre: 0.675770 + 0.078142 (arch.mlp_set_eig (4,2,44), epochs 26, batch 24, lr 0.007571, decay 0.000834)
+Split 0, loss 0.7004 (0.8387), auc 0.4167, time 1.366264
+Split 1, loss 0.4154 (0.6414), auc 0.8000, time 2.773387
+Split 2, loss 0.7004 (0.8350), auc 0.4167, time 4.171428
+Split 3, loss 0.6932 (0.7102), auc 0.5833, time 5.588027
+Mistakes: 0,3,5,8,10,11,12,14,18,19,22,27
+AUC: 0.554167 + 0.363496, CE: 0.627357 + 0.282731, CEpre: 0.756344 + 0.194298 (arch.mlp_set_eig (5,3,67), epochs 14, batch 16, lr 0.002067, decay 0.000006)
+Split 0, loss 0.6358 (0.6756), auc 0.9167, time 2.537743
+Split 1, loss 0.6761 (0.6774), auc 0.8000, time 5.124835
+Split 2, loss 0.7157 (1.3100), auc 0.5000, time 7.767211
+Split 3, loss 0.6960 (0.7494), auc 0.6667, time 10.365064
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.720833 + 0.358366, CE: 0.680898 + 0.068263, CEpre: 0.853106 + 0.613004 (arch.mlp_set_eig (2,5,126), epochs 45, batch 49, lr 0.001627, decay 0.000001)
+Split 0, loss 0.6969 (0.7679), auc 0.4167, time 1.334804
+Split 1, loss 0.7174 (1.1784), auc 0.5000, time 2.669161
+Split 2, loss 0.6947 (0.7221), auc 0.6667, time 4.026450
+Split 3, loss 0.6904 (0.6931), auc 0.5000, time 5.347202
+Mistakes: 10,14,18,22
+AUC: 0.520833 + 0.209718, CE: 0.699867 + 0.024032, CEpre: 0.840361 + 0.454915 (arch.mlp_set_eig (8,1,20), epochs 13, batch 34, lr 0.000008, decay 0.000016)
+Split 0, loss 0.6037 (0.6296), auc 0.8333, time 0.969618
+Split 1, loss 0.5963 (0.6832), auc 0.8000, time 1.932260
+Split 2, loss 0.6155 (0.6436), auc 0.7500, time 2.896006
+Split 3, loss 0.6934 (0.6979), auc 1.0000, time 3.817596
+Mistakes: 0,3,5,8,11,12,19,27
+AUC: 0.845833 + 0.216667, CE: 0.627220 + 0.089626, CEpre: 0.663574 + 0.064495 (arch.mlp_set_eig (3,3,219), epochs 10, batch 8, lr 0.005864, decay 0.000112)
+Split 0, loss 0.6970 (0.7705), auc 0.8333, time 1.207382
+Split 1, loss 0.5915 (0.6686), auc 0.8000, time 2.405434
+Split 2, loss 0.6942 (0.7144), auc 0.6667, time 3.553902
+Split 3, loss 0.6830 (0.7056), auc 0.5000, time 4.697460
+Mistakes: 5,10,14,18,21,22
+AUC: 0.700000 + 0.303071, CE: 0.666446 + 0.100704, CEpre: 0.714784 + 0.084236 (arch.mlp_set_eig (1,7,56), epochs 26, batch 24, lr 0.000223, decay 0.000892)
+Split 0, loss 0.6961 (0.7503), auc 0.7500, time 4.031776
+Split 1, loss 0.5973 (0.6042), auc 0.7000, time 8.048355
+Split 2, loss 0.6997 (0.8273), auc 0.5833, time 11.993382
+Split 3, loss 0.6966 (0.7664), auc 0.9167, time 16.081714
+Mistakes: 3,5,10,11,14,18,19,21,22,27
+AUC: 0.737500 + 0.276720, CE: 0.672420 + 0.100252, CEpre: 0.737076 + 0.189135 (arch.mlp_set_eig (2,5,272), epochs 73, batch 63, lr 0.000093, decay 0.000021)
+Split 0, loss 0.7049 (0.9259), auc 0.3333, time 1.870380
+Split 1, loss 0.6822 (0.6827), auc 0.8000, time 3.704315
+Split 2, loss 0.6832 (0.6868), auc 0.5000, time 5.546763
+Split 3, loss 0.6958 (0.7470), auc 1.0000, time 7.410224
+Mistakes: 0,3,11,12,19,27
+AUC: 0.658333 + 0.597216, CE: 0.691535 + 0.021736, CEpre: 0.760604 + 0.228097 (arch.mlp_set_eig (6,2,97), epochs 22, batch 38, lr 0.001109, decay 0.000070)
+Split 0, loss 0.6819 (0.6824), auc 0.5000, time 2.129449
+Split 1, loss 0.2923 (0.6598), auc 0.9000, time 4.277201
+Split 2, loss 0.7028 (1.0838), auc 0.5833, time 6.408158
+Split 3, loss 0.6929 (0.6965), auc 0.7500, time 8.501995
+Mistakes: 0,3,8,11,12,14,18,19,21,22,27
+AUC: 0.683333 + 0.355903, CE: 0.592471 + 0.400574, CEpre: 0.780632 + 0.405353 (arch.mlp_set_eig (3,4,35), epochs 39, batch 28, lr 0.002433, decay 0.000004)
+Split 0, loss 0.5725 (0.6843), auc 0.5833, time 17.652798
+Split 1, loss 0.5762 (0.6044), auc 0.9000, time 35.468248
+Split 2, loss 0.6303 (2.5938), auc 0.7500, time 53.125966
+Split 3, loss 0.6934 (0.7067), auc 1.0000, time 70.963090
+Mistakes: 3,11,12,18,19,27
+AUC: 0.808333 + 0.363624, CE: 0.618098 + 0.113470, CEpre: 1.147286 + 1.930726 (arch.mlp_set_eig (4,6,502), epochs 230, batch 18, lr 0.000747, decay 0.000008)
+Split 0, loss 0.6675 (0.7663), auc 0.8333, time 26.471842
+Split 1, loss 0.2357 (0.4468), auc 1.0000, time 53.151550
+Split 2, loss 0.4298 (0.4319), auc 1.0000, time 79.555786
+Split 3, loss 0.6669 (0.6854), auc 0.8333, time 106.493761
+Mistakes: 0,5,8,12,14
+AUC: 0.916667 + 0.192450, CE: 0.499967 + 0.417489, CEpre: 0.582621 + 0.337559 (arch.mlp_set_eig (1,4,154), epochs 643, batch 14, lr 0.006199, decay 0.000430)
+Split 0, loss 0.6883 (2.2253), auc 0.8333, time 35.375161
+Split 1, loss 0.6941 (0.7136), auc 1.0000, time 70.512303
+Split 2, loss 0.4279 (0.4448), auc 0.8333, time 105.708564
+Split 3, loss 0.4984 (0.5039), auc 0.9167, time 141.428955
+Mistakes: 0,8,12
+AUC: 0.895833 + 0.159571, CE: 0.577199 + 0.269633, CEpre: 0.971870 + 1.687085 (arch.mlp_set_eig (1,8,378), epochs 704, batch 15, lr 0.001128, decay 0.000449)
+Split 0, loss 0.7001 (0.8493), auc 0.7500, time 32.932440
+Split 1, loss 0.6941 (0.7129), auc 0.9000, time 65.912235
+Split 2, loss 0.7297 (2.5818), auc 0.6667, time 98.797228
+Split 3, loss 0.3745 (0.4735), auc 0.9167, time 131.751615
+Mistakes: 0,8,10,12,18,22
+AUC: 0.808333 + 0.241139, CE: 0.624597 + 0.334895, CEpre: 1.154376 + 1.928424 (arch.mlp_set_eig (3,7,167), epochs 538, batch 14, lr 0.000477, decay 0.000599)
+Split 0, loss 0.6829 (0.6829), auc 0.9167, time 49.751321
+Split 1, loss 0.6942 (0.7141), auc 0.8000, time 99.326571
+Split 2, loss 0.6943 (0.7149), auc 0.7917, time 148.928722
+Split 3, loss 0.6959 (0.7456), auc 0.8750, time 198.547018
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.845833 + 0.120570, CE: 0.691799 + 0.011956, CEpre: 0.714382 + 0.051200 (arch.mlp_set_eig (9,5,330), epochs 455, batch 9, lr 0.002981, decay 0.000204)
+Split 0, loss 0.7174 (1.3907), auc 0.8333, time 6.730120
+Split 1, loss 0.7075 (0.9718), auc 0.6000, time 13.569976
+Split 2, loss 0.6084 (0.6286), auc 0.7500, time 20.424019
+Split 3, loss 0.6994 (0.8156), auc 0.4167, time 27.214070
+Mistakes: 3,11,14,19
+AUC: 0.650000 + 0.366161, CE: 0.683162 + 0.100811, CEpre: 0.951701 + 0.649150 (arch.mlp_set_eig (1,4,490), epochs 167, batch 12, lr 0.000001, decay 0.000000)
+Split 0, loss 0.7195 (1.3713), auc 0.5000, time 23.551969
+Split 1, loss 0.3828 (0.6488), auc 1.0000, time 47.155594
+Split 2, loss 0.7049 (1.0288), auc 0.5833, time 70.782058
+Split 3, loss 0.6227 (0.7596), auc 0.8333, time 94.354310
+Mistakes: 0,8,11,12,18,22,27
+AUC: 0.729167 + 0.458964, CE: 0.607492 + 0.311477, CEpre: 0.952104 + 0.643576 (arch.mlp_set_eig (6,2,144), epochs 262, batch 10, lr 0.000131, decay 0.000235)
+Split 0, loss 0.6934 (0.7136), auc 0.6667, time 45.181971
+Split 1, loss 0.6967 (0.7635), auc 1.0000, time 90.620972
+Split 2, loss 0.3826 (0.3852), auc 1.0000, time 136.067695
+Split 3, loss 0.6934 (0.7032), auc 1.0000, time 181.282370
+Mistakes: 3,10,11,14,19,27
+AUC: 0.916667 + 0.333333, CE: 0.616524 + 0.311969, CEpre: 0.641363 + 0.345630 (arch.mlp_set_eig (3,9,228), epochs 712, batch 14, lr 0.005836, decay 0.000000)
+Split 0, loss 0.6787 (0.6788), auc 0.8333, time 6.194075
+Split 1, loss 0.5582 (0.6498), auc 0.7000, time 12.403721
+Split 2, loss 0.6853 (0.6884), auc 0.4167, time 18.599494
+Split 3, loss 0.7064 (1.0057), auc 0.8333, time 24.776206
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.695833 + 0.392876, CE: 0.657159 + 0.133987, CEpre: 0.755657 + 0.334935 (arch.mlp_set_eig (1,6,190), epochs 108, batch 20, lr 0.000012, decay 0.000000)
+Split 0, loss 0.6989 (0.8142), auc 0.9167, time 16.696038
+Split 1, loss 0.6973 (0.7753), auc 0.8000, time 33.302565
+Split 2, loss 0.6776 (1.1696), auc 0.6667, time 49.923500
+Split 3, loss 0.4849 (0.6473), auc 0.8333, time 66.485022
+Mistakes: 14,18,22
+AUC: 0.804167 + 0.207944, CE: 0.639665 + 0.207322, CEpre: 0.851614 + 0.447329 (arch.mlp_set_eig (5,4,122), epochs 326, batch 25, lr 0.000348, decay 0.000055)
+Split 0, loss 0.5018 (0.6825), auc 0.8333, time 42.860036
+Split 1, loss 0.6942 (0.7138), auc 0.8000, time 85.119047
+Split 2, loss 0.7033 (2.0052), auc 0.6667, time 127.750260
+Split 3, loss 0.3061 (0.3118), auc 0.9167, time 170.616761
+Mistakes: 18,22,27
+AUC: 0.804167 + 0.207944, CE: 0.551338 + 0.376121, CEpre: 0.928324 + 1.481544 (arch.mlp_set_eig (4,3,315), epochs 992, batch 22, lr 0.001509, decay 0.000002)
+Split 0, loss 0.6876 (0.7254), auc 0.6667, time 18.657779
+Split 1, loss 0.5707 (0.5807), auc 0.9000, time 37.269347
+Split 2, loss 0.6829 (0.6879), auc 0.7500, time 56.412418
+Split 3, loss 0.6950 (0.7282), auc 1.0000, time 75.772346
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.829167 + 0.298608, CE: 0.659064 + 0.118183, CEpre: 0.680530 + 0.138063 (arch.mlp_set_eig (12,5,438), epochs 191, batch 30, lr 0.000674, decay 0.000003)
+Split 0, loss 0.6821 (0.6864), auc 0.8333, time 5.379676
+Split 1, loss 0.6970 (0.7700), auc 1.0000, time 10.912409
+Split 2, loss 0.6945 (0.7200), auc 0.7500, time 16.406315
+Split 3, loss 0.6947 (0.7227), auc 1.0000, time 21.936817
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.895833 + 0.250000, CE: 0.692092 + 0.013484, CEpre: 0.724772 + 0.068752 (arch.mlp_set_eig (8,8,258), epochs 61, batch 12, lr 0.005773, decay 0.000000)
+Split 0, loss 0.6818 (1.0391), auc 0.7500, time 5.557033
+Split 1, loss 0.6773 (0.6774), auc 0.8000, time 11.091307
+Split 2, loss 0.6171 (0.7544), auc 0.7500, time 16.566812
+Split 3, loss 0.3989 (0.4206), auc 0.8333, time 22.094638
+Mistakes: 0,8,12,18
+AUC: 0.783333 + 0.081650, CE: 0.593764 + 0.266431, CEpre: 0.722845 + 0.509154 (arch.mlp_set_eig (2,4,161), epochs 90, batch 18, lr 0.003030, decay 0.000013)
+Split 0, loss 0.7060 (0.9945), auc 0.9583, time 41.803323
+Split 1, loss 0.5983 (0.6275), auc 0.9000, time 83.615806
+Split 2, loss 0.6963 (0.7536), auc 0.4167, time 124.929145
+Split 3, loss 0.7050 (0.9660), auc 0.8333, time 166.913216
+Mistakes: 3,5,10,11,14,18,19,21,22,27
+AUC: 0.777083 + 0.491290, CE: 0.676394 + 0.104536, CEpre: 0.835419 + 0.350761 (arch.mlp_set_eig (7,11,203), epochs 372, batch 10, lr 0.000004, decay 0.000000)
+Split 0, loss 0.6936 (0.7020), auc 0.4167, time 11.289178
+Split 1, loss 0.7016 (0.8570), auc 0.7000, time 21.649706
+Split 2, loss 0.6829 (0.7203), auc 0.6667, time 31.756801
+Split 3, loss 0.6961 (0.7495), auc 0.5833, time 42.979589
+Mistakes: 3,11,19,27
+AUC: 0.591667 + 0.253129, CE: 0.693532 + 0.015669, CEpre: 0.757194 + 0.138714 (arch.mlp_set_eig (11,3,93), epochs 125, batch 32, lr 0.000020, decay 0.000082)
+Split 0, loss 0.6829 (0.6980), auc 0.9167, time 59.719452
+Split 1, loss 0.6578 (0.6875), auc 0.9000, time 119.781831
+Split 2, loss 0.6954 (0.7360), auc 0.8333, time 179.583945
+Split 3, loss 0.5537 (0.5657), auc 0.9167, time 239.224438
+Mistakes: 0,8,10,12,14,18,22,27
+AUC: 0.891667 + 0.079349, CE: 0.647455 + 0.128789, CEpre: 0.671816 + 0.147426 (arch.mlp_set_eig (9,6,350), epochs 593, batch 16, lr 0.000300, decay 0.000203)
+Split 0, loss 0.6936 (0.7016), auc 0.4167, time 51.167943
+Split 1, loss 0.4998 (0.6131), auc 0.9000, time 101.851473
+Split 2, loss 0.7047 (1.0325), auc 0.5833, time 153.229951
+Split 3, loss 0.7090 (1.0911), auc 0.6667, time 204.081480
+Mistakes: 3,5,11,18,19,21,22,27
+AUC: 0.641667 + 0.402308, CE: 0.651769 + 0.202984, CEpre: 0.859615 + 0.475001 (arch.mlp_set_eig (6,1,447), epochs 908, batch 26, lr 0.000130, decay 0.000001)
+Split 0, loss 0.6879 (1.3661), auc 0.2500, time 1.081743
+Split 1, loss 0.5000 (0.6866), auc 1.0000, time 2.217616
+Split 2, loss 0.6793 (0.6812), auc 0.5000, time 3.328301
+Split 3, loss 0.7040 (0.9382), auc 0.5833, time 4.474979
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.583333 + 0.623610, CE: 0.642828 + 0.191508, CEpre: 0.918018 + 0.643723 (arch.mlp_set_eig (1,8,70), epochs 16, batch 13, lr 0.000764, decay 0.000030)
+Split 0, loss 0.6700 (0.7526), auc 0.6667, time 1.034170
+Split 1, loss 0.6327 (0.6444), auc 0.7000, time 2.072588
+Split 2, loss 0.7222 (1.3326), auc 0.3333, time 3.098843
+Split 3, loss 0.6942 (0.7125), auc 0.5000, time 4.119701
+Mistakes: 0,3,8,10,11,12,18,21,22
+AUC: 0.550000 + 0.337749, CE: 0.679769 + 0.075824, CEpre: 0.860516 + 0.635739 (arch.mlp_set_eig (2,2,110), epochs 12, batch 9, lr 0.000037, decay 0.000372)
+Split 0, loss 0.6909 (1.8356), auc 0.6667, time 12.943826
+Split 1, loss 0.6941 (0.7124), auc 1.0000, time 25.960055
+Split 2, loss 0.7086 (1.9996), auc 0.6667, time 39.087471
+Split 3, loss 0.3333 (0.4179), auc 1.0000, time 52.132657
+Mistakes: 8,12,14,18,22,27
+AUC: 0.833333 + 0.384900, CE: 0.606709 + 0.364867, CEpre: 1.241397 + 1.585778 (arch.mlp_set_eig (4,7,149), epochs 159, batch 20, lr 0.001423, decay 0.000000)
+Split 0, loss 0.6943 (0.7152), auc 0.7500, time 12.722522
+Split 1, loss 0.6932 (0.6942), auc 1.0000, time 25.296483
+Split 2, loss 0.6380 (1.3532), auc 0.7500, time 38.057758
+Split 3, loss 0.3367 (0.4565), auc 1.0000, time 50.758114
+Mistakes: 10
+AUC: 0.875000 + 0.288675, CE: 0.590536 + 0.342539, CEpre: 0.804762 + 0.767953 (arch.mlp_set_eig (3,10,83), epochs 210, batch 11, lr 0.004323, decay 0.000000)
+Split 0, loss 0.6636 (0.6789), auc 0.9167, time 2.935091
+Split 1, loss 0.4518 (0.6259), auc 0.9000, time 5.961045
+Split 2, loss 0.7095 (1.3741), auc 0.5833, time 8.960850
+Split 3, loss 0.6929 (0.6933), auc 1.0000, time 11.981221
+Mistakes: 0,3,5,8,10,11,12,14,18,19,21,27
+AUC: 0.850000 + 0.366161, CE: 0.629438 + 0.239873, CEpre: 0.843039 + 0.710465 (arch.mlp_set_eig (5,4,189), epochs 55, batch 23, lr 0.002431, decay 0.000003)
+Split 0, loss 0.6829 (0.6854), auc 0.8333, time 17.286125
+Split 1, loss 0.4266 (0.4997), auc 1.0000, time 34.393229
+Split 2, loss 0.6627 (0.7495), auc 0.7500, time 51.658262
+Split 3, loss 0.6770 (0.6780), auc 1.0000, time 68.897852
+Mistakes: 0,3,8,11,12,19,27
+AUC: 0.895833 + 0.250000, CE: 0.612304 + 0.248138, CEpre: 0.653147 + 0.214455 (arch.mlp_set_eig (4,5,301), epochs 261, batch 14, lr 0.009473, decay 0.000548)
+Split 0, loss 0.7039 (0.9655), auc 0.7500, time 23.499282
+Split 1, loss 0.6025 (0.6590), auc 0.7000, time 47.162855
+Split 2, loss 0.6784 (0.9648), auc 0.6667, time 70.916429
+Split 3, loss 0.5309 (0.5319), auc 0.8333, time 94.379084
+Mistakes: 0,8,12,18,21,22
+AUC: 0.737500 + 0.144978, CE: 0.628934 + 0.156503, CEpre: 0.780300 + 0.439304 (arch.mlp_set_eig (2,3,246), epochs 417, batch 18, lr 0.000070, decay 0.000006)
+Split 0, loss 0.7029 (0.9125), auc 0.9167, time 6.176595
+Split 1, loss 0.6794 (0.6801), auc 0.7000, time 12.361357
+Split 2, loss 0.6961 (0.7628), auc 0.7500, time 18.599062
+Split 3, loss 0.4421 (0.4856), auc 0.9167, time 24.856254
+Mistakes: 5,10,14,18,22,27
+AUC: 0.820833 + 0.225051, CE: 0.630124 + 0.251458, CEpre: 0.710255 + 0.355949 (arch.mlp_set_eig (3,6,177), epochs 84, batch 9, lr 0.000547, decay 0.000155)
+Split 0, loss 0.6835 (0.6847), auc 0.2500, time 3.328729
+Split 1, loss 0.6947 (0.7241), auc 0.7000, time 6.718500
+Split 2, loss 0.6954 (0.7355), auc 0.4167, time 10.042865
+Split 3, loss 0.6943 (0.7157), auc 1.0000, time 13.375279
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.591667 + 0.659124, CE: 0.691947 + 0.011350, CEpre: 0.715008 + 0.043578 (arch.mlp_set_eig (7,2,64), epochs 43, batch 35, lr 0.000154, decay 0.000026)
+Split 0, loss 0.6829 (0.6833), auc 0.7083, time 2.037069
+Split 1, loss 0.5983 (0.6822), auc 0.8500, time 3.918538
+Split 2, loss 0.6944 (0.7169), auc 0.7917, time 5.780732
+Split 3, loss 0.6955 (0.7384), auc 0.8333, time 7.786834
+Mistakes: 0,3,5,8,10,11,12,14,18,19,21,22,27
+AUC: 0.795833 + 0.126564, CE: 0.667764 + 0.093355, CEpre: 0.705211 + 0.054678 (arch.mlp_set_eig (9,7,132), epochs 17, batch 44, lr 0.007464, decay 0.000052)
+Split 0, loss 0.4713 (0.5463), auc 0.8333, time 1.524109
+Split 1, loss 0.6547 (0.6635), auc 0.5000, time 3.055638
+Split 2, loss 0.7146 (1.1686), auc 0.2500, time 4.565293
+Split 3, loss 0.7144 (1.2167), auc 0.5000, time 6.095307
+Mistakes: 3,8,10,11,12,14,18,19,21,22,27
+AUC: 0.520833 + 0.478714, CE: 0.638756 + 0.230249, CEpre: 0.898801 + 0.686542 (arch.mlp_set_eig (1,3,110), epochs 26, batch 16, lr 0.000002, decay 0.000092)
+Split 0, loss 0.6496 (1.0666), auc 0.7500, time 29.809777
+Split 1, loss 0.5610 (0.6317), auc 0.7000, time 59.551005
+Split 2, loss 0.6645 (0.7487), auc 0.5833, time 89.668055
+Split 3, loss 0.6765 (0.6997), auc 0.6667, time 119.621656
+Mistakes: 0,8,12,18,21
+AUC: 0.675000 + 0.140106, CE: 0.637927 + 0.104850, CEpre: 0.786685 + 0.385320 (arch.mlp_set_eig (2,1,391), epochs 745, batch 11, lr 0.000331, decay 0.000001)
+Split 0, loss 0.7112 (1.8093), auc 0.5833, time 6.395077
+Split 1, loss 0.6964 (0.7579), auc 1.0000, time 12.759938
+Split 2, loss 0.6956 (0.7464), auc 0.5833, time 19.211261
+Split 3, loss 0.6936 (0.7117), auc 0.7500, time 25.646010
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.729167 + 0.393818, CE: 0.699190 + 0.016166, CEpre: 1.006344 + 1.071312 (arch.mlp_set_eig (5,4,279), epochs 108, batch 31, lr 0.000943, decay 0.000001)
+Split 0, loss 0.6828 (0.6845), auc 0.5833, time 0.974922
+Split 1, loss 0.5981 (0.6460), auc 0.8000, time 1.975384
+Split 2, loss 0.6980 (0.7899), auc 0.4167, time 2.997692
+Split 3, loss 0.6940 (0.7098), auc 0.7500, time 4.018865
+Mistakes: 0,3,5,8,10,11,12,14,18,19,21,22,27
+AUC: 0.637500 + 0.347877, CE: 0.668229 + 0.094365, CEpre: 0.707564 + 0.121648 (arch.mlp_set_eig (6,5,44), epochs 11, batch 27, lr 0.001958, decay 0.000980)
+Split 0, loss 0.6144 (0.6219), auc 0.8333, time 33.004936
+Split 1, loss 0.6977 (0.7837), auc 1.0000, time 65.492241
+Split 2, loss 0.6977 (0.7849), auc 0.6667, time 98.336751
+Split 3, loss 0.6873 (0.6877), auc 1.0000, time 131.120710
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.875000 + 0.319142, CE: 0.674287 + 0.080416, CEpre: 0.719553 + 0.158932 (arch.mlp_set_eig (3,9,217), epochs 510, batch 14, lr 0.006265, decay 0.000000)
+Split 0, loss 0.6830 (0.6832), auc 0.6667, time 34.375950
+Split 1, loss 0.5730 (0.6305), auc 1.0000, time 68.715985
+Split 2, loss 0.5157 (0.5764), auc 0.8333, time 103.253254
+Split 3, loss 0.2656 (0.2659), auc 1.0000, time 137.560545
+Mistakes: 0,5,8,12,21
+AUC: 0.875000 + 0.319142, CE: 0.509358 + 0.353373, CEpre: 0.538982 + 0.374428 (arch.mlp_set_eig (1,9,223), epochs 665, batch 15, lr 0.005032, decay 0.000000)
+Split 0, loss 0.7171 (1.2406), auc 0.6667, time 19.215842
+Split 1, loss 0.3674 (0.3674), auc 0.9000, time 38.462204
+Split 2, loss 0.5876 (0.9951), auc 0.7917, time 57.643077
+Split 3, loss 0.6937 (0.7044), auc 0.9167, time 76.949085
+Mistakes: 0,3,8,11,12,18,19,21,27
+AUC: 0.818750 + 0.231090, CE: 0.591460 + 0.319306, CEpre: 0.826851 + 0.753267 (arch.mlp_set_eig (1,10,153), epochs 343, batch 17, lr 0.004484, decay 0.000000)
+Split 0, loss 0.5994 (0.6022), auc 1.0000, time 30.339988
+Split 1, loss 0.6776 (0.6867), auc 1.0000, time 60.274147
+Split 2, loss 0.6986 (0.8052), auc 0.7500, time 90.604713
+Split 3, loss 0.4927 (0.5398), auc 0.9167, time 120.964233
+Mistakes: 10,14,18,22,27
+AUC: 0.916667 + 0.235702, CE: 0.617072 + 0.186594, CEpre: 0.658483 + 0.229769 (arch.mlp_set_eig (1,12,364), epochs 563, batch 13, lr 0.002560, decay 0.000000)
+Split 0, loss 0.7178 (2.0065), auc 0.8333, time 48.353984
+Split 1, loss 0.6951 (0.7335), auc 1.0000, time 96.328638
+Split 2, loss 0.4472 (0.5204), auc 0.9167, time 144.675308
+Split 3, loss 0.4491 (0.4877), auc 1.0000, time 192.815320
+Mistakes: 
+AUC: 0.937500 + 0.159571, CE: 0.577326 + 0.298865, CEpre: 0.937008 + 1.442575 (arch.mlp_set_eig (2,9,243), epochs 814, batch 15, lr 0.003418, decay 0.000002)
+Split 0, loss 0.7255 (1.8537), auc 0.6667, time 41.690166
+Split 1, loss 0.5963 (0.6017), auc 1.0000, time 83.847512
+Split 2, loss 0.7474 (3.3234), auc 0.8333, time 126.173450
+Split 3, loss 0.6987 (0.8054), auc 1.0000, time 168.316312
+Mistakes: 0,3,5,10,11,12,14,18,19,21,22,27
+AUC: 0.875000 + 0.319142, CE: 0.691951 + 0.133604, CEpre: 1.646053 + 2.491024 (arch.mlp_set_eig (2,12,100), epochs 609, batch 19, lr 0.007058, decay 0.000000)
+Split 0, loss 0.7390 (2.1266), auc 0.7500, time 9.989197
+Split 1, loss 0.6939 (0.7070), auc 0.8000, time 19.779068
+Split 2, loss 0.6288 (1.9541), auc 0.8333, time 29.302544
+Split 3, loss 0.4028 (0.4628), auc 1.0000, time 39.175549
+Mistakes: 8,12,14,18
+AUC: 0.845833 + 0.216667, CE: 0.616130 + 0.298458, CEpre: 1.312624 + 1.698217 (arch.mlp_set_eig (1,11,84), epochs 293, batch 21, lr 0.001275, decay 0.000000)
+Split 0, loss 0.6950 (0.7292), auc 0.9167, time 28.655285
+Split 1, loss 0.6948 (0.7269), auc 1.0000, time 57.170640
+Split 2, loss 0.6999 (0.8872), auc 1.0000, time 86.035410
+Split 3, loss 0.6961 (0.7516), auc 0.9167, time 114.730654
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.958333 + 0.096225, CE: 0.696452 + 0.004746, CEpre: 0.773738 + 0.152923 (arch.mlp_set_eig (4,10,299), epochs 425, batch 12, lr 0.004843, decay 0.000000)
+Split 0, loss 0.6902 (2.3576), auc 0.6667, time 15.782030
+Split 1, loss 0.5935 (0.6559), auc 0.8500, time 31.630540
+Split 2, loss 0.6889 (1.9263), auc 0.9167, time 46.839668
+Split 3, loss 0.6446 (0.7101), auc 0.7917, time 62.391453
+Mistakes: 0,5,8,12,14,18,21,22
+AUC: 0.806250 + 0.212296, CE: 0.654307 + 0.091496, CEpre: 1.412486 + 1.721612 (arch.mlp_set_eig (1,8,119), epochs 490, batch 22, lr 0.009774, decay 0.000001)
+Split 0, loss 0.7206 (2.1406), auc 0.5833, time 36.014309
+Split 1, loss 0.3629 (0.6541), auc 1.0000, time 71.830531
+Split 2, loss 0.4221 (0.4364), auc 0.8333, time 107.549308
+Split 3, loss 0.6948 (0.7262), auc 1.0000, time 143.251225
+Mistakes: 0,3,5,8,11,12,18,19,27
+AUC: 0.854167 + 0.393818, CE: 0.550103 + 0.367802, CEpre: 0.989332 + 1.554635 (arch.mlp_set_eig (2,6,209), epochs 649, batch 15, lr 0.001764, decay 0.000008)
+Split 0, loss 0.7029 (0.9160), auc 0.8333, time 10.832336
+Split 1, loss 0.4748 (0.6546), auc 1.0000, time 21.760446
+Split 2, loss 0.6310 (0.7373), auc 0.6667, time 32.582985
+Split 3, loss 0.4770 (0.6937), auc 1.0000, time 43.199785
+Mistakes: 14,18,22
+AUC: 0.875000 + 0.319142, CE: 0.571439 + 0.228243, CEpre: 0.750413 + 0.230857 (arch.mlp_set_eig (3,7,472), epochs 155, batch 17, lr 0.000588, decay 0.000004)
+Split 0, loss 0.6932 (0.6935), auc 0.8333, time 59.634065
+Split 1, loss 0.2577 (0.6630), auc 1.0000, time 119.491524
+Split 2, loss 0.6993 (0.8202), auc 0.7500, time 179.432645
+Split 3, loss 0.5061 (0.9776), auc 0.9167, time 239.204114
+Mistakes: 10,14,18,21,22,27
+AUC: 0.875000 + 0.215166, CE: 0.539067 + 0.415830, CEpre: 0.788578 + 0.286482 (arch.mlp_set_eig (1,11,417), epochs 993, batch 19, lr 0.001059, decay 0.000000)
+Split 0, loss 0.6932 (0.6938), auc 0.6667, time 1.623794
+Split 1, loss 0.6934 (0.6975), auc 0.7000, time 3.287357
+Split 2, loss 0.6957 (0.7424), auc 0.4167, time 4.958742
+Split 3, loss 0.6949 (0.7267), auc 1.0000, time 6.775331
+Mistakes: 3,10,11,14,18,19,22,27
+AUC: 0.695833 + 0.477939, CE: 0.694280 + 0.002441, CEpre: 0.715094 + 0.046810 (arch.mlp_set_eig (11,5,143), epochs 20, batch 24, lr 0.000850, decay 0.000001)
+Split 0, loss 0.6887 (0.6961), auc 0.4167, time 6.961101
+Split 1, loss 0.5875 (0.6612), auc 0.9000, time 14.024691
+Split 2, loss 0.6323 (1.1216), auc 0.8333, time 20.967827
+Split 3, loss 0.5370 (0.5885), auc 0.8333, time 27.861101
+Mistakes: 0,5,8,11,12,14,18,21,27
+AUC: 0.745833 + 0.443367, CE: 0.611373 + 0.129201, CEpre: 0.766860 + 0.481399 (arch.mlp_set_eig (2,8,341), epochs 130, batch 11, lr 0.002223, decay 0.000000)
+Split 0, loss 0.6829 (0.6829), auc 0.8333, time 68.761471
+Split 1, loss 0.6945 (0.7218), auc 0.9000, time 137.111677
+Split 2, loss 0.5749 (0.8479), auc 0.8333, time 205.259345
+Split 3, loss 0.1776 (0.3772), auc 1.0000, time 273.566520
+Mistakes: 0,8,12,18
+AUC: 0.891667 + 0.157527, CE: 0.532473 + 0.485220, CEpre: 0.657446 + 0.399402 (arch.mlp_set_eig (3,10,167), epochs 905, batch 8, lr 0.003458, decay 0.000013)
+Split 0, loss 0.7214 (1.4010), auc 0.5000, time 11.193211
+Split 1, loss 0.6914 (0.6975), auc 0.7000, time 22.119206
+Split 2, loss 0.6845 (0.8805), auc 0.6667, time 33.313650
+Split 3, loss 0.6999 (0.8489), auc 0.8333, time 44.689804
+Mistakes: 3,5,8,11,12,18,19,22,27
+AUC: 0.675000 + 0.274199, CE: 0.699333 + 0.032052, CEpre: 0.956988 + 0.613126 (arch.mlp_set_eig (2,4,261), epochs 227, batch 13, lr 0.000242, decay 0.000325)
+Split 0, loss 0.6824 (0.6826), auc 0.7500, time 2.920184
+Split 1, loss 0.5941 (0.6776), auc 0.9000, time 5.738470
+Split 2, loss 0.7052 (0.9776), auc 0.8333, time 8.501440
+Split 3, loss 0.6766 (0.6776), auc 1.0000, time 11.385606
+Mistakes: 0,5,8,10,12,14,18,21,22
+AUC: 0.870833 + 0.211476, CE: 0.664577 + 0.097214, CEpre: 0.753852 + 0.298422 (arch.mlp_set_eig (4,7,178), epochs 30, batch 10, lr 0.008127, decay 0.000001)
+Split 0, loss 0.7180 (1.2813), auc 0.7500, time 14.030807
+Split 1, loss 0.4945 (0.4999), auc 0.8000, time 27.977475
+Split 2, loss 0.6693 (1.8565), auc 0.8333, time 41.719672
+Split 3, loss 0.5637 (0.6618), auc 0.8333, time 55.680776
+Mistakes: 0,5,8,12,21,27
+AUC: 0.804167 + 0.078764, CE: 0.611361 + 0.202147, CEpre: 1.074886 + 1.240768 (arch.mlp_set_eig (1,2,233), epochs 283, batch 20, lr 0.000406, decay 0.000000)
+Split 0, loss 0.6815 (0.6879), auc 0.6667, time 12.539220
+Split 1, loss 0.5986 (0.6132), auc 0.5000, time 25.025738
+Split 2, loss 0.6889 (0.6911), auc 0.4167, time 37.530890
+Split 3, loss 0.7066 (1.0125), auc 0.8333, time 50.054920
+Mistakes: 0,3,5,8,11,12,19,21,27
+AUC: 0.604167 + 0.369559, CE: 0.668888 + 0.096122, CEpre: 0.751196 + 0.355808 (arch.mlp_set_eig (4,6,57), epochs 180, batch 15, lr 0.000012, decay 0.000000)
+Split 0, loss 0.6419 (0.8351), auc 0.8333, time 17.599932
+Split 1, loss 0.3705 (0.6126), auc 0.9000, time 35.239775
+Split 2, loss 0.5493 (0.9168), auc 0.8333, time 53.120093
+Split 3, loss 0.6975 (0.7867), auc 1.0000, time 70.861822
+Mistakes: 0,3,5,8,11,12,18,19,27
+AUC: 0.891667 + 0.157527, CE: 0.564806 + 0.286530, CEpre: 0.787781 + 0.257088 (arch.mlp_set_eig (5,3,511), epochs 357, batch 23, lr 0.005368, decay 0.000002)
+Split 0, loss 0.6975 (0.7808), auc 0.8333, time 52.970024
+Split 1, loss 0.6055 (0.9312), auc 0.8000, time 105.858437
+Split 2, loss 0.6848 (0.7300), auc 0.9167, time 158.777738
+Split 3, loss 0.6941 (0.7120), auc 1.0000, time 211.734427
+Mistakes: 3,5,10,11,14,18,19,22,27
+AUC: 0.887500 + 0.179247, CE: 0.670487 + 0.087355, CEpre: 0.788515 + 0.199014 (arch.mlp_set_eig (8,6,198), epochs 771, batch 29, lr 0.002678, decay 0.000019)
+Split 0, loss 0.7124 (1.1372), auc 0.7500, time 25.847566
+Split 1, loss 0.6937 (0.7045), auc 1.0000, time 51.653080
+Split 2, loss 0.6958 (0.7451), auc 0.5833, time 77.296035
+Split 3, loss 0.6942 (0.7140), auc 1.0000, time 103.200089
+Mistakes: 0,3,8,10,11,12,14,18,19,22,27
+AUC: 0.833333 + 0.408248, CE: 0.699045 + 0.017948, CEpre: 0.825176 + 0.417417 (arch.mlp_set_eig (3,9,23), epochs 473, batch 37, lr 0.001678, decay 0.000725)
+Split 0, loss 0.6829 (0.7047), auc 0.9167, time 50.018599
+Split 1, loss 0.5982 (0.6669), auc 1.0000, time 99.988223
+Split 2, loss 0.6932 (0.6933), auc 0.5833, time 150.007985
+Split 3, loss 0.5367 (0.6208), auc 1.0000, time 200.021079
+Mistakes: 0,5,8,10,11,12,14,18,21,22,27
+AUC: 0.875000 + 0.396746, CE: 0.627749 + 0.148228, CEpre: 0.671418 + 0.074542 (arch.mlp_set_eig (10,5,296), epochs 679, batch 26, lr 0.000095, decay 0.000000)
+Split 0, loss 0.6920 (0.7549), auc 0.3333, time 1.563135
+Split 1, loss 0.0993 (0.6689), auc 1.0000, time 3.125834
+Split 2, loss 0.6906 (0.6907), auc 0.5000, time 4.683518
+Split 3, loss 0.6695 (0.6743), auc 0.8333, time 6.211240
+Mistakes: 0,8,12,18,22
+AUC: 0.666667 + 0.608581, CE: 0.537844 + 0.585113, CEpre: 0.697193 + 0.079123 (arch.mlp_set_eig (1,4,324), epochs 23, batch 10, lr 0.000032, decay 0.000006)
+Split 0, loss 0.6931 (0.6931), auc 0.5000, time 3.827058
+Split 1, loss 0.3599 (0.3613), auc 0.8000, time 7.556309
+Split 2, loss 0.6932 (0.6948), auc 0.4167, time 11.325436
+Split 3, loss 0.6931 (0.6932), auc 0.6250, time 15.116627
+Mistakes: 0,3,5,8,10,11,12,18,19,22,27
+AUC: 0.585417 + 0.333438, CE: 0.609862 + 0.333242, CEpre: 0.610604 + 0.332357 (arch.mlp_set_eig (2,1,133), epochs 67, batch 17, lr 0.003737, decay 0.000002)
+Split 0, loss 0.6521 (0.6551), auc 0.6667, time 3.845350
+Split 1, loss 0.5340 (0.6277), auc 0.7000, time 7.704090
+Split 2, loss 0.6570 (0.8589), auc 0.6667, time 11.534525
+Split 3, loss 0.6712 (0.7220), auc 0.6667, time 15.421654
+Mistakes: 0,8,11,12,18,21,22,27
+AUC: 0.675000 + 0.033333, CE: 0.628553 + 0.127167, CEpre: 0.715916 + 0.206447 (arch.mlp_set_eig (2,1,73), epochs 68, batch 17, lr 0.000193, decay 0.000000)
+Split 0, loss 0.6931 (0.6931), auc 0.5000, time 3.955209
+Split 1, loss 0.6931 (0.6931), auc 0.5000, time 7.961747
+Split 2, loss 0.6009 (0.6930), auc 0.6667, time 11.915202
+Split 3, loss 0.6333 (0.6931), auc 0.5833, time 15.856787
+Mistakes: 0,3,5,8,10,11,12,14,18,19,21,22,27
+AUC: 0.562500 + 0.159571, CE: 0.655134 + 0.091680, CEpre: 0.693113 + 0.000135 (arch.mlp_set_eig (1,1,104), epochs 96, batch 9, lr 0.003579, decay 0.000001)
+Split 0, loss 0.6932 (0.6937), auc 0.4167, time 3.557209
+Split 1, loss 0.6945 (0.7201), auc 0.7000, time 7.138595
+Split 2, loss 0.6829 (0.7335), auc 0.6667, time 10.656638
+Split 3, loss 0.6829 (0.7511), auc 0.6667, time 14.206303
+Mistakes: 
+AUC: 0.612500 + 0.262996, CE: 0.688350 + 0.012656, CEpre: 0.724599 + 0.048412 (arch.mlp_set_eig (3,8,132), epochs 52, batch 13, lr 0.000005, decay 0.000003)
+Split 0, loss 0.7198 (3.0926), auc 0.6667, time 6.249421
+Split 1, loss 0.6986 (0.7998), auc 1.0000, time 12.404680
+Split 2, loss 0.5872 (0.6125), auc 0.7500, time 18.277380
+Split 3, loss 0.6956 (0.7397), auc 0.6667, time 24.649731
+Mistakes: 3,8,11,12,18,19,27
+AUC: 0.770833 + 0.315495, CE: 0.675316 + 0.119396, CEpre: 1.311139 + 2.380399 (arch.mlp_set_eig (6,2,120), epochs 76, batch 16, lr 0.001383, decay 0.000000)
+Split 0, loss 0.6966 (0.7602), auc 0.8333, time 2.677029
+Split 1, loss 0.7028 (0.8804), auc 0.9000, time 5.390277
+Split 2, loss 0.6934 (0.6983), auc 0.6667, time 8.136967
+Split 3, loss 0.6829 (0.7095), auc 0.6667, time 10.845890
+Mistakes: 10,14,18,22
+AUC: 0.766667 + 0.237268, CE: 0.693918 + 0.016645, CEpre: 0.762107 + 0.166621 (arch.mlp_set_eig (3,9,80), epochs 39, batch 12, lr 0.000052, decay 0.000002)
+Split 0, loss 0.7049 (0.9626), auc 0.7500, time 3.252928
+Split 1, loss 0.6465 (0.6619), auc 0.6000, time 6.478953
+Split 2, loss 0.6965 (1.1944), auc 0.6667, time 9.759053
+Split 3, loss 0.7064 (1.0521), auc 0.5833, time 13.015190
+Mistakes: 0,3,8,11,12,18,21,22,27
+AUC: 0.650000 + 0.151535, CE: 0.688595 + 0.056797, CEpre: 0.967751 + 0.450281 (arch.mlp_set_eig (2,3,93), epochs 59, batch 14, lr 0.000284, decay 0.000005)
+Split 0, loss 0.5991 (0.9907), auc 0.9167, time 7.475990
+Split 1, loss 0.5322 (0.6288), auc 1.0000, time 15.000691
+Split 2, loss 0.5773 (0.9832), auc 0.7500, time 22.389197
+Split 3, loss 0.6951 (0.7301), auc 1.0000, time 29.762381
+Mistakes: 3,5,8,11,12,18,19,21,27
+AUC: 0.916667 + 0.235702, CE: 0.600907 + 0.137332, CEpre: 0.833182 + 0.364603 (arch.mlp_set_eig (1,11,33), epochs 114, batch 8, lr 0.000601, decay 0.000000)
+Split 0, loss 0.6429 (0.6840), auc 0.5833, time 11.289245
+Split 1, loss 0.4745 (0.6725), auc 0.8000, time 22.657366
+Split 2, loss 0.7058 (1.0554), auc 0.5833, time 34.001510
+Split 3, loss 0.6942 (0.7151), auc 0.6667, time 45.553874
+Mistakes: 0,3,8,11,12,14,18,19,21,22,27
+AUC: 0.658333 + 0.204577, CE: 0.629357 + 0.213593, CEpre: 0.781745 + 0.366603 (arch.mlp_set_eig (5,1,59), epochs 147, batch 18, lr 0.000484, decay 0.000012)
+Split 0, loss 0.6829 (0.6894), auc 0.4167, time 3.323978
+Split 1, loss 0.5982 (0.6893), auc 0.8000, time 6.718795
+Split 2, loss 0.6829 (0.6845), auc 0.6667, time 9.986067
+Split 3, loss 0.6829 (0.6913), auc 0.5000, time 13.333974
+Mistakes: 0,5,8,12,21
+AUC: 0.595833 + 0.342513, CE: 0.661742 + 0.084664, CEpre: 0.688644 + 0.005776 (arch.mlp_set_eig (4,12,182), epochs 44, batch 11, lr 0.000073, decay 0.000000)
+Split 0, loss 0.6939 (0.7074), auc 0.5833, time 19.166406
+Split 1, loss 0.5983 (0.6905), auc 0.8500, time 38.311063
+Split 2, loss 0.6939 (0.7080), auc 0.8333, time 57.500990
+Split 3, loss 0.6944 (0.7168), auc 0.5417, time 76.438513
+Mistakes: 3,5,10,11,14,18,19,21,22,27
+AUC: 0.702083 + 0.324430, CE: 0.670109 + 0.095787, CEpre: 0.705680 + 0.021977 (arch.mlp_set_eig (12,10,156), epochs 180, batch 12, lr 0.002954, decay 0.000043)
+Best hyperparam (<util.smartparse.obj object at 0x7ff0b961aa00>)
