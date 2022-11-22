@@ -65,15 +65,15 @@ def analyze(param,nbins=100,szcap=4096):
         #Analyze eigs
         #1) eig distribution
         e2=(e**2).sum(1);
-        rank=int(e2==0).long().sum();
+        rank=int(e2.gt(0).long().sum());
         if rank<m:
             #pad 0s to eig
-            e_nz=e[e2 == 0].clone();
+            e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(m-rank,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
         else:
             #Still adds a 0 for perspective
-            e_nz=e[e2== 0].clone();
+            e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(1,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
 
