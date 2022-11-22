@@ -119,7 +119,7 @@ def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirp
     params = smartparse.merge(params,default_params);
 
     if not id is None:
-        model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id);
+        model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id, root = '/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/');
 
     interface=engine.new(model_filepath);
     fvs=run(interface,nbins=params.nbins,szcap=params.szcap)
@@ -138,35 +138,38 @@ if __name__ == "__main__":
     default_params.szcap=4096;
     default_params.fname='data_r10_weight.pt'
     params=smartparse.parse(default_params);
-    params.argv=sys.argv;
+    params.argv=sys.argv
     data.d['params']=db.Table.from_rows([vars(params)]);
 
     model_ids=list(range(0,144))
 
     for i,id in enumerate(model_ids):
         print(i,id)
-        fv=extract_fv(id,params=params);
+        try:
+            fv=extract_fv(id,params=params);
 
-        '''
-        #Load GT
-        fname=os.path.join(helper.get_root(id),'ground_truth.csv');
-        f=open(fname,'r');
-        for line in f:
-            line.rstrip('\n').rstrip('\r')
-            label=int(line);
-            break;
+            '''
+            #Load GT
+            fname=os.path.join(helper.get_root(id),'ground_truth.csv');
+            f=open(fname,'r');
+            for line in f:
+                line.rstrip('\n').rstrip('\r')
+                label=int(line);
+                break;
 
-        f.close();
-        '''
+            f.close();
+            '''
 
-        data['table_ann']['model_name'].append('id-%08d'%id);
-        data['table_ann']['model_id'].append(id);
-        #data['table_ann']['label'].append(label);
-        data['table_ann']['fvs'].append(fv);
+            data['table_ann']['model_name'].append('id-%08d'%id);
+            data['table_ann']['model_id'].append(id);
+            #data['table_ann']['label'].append(label);
+            data['table_ann']['fvs'].append(fv);
 
-        print('Model %d(%d), time %f'%(i,id,time.time()-t0));
-        if i%1==0:
-            data.save(params.fname);
+            print('Model %d(%d), time %f'%(i,id,time.time()-t0));
+            if i%1==0:
+                data.save(params.fname);
+        except AttributeError as e:
+            print(f"Skip loading Model-{id}: {e}")
 
     data.save(params.fname);
 

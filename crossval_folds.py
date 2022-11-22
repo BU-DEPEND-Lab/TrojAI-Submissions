@@ -67,7 +67,7 @@ data.cuda();
 params.stuff=data.preprocess();
 
 import pandas
-meta=pandas.read_csv('../trojai-datasets/round10-train-dataset/METADATA.csv');
+meta=pandas.read_csv('/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/METADATA.csv');
 meta_table={};
 meta_table['model_name']=list(meta['model_name']);
 meta_table['label']=[int(x) for x in list(meta['poisoned'])];
@@ -141,8 +141,9 @@ crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in fo
 
 
 best_loss_so_far=1e10;
+best_auc_so_far = 0.0;
 def run_crossval(p):
-    global best_loss_so_far
+    global best_loss_so_far, best_auc_so_far
     max_batch=16;
     arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
     params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
@@ -162,6 +163,7 @@ def run_crossval(p):
 
         #Train loop
         best_loss=-1e10;
+        best_auc =-1e10;
         best_net=copy.deepcopy(net);
 
         #Training
@@ -210,9 +212,13 @@ def run_crossval(p):
 
             auc_i=sklearn.metrics.roc_auc_score(gt.numpy(),scores.numpy());
             loss_i=float(F.binary_cross_entropy_with_logits(scores,gt.float()));
-            if best_loss<auc_i:
-                best_loss=auc_i;
-                best_net=copy.deepcopy(net);
+            if best_auc < auc_i:
+                best_auc = auc_i;
+                best_net = copy.deepcopy(net)
+
+            #if best_loss<auc_i:
+            #    best_loss=auc_i;
+            #    best_net=copy.deepcopy(net);
 
             #print('train %.4f, loss %.4f, auc %.4f'%(float(loss_total),float(loss_i),float(auc_i)))
             #for g in opt.param_groups:
@@ -315,7 +321,10 @@ def run_crossval(p):
 
     if float(cepre.mean())<best_loss_so_far:
         best_loss_so_far=float(cepre.mean());
-        torch.save(ensemble,session.file('model.pt'))
+        torch.save(ensemble,session.file('min_loss_model.pt'))
+    if float(auc.mean()) >best_auc_so_far:
+        best_auc_so_far=float(auc.mean())
+        torch.save(ensemble,session.file('max_auc_model.pt'))
 
     session.log('AUC: %f + %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
 
@@ -333,11 +342,14 @@ def run_crossval(p):
 
 #Get results from hyper parameter search
 best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
-#best=util.macro.obj(best);
-params_=configure_pipeline(**best);
-hyper_params_str=json.dumps(best);
-session.log('Best hyperparam (%s)'%(hyper_params_str));
-
+if len(best) == 0:
+    best=util.macro.obj(best);
+params_=configure_pipeline(params, **best);
+try:
+    hyper_params_str=json.dumps(best);
+    session.log('Best hyperparam (%s)'%(hyper_params_str));
+except:
+    session.log('Best hyperparam (%s)'%params)
 
 
 #Load extracted features
