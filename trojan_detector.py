@@ -68,7 +68,7 @@ def example_trojan_detector(model_filepath,
     logging.info("Using compute device: {}".format(device))
     
     logging.info('Extracting features')
-    import analyzer_weight as feature_extractor
+    import analyzer_weight_v1 as feature_extractor
     fv=feature_extractor.extract_fv(model_filepath=model_filepath, scratch_dirpath=scratch_dirpath, examples_dirpath=examples_dirpath, params=config);
     fvs={'fvs':[fv]};
     
