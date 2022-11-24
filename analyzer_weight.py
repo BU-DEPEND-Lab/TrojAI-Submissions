@@ -92,7 +92,15 @@ def run(interface, k, szcap=4096):
     fvs=torch.stack(fvs);
     #print('after torch stack', len(fvs))
     #print()
-    
+
+    # 302 x 4
+
+    min_features = torch.min(fvs, dim=0).values
+    max_features = torch.max(fvs, dim=0).values
+    mean_features = torch.mean(fvs, dim=0)
+    std_features = torch.std(fvs, dim=0)
+    fvs = torch.cat((min_features, max_features, mean_features, std_features), dim=0)
+
     return fvs;
 
 
@@ -108,7 +116,7 @@ def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirp
         model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id, root = '/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/');
 
     interface=engine.new(model_filepath);
-    fvs=run(interface, 1, szcap=params.szcap)
+    fvs=run(interface, 3, szcap=params.szcap)
 
     print('Weight analysis done, time %.2f'%(time.time()-t0))
     return fvs
@@ -121,12 +129,12 @@ if __name__ == "__main__":
 
     default_params=smartparse.obj();
     default_params.szcap=4096;
-    default_params.fname='data_r11_weight_szcap_1048576.pt'
+    default_params.fname='data_r11_k3_20_features.pt'
     params=smartparse.parse(default_params);
     params.argv=sys.argv
     data.d['params']=db.Table.from_rows([vars(params)]);
 
-    model_ids=list(range(0,144))
+    model_ids=list(range(0,288))
 
     for i,id in enumerate(model_ids):
         print(i,id)

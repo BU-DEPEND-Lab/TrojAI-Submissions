@@ -1,0 +1,33 @@
+Split 0, loss 0.6923 (0.6923), auc 0.5259, time 3.788133
+Split 1, loss 0.6919 (0.6919), auc 0.6612, time 7.439789
+Split 2, loss 0.7023 (0.7023), auc 0.4810, time 11.260974
+Split 3, loss 0.7207 (0.7207), auc 0.3971, time 14.904597
+Mistakes: 
+AUC: 0.516277 + 0.220797, CE: 0.701807 + 0.026951, CEpre: 0.701807 + 0.026951 (arch.mlp (10,3,19), epochs 254, batch 11, lr 0.000044, decay 0.000093)
+Split 0, loss 0.6981 (0.6981), auc 0.5251, time 1.883805
+Split 1, loss 0.7393 (0.7393), auc 0.5105, time 3.757217
+Split 2, loss 0.7034 (0.7034), auc 0.5746, time 5.614318
+Split 3, loss 0.9761 (0.9761), auc 0.4706, time 7.480259
+Mistakes: 
+AUC: 0.520194 + 0.085940, CE: 0.779222 + 0.265020, CEpre: 0.779222 + 0.265020 (arch.mlp (8,5,51), epochs 148, batch 26, lr 0.006435, decay 0.000134)
+Split 0, loss 0.8087 (0.8087), auc 0.4873, time 3.396631
+Split 1, loss 0.7550 (0.7550), auc 0.4553, time 6.744876
+Split 2, loss 0.7162 (0.7162), auc 0.5437, time 10.085267
+Split 3, loss 0.8606 (0.8606), auc 0.4226, time 13.416117
+Mistakes: 
+AUC: 0.477208 + 0.103128, CE: 0.785111 + 0.126069, CEpre: 0.785111 + 0.126069 (arch.mlp (3,3,91), epochs 520, batch 54, lr 0.000006, decay 0.000001)
+Split 0, loss 0.7681 (0.7681), auc 0.3768, time 4.260856
+Split 1, loss 0.6768 (0.6768), auc 0.6138, time 8.485485
+Split 2, loss 0.7429 (0.7429), auc 0.4151, time 12.763026
+Split 3, loss 0.7146 (0.7146), auc 0.5015, time 17.033531
+Mistakes: 
+AUC: 0.476823 + 0.210373, CE: 0.725587 + 0.078367, CEpre: 0.725587 + 0.078367 (arch.mlp (3,6,211), epochs 658, batch 11, lr 0.000004, decay 0.000005)
+Split 0, loss 0.6936 (0.6936), auc 0.5158, time 0.273592
+Split 1, loss 0.6960 (0.6960), auc 0.6286, time 0.553777
+Split 2, loss 0.6943 (0.6943), auc 0.5849, time 0.826500
+Split 3, loss 0.7001 (0.7001), auc 0.4226, time 1.088768
+Mistakes: 
+AUC: 0.537986 + 0.179693, CE: 0.696004 + 0.005873, CEpre: 0.696004 + 0.005873 (arch.mlp (9,8,300), epochs 20, batch 19, lr 0.000006, decay 0.000378)
+Split 0, loss 25.2125 (25.2125), auc 0.4950, time 3.137197
+Split 1, loss 9.5615 (9.5615), auc 0.3178, time 6.179161
+Split 2, loss 10.9597 (10.9597), auc 0.4762, time 9.290976
