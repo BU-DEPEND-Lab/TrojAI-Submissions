@@ -1,6 +1,3 @@
-
-
-
 import os
 import sys
 import torch
@@ -35,77 +32,75 @@ def hist_v(w,bins=100):
 
     return hist;
 
-def analyze(param,nbins=100,szcap=4096):
+def analyze(param, k, szcap=4096):
     if len(param.shape)==1:
-        fvs=analyze(param.view(1,-1),nbins=nbins,szcap=szcap)
+        fvs=analyze(param.view(1,-1), k, szcap=szcap)
         return fvs
     if len(param.shape)==4:
         #Conv filters
         fvs=[];
         for i in range(param.shape[-2]):
             for j in range(param.shape[-1]):
-                fv=analyze(param[:,:,i,j],nbins=nbins,szcap=szcap);
+                fv=analyze(param[:,:,i,j], k, szcap=szcap);
                 fvs=fvs+fv;
 
         return fvs
     elif len(param.shape)==2:
         #Create an overarching matrix
-        nx=param.shape[1]
-        ny=param.shape[0]
-        n=max(nx,ny);
-        n=min(n,szcap)
-        m=min(nx,ny);
-        z=torch.zeros(n,n).to(param.device);
-        z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
+        #print('szcap', szcap)
+        # nx=param.shape[1]
+        # ny=param.shape[0]
+        # n=max(nx,ny);
+        # n=min(n,szcap)
+        # m=min(nx,ny);
+        # z=torch.zeros(n,n).to(param.device);
+        # z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
-        #
-        e,_=z.eig();
-        e = e/torch.linalg.norm(e)
+#         print('before svd')
+        U, S, V = param.svd()
+#         print('after svd')
+        # e,_=z.eig();
+        # eig_norm = torch.linalg.norm(e, dim=1)
+        #e = e/eig_norm
 
-        #Analyze eigs
-        #1) eig distribution
-        e2=(e**2).sum(1);
-        rank=int(e2==0).long().sum();
-        if rank<m:
-            #pad 0s to eig
-            e_nz=e[e2 == 0].clone();
-            e_z=torch.Tensor(m-rank,2).fill_(0).to(e.device);
-            e=torch.cat((e_nz,e_z),dim=0);
-        else:
-            #Still adds a 0 for perspective
-            e_nz=e[e2== 0].clone();
-            e_z=torch.Tensor(1,2).fill_(0).to(e.device);
-            e=torch.cat((e_nz,e_z),dim=0);
+        mean = S.mean(axis=0).unsqueeze(0)
+        std = torch.std(S, dim=0, unbiased=False).unsqueeze(0) # use biased std to avoid NaN
 
-        #Get histogram of abs, real, imaginary
-        e2=(e**2).sum(1)**0.5;
-        e2_hist=hist_v(e2,nbins);
-        er_hist=hist_v(e[:,0],nbins);
-        ec_hist=hist_v(e[:,1],nbins);
+#         print('S shape', S.shape)
+        S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1)).cuda()), dim=1)
+        eig_norm = torch.linalg.norm(S_expanded, dim=1)
+        indices_norm_based_desc = torch.argsort(eig_norm)
+        top_k_indices = indices_norm_based_desc[-1 * k:]
+        top_k_eigen = S[top_k_indices]
+        bottom_k_indices = indices_norm_based_desc[:k]
+        bottom_k_eigen = S[bottom_k_indices]
 
-        #2) histogram of eig persistence
-        cm=AgglomerativeClustering(distance_threshold=0, n_clusters=None,linkage='single')
-        cm=cm.fit(e.cpu())
-        d=torch.from_numpy(cm.distances_);
-        eig_persist=hist_v(d,nbins)
+        fv=torch.cat((mean, std, top_k_eigen, bottom_k_eigen, torch.linalg.norm(S).unsqueeze(0)),dim=0)
 
-
-        #Get histogram of weight value and abs
-        w=param.data.view(-1);
-        w_hist=hist_v(w,nbins);
-        wabs_hist=hist_v(w.abs(),nbins);
-
-        fv=torch.cat((e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
         return [fv];
     else:
         return [];
 
-def run(interface,nbins=100,szcap=4096):
+def run(interface, k, szcap=4096):
     fvs=[];
     for param in interface.model.parameters():
-        fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
+        #print('fvs', len(fvs))
+        fvs=fvs+analyze(param.data, k, szcap=szcap);
 
+    #print()
+    #print('fvs shape', len(fvs), len(fvs[0]), len(fvs[49]))
     fvs=torch.stack(fvs);
+    #print('after torch stack', len(fvs))
+    #print()
+
+    # 302 x 4
+
+    min_features = torch.min(fvs, dim=0).values
+    max_features = torch.max(fvs, dim=0).values
+    mean_features = torch.mean(fvs, dim=0)
+    std_features = torch.std(fvs, dim=0)
+    fvs = torch.cat((min_features, max_features, mean_features, std_features), dim=0)
+
     return fvs;
 
 
@@ -114,7 +109,6 @@ def run(interface,nbins=100,szcap=4096):
 def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirpath=None, params=None):
     t0=time.time();
     default_params=smartparse.obj();
-    default_params.nbins=100
     default_params.szcap=4096
     params = smartparse.merge(params,default_params);
 
@@ -122,7 +116,7 @@ def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirp
         model_filepath, scratch_dirpath, examples_dirpath=helper.get_paths(id, root = '/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round11/');
 
     interface=engine.new(model_filepath);
-    fvs=run(interface,nbins=params.nbins,szcap=params.szcap)
+    fvs=run(interface, 3, szcap=params.szcap)
 
     print('Weight analysis done, time %.2f'%(time.time()-t0))
     return fvs
@@ -134,14 +128,13 @@ if __name__ == "__main__":
     t0=time.time()
 
     default_params=smartparse.obj();
-    default_params.nbins=100;
     default_params.szcap=4096;
-    default_params.fname='data_r10_weight.pt'
+    default_params.fname='data_r11_k3_20_features.pt'
     params=smartparse.parse(default_params);
     params.argv=sys.argv
     data.d['params']=db.Table.from_rows([vars(params)]);
 
-    model_ids=list(range(0,144))
+    model_ids=list(range(0,288))
 
     for i,id in enumerate(model_ids):
         print(i,id)
