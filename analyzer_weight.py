@@ -70,9 +70,9 @@ def analyze(param,nbins=100,szcap=4096):
         # eigen norm
         e_norm = torch.linalg.norm(e, dim = 0).flatten()
         ids_norm_based_desc = torch.argsort(e_norm).flatten()
-        top_k_ids = ids_norm_based_desc.tolist()[-1: -5:-1]
+        #top_k_ids = ids_norm_based_desc.tolist()[-1: -5:-1]
         top_k_e = e[top_k_ids].flatten()
-        bot_k_ids = ids_norm_based_desc[:5]
+        #bot_k_ids = ids_norm_based_desc[:5]
         bot_k_e = e[bot_k_ids].flatten()
 
         e = e/torch.linalg.norm(e)
@@ -123,9 +123,9 @@ def analyze(param,nbins=100,szcap=4096):
         s_norm = torch.linalg.norm(S_expanded, dim=1).flatten()
         indices_norm_based_desc = torch.argsort(s_norm).flatten()
         top_k_ids = indices_norm_based_desc.tolist()[-1: -11:-1]
-        top_k_s = S[top_k_ids].flatten()
+        #top_k_s = S[top_k_ids].flatten()
         bot_k_ids = indices_norm_based_desc[:10]
-        bot_k_s = S[bot_k_ids].flatten()
+        #bot_k_s = S[bot_k_ids].flatten()
          
         fv=torch.cat((e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
         return [fv];
