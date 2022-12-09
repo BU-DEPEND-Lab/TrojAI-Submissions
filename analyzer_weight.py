@@ -126,7 +126,7 @@ def analyze(param,nbins=100,szcap=4096):
         top_k_s = S[top_k_ids].flatten()
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
-
+        print(e_mean.shape, s_mean.shape, e2_hist.shape)
         fv=torch.cat((e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
         return [fv];
     else:
