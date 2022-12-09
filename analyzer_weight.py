@@ -70,7 +70,7 @@ def analyze(param,nbins=100,szcap=4096):
         # eigen norm
         e_norm = torch.linalg.norm(e, dim = 0).flatten()
         ids_norm_based_desc = torch.argsort(e_norm).flatten()
-        top_k_ids = ids_norm_based_desc[-1 * 10]
+        top_k_ids = ids_norm_based_desc[-1: -11]
         top_k_e = e[top_k_ids].flatten()
         bot_k_ids = ids_norm_based_desc[:10]
         bot_k_e = e[bot_k_ids].flatten()
