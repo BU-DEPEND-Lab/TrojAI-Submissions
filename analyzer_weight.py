@@ -68,7 +68,7 @@ def analyze(param,nbins=100,szcap=4096):
         # eigen std
         e_std = torch.std(e, dim = 0, unbiased=False).unsqueeze(0)
         # eigen norm
-        e_norm = torch.linalg.norm(e_norm, dim = 1)
+        e_norm = torch.linalg.norm(e, dim = 1)
         ids_norm_based_desc = torch.argsort(e_norm)
         top_k_ids = ids_norm_based_desc[-1 * 10]
         top_k_e = e[top_k_ids]
