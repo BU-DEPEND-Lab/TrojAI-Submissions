@@ -157,6 +157,5 @@ if __name__ == "__main__":
         except AttributeError as e:
             print(f"Skip loading Model-{id}: {e}")
 
-    print(data['table_ann']['fvs'])
     data.save(params.fname);
 
