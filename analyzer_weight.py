@@ -117,7 +117,7 @@ def analyze(param,nbins=100,szcap=4096):
         # SVD decomposition
         U, S, V = param.svd()
         S = S.cpu()
-        s_mean = S.mean(axis=0).unsqueeze(0)
+        s_mean = S.mean(axis=0).flatten()
         s_std = torch.std(S, dim=0, unbiased=False).unsqueeze(0) # use biased std to avoid NaN        
         S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1))), dim=1)
         s_norm = torch.linalg.norm(S_expanded, dim=1)
