@@ -120,7 +120,7 @@ def analyze(param,nbins=100,szcap=4096):
         s_mean = S.mean(axis=0).flatten()
         s_std = torch.std(S, dim=0, unbiased=False).flatten() # use biased std to avoid NaN        
         #S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1))), dim=1)
-        s_norm = torch.linalg.norm(S, dim=1).flatten()
+        s_norm = torch.linalg.norm(S, dim=0).flatten()
         indices_norm_based_desc = torch.argsort(s_norm).flatten()
         top_k_ids = indices_norm_based_desc[-1: -11:-1].tolist()
         top_k_s = S[top_k_ids].flatten()
