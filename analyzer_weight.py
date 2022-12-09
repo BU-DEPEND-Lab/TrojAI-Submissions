@@ -58,20 +58,39 @@ def analyze(param,nbins=100,szcap=4096):
         z=torch.zeros(n,n).to(param.device);
         z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
+        # matrix norm
+        mat_norm = torch.linalg.matrix_norm(z)
+
         #
         e,_=z.eig();
-        e = e/torch.linalg.norm(e)
+        # eigen mean
+        e_mean = e.mean(axis = 0).unsqueeze(0)
+        # eigen std
+        e_std = torch.std(e, dim = 0, unbiased=False).unsqueeze(0)
+        # eigen norm
+        e_norm = torch.linalg.norm(e_norm, dim = 1)
+        ids_norm_based_desc = torch.argsort(e_norm)
+        top_k_ids = ids_norm_based_desc[-1 * 10]
+        top_k_e = e[top_k_ids]
+        bot_k_ids = ids_norm_based_desc[:10]
+        bot_k_e = e[bot_k_ids]
 
+        e = e/torch.linalg.norm(e)
+        # e is normalized to +-1 or NAN
         #Analyze eigs
+        
         #1) eig distribution
         e2=(e**2).sum(1);
+        # e is squared to 1 or NAN
         rank=int(e2.gt(0).long().sum());
+        # count the number of ones in the eigenvalues
         if rank<m:
-            #pad 0s to eig
+            #pad 0s to eig to replace NAN
             e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(m-rank,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
         else:
+            # Even if the matrix is full ranked
             #Still adds a 0 for perspective
             e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(1,2).fill_(0).to(e.device);
@@ -95,7 +114,19 @@ def analyze(param,nbins=100,szcap=4096):
         w_hist=hist_v(w,nbins);
         wabs_hist=hist_v(w.abs(),nbins);
 
-        fv=torch.cat((e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
+        # SVD decomposition
+        U, S, V = param.svd()
+        s_mean = S.mean(axis=0).unsqueeze(0)
+        s_std = torch.std(S, dim=0, unbiased=False).unsqueeze(0) # use biased std to avoid NaN        
+        S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1)).cuda()), dim=1)
+        s_norm = torch.linalg.norm(S_expanded, dim=1)
+        indices_norm_based_desc = torch.argsort(s_norm)
+        top_k_ids = indices_norm_based_desc[-1 * 10:]
+        top_k_s = S[top_k_ids]
+        bot_k_ids = indices_norm_based_desc[:10]
+        bot_k_s = S[bot_k_ids]
+
+        fv=torch.cat((e_mean, e_std, e_norm, top_k_e, bot_k_e, s_mean, s_std, s_norm, top_k_s, bot_k_s, e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
         return [fv];
     else:
         return [];
