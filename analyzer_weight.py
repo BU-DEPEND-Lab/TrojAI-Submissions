@@ -118,7 +118,7 @@ def analyze(param,nbins=100,szcap=4096):
         U, S, V = param.svd()
         s_mean = S.mean(axis=0).unsqueeze(0)
         s_std = torch.std(S, dim=0, unbiased=False).unsqueeze(0) # use biased std to avoid NaN        
-        S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1))), dim=1)
+        S_expanded = torch.cat((S.unsqueeze(dim=1).cpu(), torch.zeros((len(S), 1))), dim=1)
         s_norm = torch.linalg.norm(S_expanded, dim=1)
         indices_norm_based_desc = torch.argsort(s_norm)
         top_k_ids = indices_norm_based_desc[-1 * 10:]
