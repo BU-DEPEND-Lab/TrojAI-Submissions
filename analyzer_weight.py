@@ -59,7 +59,8 @@ def analyze(param,nbins=100,szcap=4096):
         z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
         # matrix norm
-        mat_norm = torch.linalg.matrix_norm(z).usqueeze(0)
+        mat_norm = torch.linalg.matrix_norm(z) 
+    
 
         #
         e,_=z.eig();
@@ -126,8 +127,9 @@ def analyze(param,nbins=100,szcap=4096):
         top_k_s = S[top_k_ids].flatten()
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
-         
-        fv=torch.cat((mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist));
+        fv_ = (mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist)
+        print(fv_)
+        fv=torch.cat(fv_);
         return [fv];
     else:
         return [];
