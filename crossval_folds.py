@@ -163,7 +163,7 @@ def run_crossval(p):
     criterion = nn.BCELoss()
     for split_id,split in enumerate(crossval_splits):
         data_train,data_val,data_test=split;
-        net=arch_.new(params_, input_size=620, output_size=1).cuda();
+        net=arch_.new(params_, input_size=620).cuda();
         opt=optim.Adam(net.parameters(),lr=params_.lr); #params_.lr
 
         #Train loop
