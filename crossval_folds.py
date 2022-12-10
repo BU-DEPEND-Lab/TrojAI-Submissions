@@ -180,7 +180,7 @@ def run_crossval(p):
                 #loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
                 spos=scores_i.gather(1,C.view(-1,1)).mean();
                 sneg=torch.exp(scores_i).mean();
-                print(spos.shape, sneg.shape)
+                #print(spos.shape, sneg.shape)
                 loss=-(spos-sneg+1);
                 #print(float(loss))
                 l2=0;
