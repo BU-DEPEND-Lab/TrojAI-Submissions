@@ -128,10 +128,10 @@ def analyze(param,nbins=100,szcap=4096):
         top_k_s = S[top_k_ids].flatten()
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
-        fv_1 = [mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu()]
-        fv_2 = [e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist]
+        fv_1 = torch.cat([mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu()])
+        fv_2 = torch.cat([e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist])
         print(fv_1.shape, fv_2.shape)
-        fv=torch.cat(fv_1 + fv_2);
+        fv=torch.cat((fv_1, fv_2));
         return [fv];
     else:
         return [];
