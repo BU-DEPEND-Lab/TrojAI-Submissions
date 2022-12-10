@@ -173,6 +173,7 @@ def run_crossval(p):
                 net.zero_grad();
                 data_batch.cuda();
                 C=data_batch['label'];
+                print(C.shape)
                 data_batch.delete_column('label');
                 scores_i=net(data_batch);
 
