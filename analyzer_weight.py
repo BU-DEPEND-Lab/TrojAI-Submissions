@@ -59,7 +59,7 @@ def analyze(param,nbins=100,szcap=4096):
         z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
         # matrix norm
-        mat_norm = torch.linalg.matrix_norm(z) 
+        mat_norm = torch.linalg.matrix_norm(z).view(1)
     
 
         #
@@ -77,6 +77,7 @@ def analyze(param,nbins=100,szcap=4096):
         bot_k_e = e[bot_k_ids].flatten()
 
         e = e/torch.linalg.norm(e)
+        print(e)
         # e is normalized to +-1 or NAN
         #Analyze eigs
         
@@ -128,7 +129,7 @@ def analyze(param,nbins=100,szcap=4096):
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
         fv_ = (mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist)
-        print(fv_)
+        #print(fv_)
         fv=torch.cat(fv_);
         return [fv];
     else:
