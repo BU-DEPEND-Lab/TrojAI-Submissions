@@ -131,7 +131,7 @@ def configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,e
     params_.epochs=int(epochs);
     params_.lr=lr;
     params_.decay=decay;
-    params_.batch=int(batch);
+    params_.batch=288#int(batch);
     params_=smartparse.merge(params_,params);
     return params_;
 
@@ -141,11 +141,16 @@ crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in fo
 
 
 best_loss_so_far=1e10;
+best_auc_so_far = 0.0;
 def run_crossval(p):
-    global best_loss_so_far
+    global best_loss_so_far, best_auc_so_far
     max_batch=16;
     arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
     params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
+    #print('params', params_)
+    test12 = vars(params_)
+    #for p in test12:
+    #    print(p, test12[p])
     arch_=importlib.import_module(params_.arch);
     #Random splits N times
     auc=[];
@@ -155,6 +160,7 @@ def run_crossval(p):
     t0=time.time();
     ensemble=[];
     mistakes=[];
+    criterion = nn.BCELoss()
     for split_id,split in enumerate(crossval_splits):
         data_train,data_val,data_test=split;
         net=arch_.new(params_).cuda();
@@ -162,6 +168,7 @@ def run_crossval(p):
 
         #Train loop
         best_loss=-1e10;
+        best_auc =-1e10;
         best_net=copy.deepcopy(net);
 
         #Training
@@ -169,6 +176,7 @@ def run_crossval(p):
             net.train();
             loss_total=[];
             for data_batch in data_train.batches(params_.batch,shuffle=True,full=True):
+                #print('print', data_batch)
                 opt.zero_grad();
                 net.zero_grad();
                 data_batch.cuda();
@@ -176,10 +184,13 @@ def run_crossval(p):
                 data_batch.delete_column('label');
                 scores_i=net(data_batch);
 
-                #loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
-                spos=scores_i.gather(1,C.view(-1,1)).mean();
-                sneg=torch.exp(scores_i).mean();
-                loss=-(spos-sneg+1);
+                # loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
+                loss = criterion(scores_i, C.float().view(-1, 1))
+                # penny: spos is the mean of the scores of the correct label?
+                # spos=scores_i.gather(1,C.view(-1,1)).mean();
+                # penny: sneg is the mean of the exponential of the logits?
+                # sneg=torch.exp(scores_i).mean();
+                # loss=-(spos-sneg+1);
                 #print(float(loss))
                 l2=0;
                 for p in net.parameters():
@@ -201,7 +212,7 @@ def run_crossval(p):
 
                 C=data_batch['label'];
                 data_batch.delete_column('label');
-                scores_i=net.logp(data_batch);
+                scores_i=net(data_batch);
                 scores.append(scores_i.data.cpu());
                 gt.append(C.data.cpu());
 
@@ -209,40 +220,44 @@ def run_crossval(p):
             gt=torch.cat(gt,dim=0);
 
             auc_i=sklearn.metrics.roc_auc_score(gt.numpy(),scores.numpy());
-            loss_i=float(F.binary_cross_entropy_with_logits(scores,gt.float()));
-            if best_loss<auc_i:
-                best_loss=auc_i;
-                best_net=copy.deepcopy(net);
+            loss_i=float(F.binary_cross_entropy(scores,gt.float().view(-1,1)));
+            if best_auc < auc_i:
+                best_auc = auc_i;
+                best_net = copy.deepcopy(net)
+
+            #if best_loss<auc_i:
+            #    best_loss=auc_i;
+            #    best_net=copy.deepcopy(net);
 
             #print('train %.4f, loss %.4f, auc %.4f'%(float(loss_total),float(loss_i),float(auc_i)))
             #for g in opt.param_groups:
             #    g['lr'] = g['lr']*0.98
 
         #Temperature-scaling calibration on val
-        net=best_net;
-        net.eval();
-        scores=[];
-        gt=[];
-        for data_batch in data_val.batches(max_batch):
-            data_batch.cuda();
+        # net=best_net;
+        # net.eval();
+        # scores=[];
+        # gt=[];
+        # for data_batch in data_val.batches(max_batch):
+        #     data_batch.cuda();
 
-            C=data_batch['label'];
-            data_batch.delete_column('label');
-            scores_i=net.logp(data_batch);
-            scores.append(scores_i.data);
-            gt.append(C);
+        #     C=data_batch['label'];
+        #     data_batch.delete_column('label');
+        #     scores_i=net(data_batch);
+        #     scores.append(scores_i.data);
+        #     gt.append(C);
 
-        scores=torch.cat(scores,dim=0);
-        gt=torch.cat(gt,dim=0);
+        # scores=torch.cat(scores,dim=0);
+        # gt=torch.cat(gt,dim=0);
 
-        T=torch.Tensor(1).fill_(0).cuda();
-        T.requires_grad_();
-        opt2=optim.Adamax([T],lr=3e-2);
-        for iter in range(500):
-            opt2.zero_grad();
-            loss=F.binary_cross_entropy_with_logits(scores*torch.exp(-T),gt.float());
-            loss.backward();
-            opt2.step();
+        # T=torch.Tensor(1).fill_(0).cuda();
+        # T.requires_grad_();
+        # opt2=optim.Adamax([T],lr=3e-2);
+        # for iter in range(500):
+        #     opt2.zero_grad();
+        #     loss=F.binary_cross_entropy(scores*torch.exp(-T),gt.float().view(-1,1));
+        #     loss.backward();
+        #     opt2.step();
 
 
         #Eval
@@ -255,9 +270,9 @@ def run_crossval(p):
 
             C=data_batch['label'];
             data_batch.delete_column('label');
-            scores_i=net.logp(data_batch);
+            scores_i=net(data_batch);
 
-            scores.append((scores_i*torch.exp(-T)).data.cpu());
+            scores.append(scores_i.data.cpu());
             scores_pre.append(scores_i.data.cpu());
 
             gt.append(C.data.cpu());
@@ -282,7 +297,7 @@ def run_crossval(p):
             else:
                 #Overall
                 auc=float(sklearn.metrics.roc_auc_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()));
-                ce=float(F.binary_cross_entropy_with_logits(torch.Tensor(scores),torch.Tensor(gt)));
+                ce=float(F.binary_cross_entropy(torch.Tensor(scores),torch.Tensor(gt).view(-1,1)));
                 return auc,ce;
 
         auc_i,ce_i=compute_metrics(scores.tolist(),gt.tolist());
@@ -305,7 +320,7 @@ def run_crossval(p):
         cepre.append(ce_pre_i);
         session.log('Split %d, loss %.4f (%.4f), auc %.4f, time %f'%(split_id,ce_i,ce_pre_i,auc_i,time.time()-t0));
 
-        ensemble.append({'net':net.cpu().state_dict(),'params':params_,'T':float(T.data.cpu())})
+        ensemble.append({'net':net.cpu().state_dict(),'params':params_})
 
     mistakes=sorted(mistakes);
     session.log('Mistakes: '+','.join(['%d'%i for i in mistakes]));
@@ -315,7 +330,10 @@ def run_crossval(p):
 
     if float(cepre.mean())<best_loss_so_far:
         best_loss_so_far=float(cepre.mean());
-        torch.save(ensemble,session.file('model.pt'))
+        torch.save(ensemble,session.file('min_loss_model.pt'))
+    if float(auc.mean()) >best_auc_so_far:
+        best_auc_so_far=float(auc.mean())
+        torch.save(ensemble,session.file('max_auc_model.pt'))
 
     session.log('AUC: %f + %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
 
@@ -335,10 +353,12 @@ def run_crossval(p):
 best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
 if len(best) == 0:
     best=util.macro.obj(best);
-params_=configure_pipeline(**best);
-hyper_params_str=json.dumps(best);
-session.log('Best hyperparam (%s)'%(hyper_params_str));
-
+params_=configure_pipeline(params, **best);
+try:
+    hyper_params_str=json.dumps(best);
+    session.log('Best hyperparam (%s)'%(hyper_params_str));
+except:
+    session.log('Best hyperparam (%s)'%params)
 
 
 #Load extracted features
