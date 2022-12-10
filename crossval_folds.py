@@ -173,10 +173,10 @@ def run_crossval(p):
                 net.zero_grad();
                 data_batch.cuda();
                 C=data_batch['label'];
-                print(C.shape)
+           
                 data_batch.delete_column('label');
                 scores_i=net(data_batch);
-
+                print(scores_i.shape)
                 #loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
                 spos=scores_i.gather(1,C.view(-1,1)).mean();
                 sneg=torch.exp(scores_i).mean();
