@@ -77,7 +77,7 @@ def analyze(param,nbins=100,szcap=4096):
         bot_k_e = e[bot_k_ids].flatten()
 
         e = e/torch.linalg.norm(e)
-        print(e)
+        
         # e is normalized to +-1 or NAN
         #Analyze eigs
         
@@ -97,7 +97,7 @@ def analyze(param,nbins=100,szcap=4096):
             e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(1,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
-
+        print(e)
         #Get histogram of abs, real, imaginary
         e2=(e**2).sum(1)**0.5;
         e2_hist=hist_v(e2,nbins);
