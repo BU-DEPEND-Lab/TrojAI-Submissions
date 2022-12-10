@@ -127,7 +127,7 @@ def analyze(param,nbins=100,szcap=4096):
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
          
-        fv=torch.cat((mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
+        fv=torch.cat(mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist);
         return [fv];
     else:
         return [];
@@ -138,6 +138,7 @@ def run(interface,nbins=100,szcap=4096):
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
 
     fvs=torch.stack(fvs);
+    print(fvs.shape)
     return fvs;
 
 #Fuzzing call for TrojAI R9
