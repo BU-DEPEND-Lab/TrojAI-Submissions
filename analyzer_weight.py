@@ -59,7 +59,7 @@ def analyze(param,nbins=100,szcap=4096):
         z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
         # matrix norm
-        mat_norm = torch.linalg.matrix_norm(z)
+        mat_norm = torch.linalg.matrix_norm(z).usqueeze(0)
 
         #
         e,_=z.eig();
