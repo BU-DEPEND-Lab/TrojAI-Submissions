@@ -63,20 +63,34 @@ def analyze(param,nbins=100,szcap=4096):
 
         #
         e,_=z.eig();
+        # eigen mean
+        e_mean = e.mean(axis = 0).flatten()
+        # eigen std
+        e_std = torch.std(e, dim = 0, unbiased=False).flatten()
+        # eigen norm
+        e_norm = torch.linalg.norm(e, dim = 0).flatten()
+        ids_norm_based_desc = torch.argsort(e_norm).flatten()
+        top_k_ids = ids_norm_based_desc.tolist()[-1: -11:-1]
+        top_k_e = e[top_k_ids].flatten()
+        bot_k_ids = ids_norm_based_desc[:10]
+        bot_k_e = e[bot_k_ids].flatten()
+
         e = e/torch.linalg.norm(e)
-        # e is normalized to +-1 or 0
+        # e is normalized to +-1 or NAN
         #Analyze eigs
+        
         #1) eig distribution
         e2=(e**2).sum(1);
-        # e is squared to 1 or 0
+        # e is squared to 1 or NAN
         rank=int(e2.gt(0).long().sum());
-        # count
+        # count the number of ones in the eigenvalues
         if rank<m:
-            #pad 0s to eig
+            #pad 0s to eig to replace NAN
             e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(m-rank,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
         else:
+            # Even if the matrix is full ranked
             #Still adds a 0 for perspective
             e_nz=e[e2.gt(0)].clone();
             e_z=torch.Tensor(1,2).fill_(0).to(e.device);
@@ -100,7 +114,20 @@ def analyze(param,nbins=100,szcap=4096):
         w_hist=hist_v(w,nbins);
         wabs_hist=hist_v(w.abs(),nbins);
 
-        fv=torch.cat((e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
+        # SVD decomposition
+        U, S, V = param.svd()
+        S = S.cpu()
+        s_mean = S.mean(axis=0).flatten()
+        s_std = torch.std(S, dim=0, unbiased=False).flatten() # use biased std to avoid NaN        
+        #S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1))), dim=1)
+        s_norm = torch.linalg.norm(S, dim=0).flatten()
+        indices_norm_based_desc = torch.argsort(s_norm).flatten()
+        top_k_ids = indices_norm_based_desc.tolist()[-1: -11:-1]
+        top_k_s = S[top_k_ids].flatten()
+        bot_k_ids = indices_norm_based_desc[:10]
+        bot_k_s = S[bot_k_ids].flatten()
+         
+        fv=torch.cat((mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu(), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist),dim=0);
         return [fv];
     else:
         return [];
@@ -112,8 +139,6 @@ def run(interface,nbins=100,szcap=4096):
 
     fvs=torch.stack(fvs);
     return fvs;
-
-
 
 #Fuzzing call for TrojAI R9
 def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirpath=None, params=None):
