@@ -53,7 +53,7 @@ class new(nn.Module):
             self.margin=8;
         
         bins=100
-        self.encoder_hist=MLP(bins*17,nh,nh,nlayers);
+        self.encoder_hist=MLP(bins*6,nh,nh,nlayers);
         self.encoder_combined=MLP(2*nh,nh2,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
