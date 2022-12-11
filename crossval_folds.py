@@ -290,7 +290,7 @@ def run_crossval(p):
                 ce=float(F.binary_cross_entropy_with_logits(torch.Tensor(scores),torch.Tensor(gt)));
                 true_pred = sklearn.metrics.accuracy_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()>= 0, normalize = False)
                 tot = torch.LongTensor(gt).numpy().shape[0]
-                print(true_pred, tot)
+                #print(true_pred, tot)
                 return auc,ce, true_pred, tot;
 
         auc_i,ce_i, true_pred, tot =compute_metrics(scores.tolist(),gt.tolist());
@@ -326,7 +326,7 @@ def run_crossval(p):
     ce=torch.Tensor(ce);
     #print(torch.tensor(true_preds), torch.sum(torch.tensor(true_preds)))
     #print(torch.tensor(tot), torch.sum(torch.tensor(tot)))
-    acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tot))
+    acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tots))
     cepre=torch.Tensor(cepre);
 
     if float(cepre.mean())<best_loss_so_far:
