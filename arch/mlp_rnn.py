@@ -70,6 +70,7 @@ class new(nn.Module):
         b=len(weight_dist);
         print(b, weight_dist[0].shape)
         state=torch.zeros([1, self.state_size]).cuda();
+        h = []
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             for j in range(weight_dist[i].shape[0]):
