@@ -74,10 +74,11 @@ class new(nn.Module):
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
             h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
+            h_i=self.encoder_combined(h_i);
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
-        h=self.encoder_combined(h);
+        
         h=torch.tanh(h)*self.margin;
         return h
     
