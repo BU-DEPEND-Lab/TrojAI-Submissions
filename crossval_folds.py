@@ -323,6 +323,8 @@ def run_crossval(p):
     session.log('Mistakes: '+','.join(['%d'%i for i in mistakes]));
     auc=torch.Tensor(auc);
     ce=torch.Tensor(ce);
+    print(torch.tensor(true_preds), torch.sum(torch.tensor(true_preds)))
+    print(torch.tensor(tot), torch.sum(torch.tensor(tot)))
     acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tot))
     cepre=torch.Tensor(cepre);
 
