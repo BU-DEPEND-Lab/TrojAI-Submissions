@@ -323,7 +323,7 @@ def run_crossval(p):
     session.log('Mistakes: '+','.join(['%d'%i for i in mistakes]));
     auc=torch.Tensor(auc);
     ce=torch.Tensor(ce);
-    acc = torch.sum(true_preds) / torch.sum(tot)
+    acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tot))
     cepre=torch.Tensor(cepre);
 
     if float(cepre.mean())<best_loss_so_far:
