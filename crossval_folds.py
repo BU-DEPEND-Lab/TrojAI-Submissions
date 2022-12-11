@@ -288,7 +288,7 @@ def run_crossval(p):
                 #Overall
                 auc=float(sklearn.metrics.roc_auc_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()));
                 ce=float(F.binary_cross_entropy_with_logits(torch.Tensor(scores),torch.Tensor(gt)));
-                true_pred = sklearn.metrics.accuracy_score(torch.LongTensor(gt).numpy() >= 0,torch.Tensor(scores).numpy(), normalize = False)
+                true_pred = sklearn.metrics.accuracy_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()>= 0, normalize = False)
                 tot = torch.LongTensor(gt).numpy().shape[0]
                 return auc,ce, true_pred, tot;
 
