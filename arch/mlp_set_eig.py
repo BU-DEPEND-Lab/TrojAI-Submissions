@@ -72,8 +72,9 @@ class new(nn.Module):
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
-            print(h_i.shape)
-            h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
+            h_i_inds=torch.quantile(torch.range(0, h_i.shape[0]),self.q,dim=0, interpolation = 'nearest')
+            h_i = h_i[h_i_inds]
+            #.contiguous().view(-1);
             h_i=self.encoder_combined(h_i).squeeze(0);
             h.append(h_i);
         
