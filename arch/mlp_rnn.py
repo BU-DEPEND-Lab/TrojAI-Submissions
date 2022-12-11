@@ -72,13 +72,15 @@ class new(nn.Module):
         state=torch.zeros([weight_dist[0].shape[0], self.state_size]).cuda();
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
-            x = torch.cat((weight_dist[i].cuda(), state), dim = 1)
-            state =self.encoder_hist(x);
+            for j in range(weight_dist[i].shape[0]):
+                x = torch.cat((weight_dist[i].cuda(), state), dim = 1)
+                state =self.encoder_hist(x);
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #h.append(h_i);
         
         #h=torch.stack(h,dim=0);
-        h=self.encoder_combined(h);
+            h_i=self.encoder_combined(state);
+            h.append(h_i)
         h=torch.tanh(h)*self.margin;
         return h
     
