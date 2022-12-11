@@ -293,7 +293,7 @@ def run_crossval(p):
                 return auc,ce, true_pred, tot;
 
         auc_i,ce_i, true_pred, tot =compute_metrics(scores.tolist(),gt.tolist());
-        _,ce_pre_i=compute_metrics(scores_pre.tolist(),gt.tolist());
+        _,ce_pre_i,_, _=compute_metrics(scores_pre.tolist(),gt.tolist());
         for i in range(len(gt)):
             if int(gt[i])==1 and float(scores[i])<=0:
                 mistakes.append(params.nsplits*i+split_id);
