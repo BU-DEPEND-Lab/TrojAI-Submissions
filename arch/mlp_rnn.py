@@ -79,10 +79,10 @@ class new(nn.Module):
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #h.append(h_i);
         
-        #h=torch.stack(h,dim=0);
             h_i=self.encoder_combined(state);
             h.append(h_i)
-        h=torch.tanh(h)*self.margin;
+       
+        h=torch.tanh(torch.stack(h,dim=0))*self.margin;
         return h
     
     def logp(self,data_batch):
