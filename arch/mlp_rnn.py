@@ -68,7 +68,7 @@ class new(nn.Module):
         #for weight in weight_dist:
         #    print(weight.shape)
         b=len(weight_dist);
-        print(b, weight_dist[0].shape)
+        #print(b, weight_dist[0].shape)
         state=torch.zeros([1, self.state_size]).cuda();
         h = []
         #Have to process one by one due to variable nim & nclasses
