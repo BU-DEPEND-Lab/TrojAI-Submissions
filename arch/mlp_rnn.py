@@ -79,7 +79,7 @@ class new(nn.Module):
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #h.append(h_i);
         
-            h_i=self.encoder_combined(state);
+            h_i=self.encoder_combined(state).squeeze(0);
             h.append(h_i)
        
         h=torch.tanh(torch.stack(h,dim=0))*self.margin;
