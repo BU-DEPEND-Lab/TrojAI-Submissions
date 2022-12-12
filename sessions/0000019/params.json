@@ -1,0 +1,1 @@
+{"nsplits": 4, "pct": 0.5, "arch": "arch.mlp_set_eig", "data": "./data_r10_weight.pt", "tag": "", "session_dir": null, "budget": 100, "argv": ["crossval_folds.py", "--arch", "arch.mlp_set_eig", "--data", "./data_r10_weight.pt"]}

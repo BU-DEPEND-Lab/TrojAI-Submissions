@@ -72,10 +72,6 @@ class new(nn.Module):
     
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
-<<<<<<< HEAD
-       
-=======
->>>>>>> 1d881ea04c58c4325d65c1848a5edf87c15247f1
         b=len(weight_dist);
         
         h=[];
