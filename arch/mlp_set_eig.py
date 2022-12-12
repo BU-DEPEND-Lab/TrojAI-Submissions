@@ -11,6 +11,8 @@ import copy
 class MLP(nn.Module):
     def __init__(self,ninput,nh,noutput,nlayers):
         super().__init__()
+        print('inside MLP ninput' + str(ninput))
+        print('inside MLP nouput' + str(noutput))
         
         self.layers=nn.ModuleList();
         self.bn=nn.LayerNorm(ninput);
@@ -40,7 +42,7 @@ class MLP(nn.Module):
 
 
 class new(nn.Module):
-    def __init__(self,params):
+    def __init__(self,params,input_size=None):
         super(new,self).__init__()
         nh=params.nh;
         nh3=params.nh3;
@@ -57,7 +59,12 @@ class new(nn.Module):
             self.margin=8;
         
         bins=100
-        self.encoder_hist=MLP(bins*6 + 20,nh,nh,nlayers);
+        in_shape = 0
+        if input_size is not None:
+            in_shape = input_size
+        else:
+            in_shape = bins*6 
+        self.encoder_hist=MLP(in_shape + 20,nh,nh,nlayers);
         self.encoder_combined=MLP(q*nh,nh3,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
@@ -65,22 +72,27 @@ class new(nn.Module):
     
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
+<<<<<<< HEAD
        
+=======
+>>>>>>> 1d881ea04c58c4325d65c1848a5edf87c15247f1
         b=len(weight_dist);
         
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
-            h_i_inds=torch.quantile(torch.range(0, h_i.shape[0]).cuda(),self.q,dim=0, interpolation = 'nearest').long()
-            h_i = h_i[h_i_inds]
-            #.contiguous().view(-1);
-            h_i=self.encoder_combined(h_i).squeeze(0);
+            print('before quantile', h_i, h_i.shape)
+            h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
+            print('quantile', h_i, h_i.shape)
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
-        
+        print('before combined MLP', h, h.shape)
+        h=self.encoder_combined(h);
+        print('after combined MLP', h, h.shape)
         h=torch.tanh(h)*self.margin;
+        print('output after passing to tanh', h, h.shape)
         return h
     
     def logp(self,data_batch):
