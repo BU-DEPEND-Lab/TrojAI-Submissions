@@ -73,10 +73,11 @@ class new(nn.Module):
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
         b=len(weight_dist);
+        print(weight_dist)
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
-            print(weight_dist[i].shape)
+            
             h_i=self.encoder_hist(weight_dist[i].cuda());
             #print('before quantile', h_i, h_i.shape)
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
