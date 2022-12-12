@@ -65,7 +65,7 @@ class new(nn.Module):
         else:
             in_shape = bins*6 
         self.encoder_hist=MLP(in_shape + 20,nh,nh,nlayers);
-        self.encoder_combined=MLP(nh,nh3,2,nlayers2);
+        self.encoder_combined=MLP(q*nh,nh3,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
         return;
@@ -81,14 +81,13 @@ class new(nn.Module):
             #print('before quantile', h_i, h_i.shape)
             h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #print('quantile', h_i, h_i.shape)
-            h_i=self.encoder_combined(h_i.unsqueeze(0));
             h.append(h_i);
-        h=torch.stack(h,dim=0);
-        #print('before combined MLP', h, h.shape)
         
-        #print('after combined MLP', h, h.shape)
+        h=torch.stack(h,dim=0);
+        print('before combined MLP', h.shape)
+        h=self.encoder_combined(h);
+        print('after combined MLP', h.shape)
         h=torch.tanh(h)*self.margin;
-
         print('output after passing to tanh', h.shape)
         return h
     
