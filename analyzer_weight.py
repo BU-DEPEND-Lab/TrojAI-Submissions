@@ -137,10 +137,7 @@ def run(interface,nbins=100,szcap=4096):
     fvs=[];
     for param in interface.model.parameters():
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
-    if len(fvs) != 1173:
-        return None
     fvs=torch.stack(fvs)#, nbins));
-    print(fvs.shape)
     return fvs;
 
 #Fuzzing call for TrojAI R9
@@ -192,8 +189,6 @@ if __name__ == "__main__":
 
             f.close();
             '''
-            if fv is None:
-                continue
 
             data['table_ann']['model_name'].append('id-%08d'%id);
             data['table_ann']['model_id'].append(id);
@@ -201,8 +196,11 @@ if __name__ == "__main__":
             data['table_ann']['fvs'].append(fv);
 
             print('Model %d(%d), time %f'%(i,id,time.time()-t0));
+            fname = params.fname.split('.')
+            fname[0] = fname[0] + f"_{fv.shape[0]}"
+            fname = '.'.join(fname)
             if i%1==0:
-                data.save(params.fname);
+                data.save(fname);
         except AttributeError as e:
             print(f"Skip loading Model-{id}: {e}")
 
