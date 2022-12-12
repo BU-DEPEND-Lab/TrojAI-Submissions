@@ -73,7 +73,7 @@ class new(nn.Module):
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
         b=len(weight_dist);
-        
+        print(weight_dist[0].shape)
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
