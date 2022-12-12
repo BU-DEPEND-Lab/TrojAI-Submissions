@@ -88,7 +88,8 @@ class new(nn.Module):
         
         #print('after combined MLP', h, h.shape)
         h=torch.tanh(h)*self.margin;
-        #print('output after passing to tanh', h, h.shape)
+
+        print('output after passing to tanh', h.shape)
         return h
     
     def logp(self,data_batch):
