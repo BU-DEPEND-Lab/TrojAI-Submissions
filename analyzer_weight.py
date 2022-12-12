@@ -137,7 +137,8 @@ def run(interface,nbins=100,szcap=4096):
     fvs=[];
     for param in interface.model.parameters():
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
-
+    if len(fvs) != 1173:
+        return
     fvs=torch.stack(fvs)#, nbins));
     print(fvs.shape)
     return fvs;

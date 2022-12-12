@@ -65,7 +65,7 @@ class new(nn.Module):
         else:
             in_shape = bins*6 
         self.encoder_hist=MLP(in_shape + 20,nh,nh,nlayers);
-        self.encoder_combined=MLP(q*nh,nh3,2,nlayers2);
+        self.encoder_combined=MLP(1173*nh,nh3,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
         return;
@@ -73,20 +73,21 @@ class new(nn.Module):
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
         b=len(weight_dist);
-        print(weight_dist[0].shape)
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
             #print('before quantile', h_i, h_i.shape)
-            h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
+            #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #print('quantile', h_i, h_i.shape)
+            h_i = h_i.flatten()
+            h_i=self.encoder_combined(h_i.unsqueeze(0));
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
-        print('before combined MLP', h.shape)
-        h=self.encoder_combined(h);
-        print('after combined MLP', h.shape)
+        #print('before combined MLP', h.shape)
+        #h=self.encoder_combined(h);
+        #print('after combined MLP', h.shape)
         h=torch.tanh(h)*self.margin;
         print('output after passing to tanh', h.shape)
         return h
