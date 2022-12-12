@@ -82,17 +82,17 @@ class new(nn.Module):
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
-            print('before quantile', h_i, h_i.shape)
+            #print('before quantile', h_i, h_i.shape)
             h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
-            print('quantile', h_i, h_i.shape)
+            #print('quantile', h_i, h_i.shape)
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
-        print('before combined MLP', h, h.shape)
+        #print('before combined MLP', h, h.shape)
         h=self.encoder_combined(h);
-        print('after combined MLP', h, h.shape)
+        #print('after combined MLP', h, h.shape)
         h=torch.tanh(h)*self.margin;
-        print('output after passing to tanh', h, h.shape)
+        #print('output after passing to tanh', h, h.shape)
         return h
     
     def logp(self,data_batch):
