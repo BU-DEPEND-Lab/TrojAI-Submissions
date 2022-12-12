@@ -1,6 +1,3 @@
-
-
-
 import os
 import sys
 import torch
@@ -78,12 +75,12 @@ def analyze(param,nbins=100,szcap=4096):
 
         e = e/torch.linalg.norm(e)
         
-        # e is normalized to +-1 or NAN
+        # e is normalized to +-1 or +-i or 0
         #Analyze eigs
         
         #1) eig distribution
         e2=(e**2).sum(1);
-        # e is squared to 1 or NAN
+        # e can be real or imaginary, of which the square is -1
         rank=int(e2.gt(0).long().sum());
         # count the number of ones in the eigenvalues
         if rank<m:
@@ -141,7 +138,7 @@ def run(interface,nbins=100,szcap=4096):
     for param in interface.model.parameters():
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
 
-    fvs=torch.stack(fvs);
+    fvs=torch.stack(hist_v(fvs, nbins));
     print(fvs.shape)
     return fvs;
 
