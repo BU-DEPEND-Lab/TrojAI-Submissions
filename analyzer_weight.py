@@ -21,7 +21,7 @@ def hist_v(w,bins=100):
     #s,_=w.sort(dim=0);
     #wmin=float(w.min());
     #wmax=float(w.max());
-    s = x
+    s = w
     n=s.shape[0];
     hist=torch.Tensor(bins);
     for i in range(bins):
