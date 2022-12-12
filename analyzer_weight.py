@@ -18,10 +18,10 @@ import engine_objdet as engine
 
 #value at top x percentile, x in 0~100
 def hist_v(w,bins=100):
-    s,_=w.sort(dim=0);
-    wmin=float(w.min());
-    wmax=float(w.max());
-
+    #s,_=w.sort(dim=0);
+    #wmin=float(w.min());
+    #wmax=float(w.max());
+    s = x
     n=s.shape[0];
     hist=torch.Tensor(bins);
     for i in range(bins):
@@ -138,7 +138,7 @@ def run(interface,nbins=100,szcap=4096):
     for param in interface.model.parameters():
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
 
-    fvs=torch.stack(hist_v(fvs, nbins));
+    fvs=torch.stack(fvs)#, nbins));
     print(fvs.shape)
     return fvs;
 
