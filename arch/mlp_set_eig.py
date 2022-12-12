@@ -82,7 +82,7 @@ class new(nn.Module):
             h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #print('quantile', h_i, h_i.shape)
             h_i=self.encoder_combined(h_i.unsqueeze(0)).squeeze(0);
-        h.append(h_i);
+            h.append(h_i);
         h=torch.stack(h,dim=0);
         #print('before combined MLP', h, h.shape)
         
