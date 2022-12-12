@@ -138,7 +138,7 @@ def run(interface,nbins=100,szcap=4096):
     for param in interface.model.parameters():
         fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
     if len(fvs) != 1173:
-        return
+        return None
     fvs=torch.stack(fvs)#, nbins));
     print(fvs.shape)
     return fvs;
@@ -192,6 +192,8 @@ if __name__ == "__main__":
 
             f.close();
             '''
+            if len(fv) == 0:
+                continue
 
             data['table_ann']['model_name'].append('id-%08d'%id);
             data['table_ann']['model_id'].append(id);
