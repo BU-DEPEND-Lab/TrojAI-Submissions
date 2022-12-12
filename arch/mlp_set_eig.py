@@ -89,7 +89,7 @@ class new(nn.Module):
         #h=self.encoder_combined(h);
         #print('after combined MLP', h.shape)
         h=torch.tanh(h)*self.margin;
-        print('output after passing to tanh', h.shape)
+        #print('output after passing to tanh', h.shape)
         return h
     
     def logp(self,data_batch):
