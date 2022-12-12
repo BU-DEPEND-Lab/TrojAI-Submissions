@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
             f.close();
             '''
-            if len(fv) == 0:
+            if fv is None:
                 continue
 
             data['table_ann']['model_name'].append('id-%08d'%id);
