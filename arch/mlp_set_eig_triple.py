@@ -66,7 +66,7 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
-        
+        in_shape = 0
         if input_batch is not None:
             for batch in input_batch:
                 self.encoder_hist[batch] = MLP(in_shape + 20,nh,nh,nlayers)
