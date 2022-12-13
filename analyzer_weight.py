@@ -196,9 +196,11 @@ if __name__ == "__main__":
             data['table_ann']['fvs'].append(fv);
 
             print('Model %d(%d), time %f'%(i,id,time.time()-t0));
-            fname = params.fname.split('.')
-            fname[0] = fname[0] + f"_{fv.shape[0]}"
-            fname = '.'.join(fname)
+            fname = params.fname
+            #fname = params.fname.split('.')
+            #fname[0] = fname[0] + f"_{fv.shape[0]}"
+            #fname = '.'.join(fname)
+            
             if i%1==0:
                 data.save(fname);
         except AttributeError as e:
