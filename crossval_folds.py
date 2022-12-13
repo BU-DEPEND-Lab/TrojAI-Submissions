@@ -139,10 +139,11 @@ crossval_splits=[];
 folds=data.generate_random_crossval_folds(nfolds=params.nsplits);
 crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in folds]
 
-
+best_auc_so_far=-1;
 best_loss_so_far=1e10;
 def run_crossval(p):
     global best_loss_so_far
+    global best_auc_so_far
     max_batch=16;
     arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
     params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
@@ -328,10 +329,12 @@ def run_crossval(p):
     #print(torch.tensor(tot), torch.sum(torch.tensor(tot)))
     acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tots))
     cepre=torch.Tensor(cepre);
-
-    if float(cepre.mean())<best_loss_so_far:
-        best_loss_so_far=float(cepre.mean());
+    if float(auc.mean()) > best_auc_so_far:
+        best_auc_so_far=float(auc.mean());
         torch.save(ensemble,session.file('model.pt'))
+    #if float(cepre.mean())<best_loss_so_far:
+    #    best_loss_so_far=float(cepre.mean());
+    #    torch.save(ensemble,session.file('model.pt'))
 
     session.log('AUC: %f + %f, ACC: %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),acc, ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
 
