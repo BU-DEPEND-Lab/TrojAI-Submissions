@@ -72,12 +72,12 @@ class new(nn.Module):
                 self.encoder_hist[batch] = MLP(in_shape + 20,nh,nh,nlayers)
                 self.encoder_combined[batch] = MLP(batch*nh,nh3,2,nlayers2)
         else:
-                self.encoder_hist[1173] = MLP(in_shape + 20,nh,nh,nlayers)
-                self.encoder_combined[1173] = MLP(1173*nh,nh3,2,nlayers2)
-                self.encoder_hist[302] = MLP(in_shape + 20,nh,nh,nlayers)
-                self.encoder_combined[302] = MLP(302*nh,nh3,2,nlayers2)
-                self.encoder_hist[337] = MLP(in_shape + 20,nh,nh,nlayers)
-                self.encoder_combined[337] = MLP(337*nh,nh3,2,nlayers2)
+                self.encoder_hist_1173 = MLP(in_shape + 20,nh,nh,nlayers)
+                self.encoder_combined_1173 = MLP(1173*nh,nh3,2,nlayers2)
+                self.encoder_hist_302 = MLP(in_shape + 20,nh,nh,nlayers)
+                self.encoder_combined_302 = MLP(302*nh,nh3,2,nlayers2)
+                self.encoder_hist_337 = MLP(in_shape + 20,nh,nh,nlayers)
+                self.encoder_combined_337 = MLP(337*nh,nh3,2,nlayers2)
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
         return;
@@ -88,13 +88,21 @@ class new(nn.Module):
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
-            print(weight_dist[i].device)#, self.encoder_hist[weight_dist[i].shape[0]].device)
-            h_i=self.encoder_hist[weight_dist[i].shape[0]](weight_dist[i].cuda());
+            #print(weight_dist[i].device)#, self.encoder_hist[weight_dist[i].shape[0]].device)
+            if weight_dist[i].shape[0] == 1173:
+                h_i=self.encoder_combined_1173(self.encoder_hist_1173(weight_dist[i].cuda())).squeeze(0);
+                 
+            elif weight_dist[i].shape[0] == 302:
+                h_i=self.encoder_combined_302(self.encoder_hist_302(weight_dist[i].cuda())).squeeze(0);
+            else:
+                h_i=self.encoder_combined_337(self.encoder_hist_337(weight_dist[i].cuda())).squeeze(0);
+
+           
             #print('before quantile', h_i, h_i.shape)
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
             #print('quantile', h_i, h_i.shape)
-            h_i = h_i.flatten()
-            h_i=self.encoder_combined[weight_dist[i].shape[0]](h_i.unsqueeze(0)).squeeze(0);
+            #h_i = h_i
+            #h_i=self.encoder_combined[weight_dist[i].shape[0]](h_i.unsqueeze(0)).squeeze(0);
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
@@ -109,9 +117,3 @@ class new(nn.Module):
         h=self.forward(data_batch);
         return h[:,1]-h[:,0];
     
-
-    def cuda(self):
-        for k in self.encoder_hist:
-            self.encoder_hist[k].cuda()
-        for k in self.encoder_combined:
-            self.encoder_combined[k].cuda()
