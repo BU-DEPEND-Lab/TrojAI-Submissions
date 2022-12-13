@@ -109,3 +109,9 @@ class new(nn.Module):
         h=self.forward(data_batch);
         return h[:,1]-h[:,0];
     
+
+    def cuda(self):
+        for k in self.encoder_hist:
+            self.encoder_hist[k].cuda()
+        for k in self.encoder_combined:
+            self.encoder_combined[k].cuda()
