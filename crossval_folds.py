@@ -338,9 +338,9 @@ def run_crossval(p):
 
     session.log('AUC: %f + %f, ACC: %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),acc, ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
 
-    #goal=-float(auc.mean());#-2*auc.std()
-    goal=float(cepre.mean());
-
+    goal=float(auc.mean())-auc.std()
+    #goal=float(cepre.mean());
+    
     for k in results_by_key:
         auc=torch.Tensor(results_by_key[k]['auc']);
         ce=torch.Tensor(results_by_key[k]['ce']);
