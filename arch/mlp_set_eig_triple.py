@@ -11,8 +11,8 @@ import copy
 class MLP(nn.Module):
     def __init__(self,ninput,nh,noutput,nlayers):
         super().__init__()
-        print('inside MLP ninput' + str(ninput))
-        print('inside MLP nouput' + str(noutput))
+        #print('inside MLP ninput' + str(ninput))
+        #print('inside MLP nouput' + str(noutput))
         
         self.layers=nn.ModuleList();
         self.bn=nn.LayerNorm(ninput);
