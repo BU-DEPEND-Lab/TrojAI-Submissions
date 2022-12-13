@@ -88,7 +88,7 @@ class new(nn.Module):
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
-            print(weight_dist[i].device(), self.encoder_hist[weight_dist[i].shape[0]].device())
+            print(weight_dist[i].device, self.encoder_hist[weight_dist[i].shape[0]].device)
             h_i=self.encoder_hist[weight_dist[i].shape[0]](weight_dist[i].cuda());
             #print('before quantile', h_i, h_i.shape)
             #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
