@@ -95,6 +95,7 @@ def analyze(param,nbins=100,szcap=4096):
             e_z=torch.Tensor(1,2).fill_(0).to(e.device);
             e=torch.cat((e_nz,e_z),dim=0);
         #print(e)
+        """
         #Get histogram of abs, real, imaginary
         e2=(e**2).sum(1)**0.5;
         e2_hist=hist_v(e2,nbins);
@@ -112,7 +113,7 @@ def analyze(param,nbins=100,szcap=4096):
         w=param.data.view(-1);
         w_hist=hist_v(w,nbins);
         wabs_hist=hist_v(w.abs(),nbins);
-
+        """
         # SVD decomposition
         U, S, V = param.svd()
         S = S.cpu()
@@ -126,10 +127,11 @@ def analyze(param,nbins=100,szcap=4096):
         bot_k_ids = indices_norm_based_desc[:10]
         bot_k_s = S[bot_k_ids].flatten()
         fv_1 = torch.cat([mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu()])
-        fv_2 = torch.cat([e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist])
+        #fv_2 = torch.cat([e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist])
         #print(fv_1.shape, fv_2.shape)
-        fv=torch.cat((fv_1, fv_2));
-        return [fv];
+        #fv=torch.cat((fv_1, fv_2));
+        
+        return [fv_1];
     else:
         return [];
 
