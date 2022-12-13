@@ -187,7 +187,7 @@ def run_crossval(p):
                 #sneg=torch.exp(scores_i).mean();
                 #print(spos.shape, sneg.shape)
                 #loss=-(spos-sneg+1);
-                print(float(loss))
+                #print(float(loss))
                 l2=0;
                 for p in net.parameters():
                     l2=l2+(p**2).sum();
