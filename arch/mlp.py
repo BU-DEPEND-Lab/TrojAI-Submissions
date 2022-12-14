@@ -63,4 +63,4 @@ class new(nn.Module):
         return logits.view(-1)
     def logp(self, data_batch):
 
-        return nn.Sigmoid(self.forward(data_batch))
+        return nn.Sigmoid()(self.forward(data_batch))
