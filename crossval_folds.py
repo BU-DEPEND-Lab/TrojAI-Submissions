@@ -178,14 +178,14 @@ def run_crossval(p):
                 C=data_batch['label'];
            
                 data_batch.delete_column('label');
-                #scores_i=net(data_batch);
+                scores_i=net(data_batch);
                 #print(scores_i.shape)
-                scores_i = net.logp(data_batch).view(-1, 1)
-                loss=F.binary_cross_entropy_with_logits(scores_i,C.float().view(-1, 1));
-                #spos=scores_i.gather(1,C.view(-1,1)).mean();
-                #sneg=torch.exp(scores_i).mean();
+                #scores_i = net.logp(data_batch).view(-1, 1)
+                #loss=F.binary_cross_entropy_with_logits(scores_i,C.float().view(-1, 1));
+                spos=scores_i.gather(1,C.view(-1,1)).mean();
+                sneg=torch.exp(scores_i).mean();
                 #print(spos.shape, sneg.shape)
-                #loss=-(spos-sneg+1);
+                loss=-(spos-sneg+1);
                 #print(float(loss))
                 l2=0;
                 for p in net.parameters():
