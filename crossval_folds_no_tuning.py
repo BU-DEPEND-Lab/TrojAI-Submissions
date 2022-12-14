@@ -165,7 +165,7 @@ def run_crossval():#p):
 
         #Train loop
         best_loss=-1e10;
-        best_net=copy.deepcopy(net);
+        best_net=None#copy.deepcopy(net);
 
         #Training
         for iter in range(params_.epochs):
@@ -225,6 +225,7 @@ def run_crossval():#p):
             #for g in opt.param_groups:
             #    g['lr'] = g['lr']*0.98
 
+        """
         #Temperature-scaling calibration on val
         net=best_net;
         net.eval();
@@ -250,7 +251,7 @@ def run_crossval():#p):
             loss=F.binary_cross_entropy_with_logits(scores*torch.exp(-T),gt.float());
             loss.backward();
             opt2.step();
-
+        """
 
         #Eval
         net.eval();
@@ -264,7 +265,7 @@ def run_crossval():#p):
             data_batch.delete_column('label');
             scores_i=net.logp(data_batch);
 
-            scores.append((scores_i*torch.exp(-T)).data.cpu());
+            scores.append((scores_i.data.cpu())) #*torch.exp(-T)).data.cpu());
             scores_pre.append(scores_i.data.cpu());
 
             gt.append(C.data.cpu());
