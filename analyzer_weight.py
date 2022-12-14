@@ -144,6 +144,7 @@ def run(interface,nbins=100,szcap=4096):
             break
     #print(len(fvs), fvs[0].shape)
     fvs=torch.stack(fvs[:nbins])#, nbins));
+    print(fvs.shape)
     return fvs;
 
 #Fuzzing call for TrojAI R9
