@@ -60,7 +60,7 @@ class new(nn.Module):
         x = data_batch['fvs'];
         prob = self.mlp(torch.stack(x).cuda());
         
-        return prob
+        return prob.view(-1)
     def logp(self, data_batch):
 
         return self.forward(data_batch)
