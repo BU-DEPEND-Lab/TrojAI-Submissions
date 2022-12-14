@@ -107,7 +107,7 @@ hp_config.append(hp.choice('arch',archs));
 hp_config.append(hp.qloguniform('nh',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh2',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh3',low=math.log(16),high=math.log(512),q=1));
-hp_config.append(hp.quniform('nlayers',low=1,high=12,q=1));
+hp_config.append(hp.quniform('nlayers',low=1,high=5,q=1));
 hp_config.append(hp.quniform('nlayers2',low=1,high=12,q=1));
 hp_config.append(hp.quniform('nlayers3',low=1,high=12,q=1));
 hp_config.append(hp.loguniform('margin',low=math.log(2),high=math.log(1e1)));
