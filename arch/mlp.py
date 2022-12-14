@@ -36,7 +36,7 @@ class MLP(nn.Module):
             h=F.relu(h);
         
         h=self.layers[-1](h);
-        return self.sigmoid(h)
+        return h
 
 
 class new(nn.Module):
@@ -58,9 +58,9 @@ class new(nn.Module):
     
     def forward(self,data_batch):
         x = data_batch['fvs'];
-        prob = self.mlp(torch.stack(x).cuda());
+        logits = self.mlp(torch.stack(x).cuda());
         
-        return prob.view(-1)
+        return logits.view(-1)
     def logp(self, data_batch):
 
-        return self.forward(data_batch)
+        return nn.Sigmoid(self.forward(data_batch))
