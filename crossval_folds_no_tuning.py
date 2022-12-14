@@ -120,7 +120,7 @@ hp_config.append(hp.qloguniform('batch',low=math.log(32),high=math.log(64),q=1))
 #Function to compute performance
 def configure_pipeline():#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch):
     params_=smartparse.obj();
-    params_.arch=arch;
+    #params_.arch=arch;
     params_.nh=256; #int(nh);
     params_.nh2=256;#int(nh2);
     params_.nh3=256;#int(nh3);
@@ -132,7 +132,6 @@ def configure_pipeline():#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margi
     params_.lr=1e-3;#lr;
     params_.decay=1e-5;#decay;
     params_.batch=32; #int(batch);
-    params_=smartparse.merge(params_,params);
     return params_;
 
 crossval_splits=[];
@@ -146,7 +145,8 @@ def run_crossval():#p):
     global best_auc_so_far
     max_batch=16;
     #arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
-    params_=configure_pipeline()#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
+    #params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
+    params_=smartparse.merge(configure_pipeline(),params);
     arch_=importlib.import_module(params_.arch);
     #Random splits N times
     auc=[];
