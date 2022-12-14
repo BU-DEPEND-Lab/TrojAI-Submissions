@@ -137,8 +137,11 @@ def analyze(param,nbins=100,szcap=4096):
 
 def run(interface,nbins=100,szcap=4096):
     fvs=[];
-    for param in interface.model.parameters():
-        fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
+    for i, param in enumerate(interface.model.parameters()):
+        if i < nbins:
+            fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
+        else:
+            break
     fvs=torch.stack(fvs)#, nbins));
     return fvs;
 

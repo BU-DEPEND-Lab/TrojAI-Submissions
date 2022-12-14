@@ -64,8 +64,9 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
+        in_shape = 0
         self.encoder_hist=MLP(in_shape + 20,nh,nh,nlayers);
-        self.encoder_combined=MLP(1173*nh,nh3,2,nlayers2);
+        self.encoder_combined=MLP(100*nh,nh3,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
         return;
