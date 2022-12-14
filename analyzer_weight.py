@@ -138,6 +138,7 @@ def analyze(param,nbins=100,szcap=4096):
 def run(interface,nbins=100,szcap=4096):
     fvs=[];
     for i, param in enumerate(interface.model.parameters()):
+        print(i)
         if i < nbins:
             fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
         else:
