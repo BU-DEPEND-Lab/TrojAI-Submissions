@@ -12,6 +12,7 @@ import torchvision
 import json
 import jsonschema
 import jsonpickle
+from joblib import dump, load
 
 import logging
 import warnings
@@ -48,66 +49,50 @@ def prepare_boxes(anns, image_id):
     return target
 
 
-def example_trojan_detector(model_filepath,
+def example_trojan_detector_svm(model_filepath,
                             result_filepath,
                             scratch_dirpath,
                             examples_dirpath,
                             #source_dataset_dirpath,
                             round_training_dataset_dirpath,
-                            parameters_dirpath,
-                            config):
+                            parameters_dirpath):
+    import importlib
+    import pandas
+    logging.info('Running Trojan classifier')
     logging.info('model_filepath = {}'.format(model_filepath))
     logging.info('result_filepath = {}'.format(result_filepath))
     logging.info('scratch_dirpath = {}'.format(scratch_dirpath))
     logging.info('examples_dirpath = {}'.format(examples_dirpath))
-    #logging.info('source_dataset_dirpath = {}'.format(source_dataset_dirpath))
     logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
     logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
-    
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info("Using compute device: {}".format(device))
-    
+
     logging.info('Extracting features')
-    import analyzer_weight as feature_extractor
-    fv=feature_extractor.extract_fv(model_filepath=model_filepath, scratch_dirpath=scratch_dirpath, examples_dirpath=examples_dirpath, params=config);
+    import analyze_weights as feature_extractor
+    fv=feature_extractor.extract_fv(model_filepath=model_filepath, scratch_dirpath=scratch_dirpath, examples_dirpath=examples_dirpath)
     fvs={'fvs':[fv]};
-    
+
     import importlib
     import pandas
     logging.info('Running Trojan classifier')
+    print('Running Trojan classifier')
     if not parameters_dirpath is None:
-        checkpoint=os.path.join(parameters_dirpath,'model.pt')
-        try:
-            checkpoint=torch.load(os.path.join(parameters_dirpath,'model.pt'));
-        except:
-            checkpoint=torch.load(os.path.join('/',parameters_dirpath,'model.pt'));
-        
-        #Compute ensemble score 
-        scores=[];
-        for i in range(len(checkpoint)):
-            params_=checkpoint[i]['params'];
-            arch_=importlib.import_module(params_.arch);
-            net=arch_.new(params_);
-            
-            net.load_state_dict(checkpoint[i]['net']);
-            net=net.cuda();
-            net.eval();
-            
-            s_i=net.logp(fvs).data.cpu();
-            s_i=s_i#*math.exp(-checkpoint[i]['T']);
-            scores.append(float(s_i))
-        
-        scores=sum(scores)/len(scores);
-        scores=torch.sigmoid(torch.Tensor([scores])); #score -> probability
-        trojan_probability=float(scores);
+        clf = load(os.path.join(parameters_dirpath, 'svm_norm_features.joblib'))
+        print(fv.shape)
+        fv = fv[-150:]
+        x = np.expand_dims(fv.detach().cpu().numpy(), axis=0)
+        print(x.shape)
+        scores = clf.predict(x)
+        trojan_probability = float(scores)
     else:
-        trojan_probability=0.5;
-    
+        trojan_probability=0.5
+
     logging.info('Trojan Probability: {}'.format(trojan_probability))
+    print('Trojan Probability: {}'.format(trojan_probability))
     with open(result_filepath, 'w') as fh:
         fh.write("{}".format(trojan_probability))
-
-
 
 
 def configure(source_dataset_dirpath,
@@ -169,6 +154,7 @@ if __name__ == "__main__":
     logging.info("example_trojan_detector.py launched")
 
     # Validate config file against schema
+    print('\n',args.metaparameters_filepath, '\n')
     if args.metaparameters_filepath is not None:
         if args.schema_filepath is not None:
             with open(args.metaparameters_filepath[0]()) as config_file:
@@ -190,13 +176,13 @@ if __name__ == "__main__":
             args.learned_parameters_dirpath is not None):
             print(vars(args))
             logging.info("Calling the trojan detector")
-            example_trojan_detector(args.model_filepath,
+            example_trojan_detector_svm(args.model_filepath,
                                     args.result_filepath,
                                     args.scratch_dirpath,
                                     args.examples_dirpath,
                                     #args.source_dataset_dirpath,
                                     args.round_training_dataset_dirpath,
-                                    args.learned_parameters_dirpath,args)
+                                    args.learned_parameters_dirpath)
         else:
             logging.info("Required Evaluation-Mode parameters missing!")
             logging.info(f"Arguments: {vars(args)}")
