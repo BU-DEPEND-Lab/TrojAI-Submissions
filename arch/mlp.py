@@ -53,7 +53,7 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
-        self.mlp=MLP(in_shape,nh,output_size,nlayers);
+        self.mlp=MLP(100 * 20,nh,output_size,nlayers);
         return;
     
     def forward(self,data_batch):
