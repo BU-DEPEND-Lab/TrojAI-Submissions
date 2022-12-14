@@ -42,7 +42,7 @@ class MLP(nn.Module):
 class new(nn.Module):
     def __init__(self, params, input_size=None, output_size=1):
         super(new,self).__init__()
-        nh=params.nh;
+        nh=100 * params.nh;
         nh3=params.nh3;
         nlayers=params.nlayers
         nlayers2=params.nlayers2
