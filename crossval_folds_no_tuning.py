@@ -118,20 +118,20 @@ hp_config.append(hp.loguniform('decay',low=math.log(1e-8),high=math.log(1e-3)));
 hp_config.append(hp.qloguniform('batch',low=math.log(32),high=math.log(64),q=1));
 
 #Function to compute performance
-def configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch):
+def configure_pipeline():#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch):
     params_=smartparse.obj();
     params_.arch=arch;
-    params_.nh=int(nh);
-    params_.nh2=int(nh2);
-    params_.nh3=int(nh3);
-    params_.nlayers=int(nlayers);
-    params_.nlayers2=int(nlayers2);
-    params_.nlayers3=int(nlayers3);
-    params_.margin=margin;
-    params_.epochs=int(epochs);
-    params_.lr=lr;
-    params_.decay=decay;
-    params_.batch=int(batch);
+    params_.nh=256; #int(nh);
+    params_.nh2=256;#int(nh2);
+    params_.nh3=256;#int(nh3);
+    params_.nlayers=4; #int(nlayers);
+    params_.nlayers2=4;#int(nlayers2);
+    params_.nlayers3=4;#int(nlayers3);
+    params_.margin=2#margin;
+    params_.epochs=100#int(epochs);
+    params_.lr=1e-3;#lr;
+    params_.decay=1e-5;#decay;
+    params_.batch=32; #int(batch);
     params_=smartparse.merge(params_,params);
     return params_;
 
@@ -141,12 +141,12 @@ crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in fo
 
 best_auc_so_far=-1;
 best_loss_so_far=1e10;
-def run_crossval(p):
+def run_crossval():#p):
     global best_loss_so_far
     global best_auc_so_far
     max_batch=16;
-    arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
-    params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
+    #arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
+    params_=configure_pipeline()#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
     arch_=importlib.import_module(params_.arch);
     #Random splits N times
     auc=[];
@@ -351,14 +351,14 @@ def run_crossval(p):
     return goal;
 
 
-
+run_crossval()
 #Get results from hyper parameter search
-best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
-if len(best) == 0:
-    best=util.macro.obj(best);
-params_=configure_pipeline(**best);
-hyper_params_str=json.dumps(best);
-session.log('Best hyperparam (%s)'%(hyper_params_str));
+#best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
+#if len(best) == 0:
+#    best=util.macro.obj(best);
+#params_=configure_pipeline(**best);
+#hyper_params_str=json.dumps(best);
+#session.log('Best hyperparam (%s)'%(hyper_params_str));
 
 
 
