@@ -104,15 +104,15 @@ hp_config=[];
 archs=[params.arch];
 
 hp_config.append(hp.choice('arch',archs));
-hp_config.append(hp.qloguniform('nh',low=math.log(128),high=math.log(128),q=1));
+hp_config.append(hp.qloguniform('nh',low=math.log(125),high=math.log(128),q=1));
 hp_config.append(hp.qloguniform('nh2',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh3',low=math.log(16),high=math.log(512),q=1));
-hp_config.append(hp.quniform('nlayers',low=5,high=5,q=1));
+hp_config.append(hp.quniform('nlayers',low=4,high=5,q=1));
 hp_config.append(hp.quniform('nlayers2',low=1,high=12,q=1));
 hp_config.append(hp.quniform('nlayers3',low=1,high=12,q=1));
 hp_config.append(hp.loguniform('margin',low=math.log(2),high=math.log(1e1)));
 #   OPT
-hp_config.append(hp.qloguniform('epochs',low=math.log(1000),high=math.log(1000),q=1));
+hp_config.append(hp.qloguniform('epochs',low=math.log(900),high=math.log(1000),q=1));
 hp_config.append(hp.loguniform('lr',low=math.log(1e-3),high=math.log(1e-2)));
 hp_config.append(hp.loguniform('decay',low=math.log(1e-8),high=math.log(1e-3)));
 hp_config.append(hp.qloguniform('batch',low=math.log(32),high=math.log(64),q=1));
