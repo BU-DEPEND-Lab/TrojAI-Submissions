@@ -142,6 +142,7 @@ def run(interface,nbins=100,szcap=4096):
             fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
         else:
             break
+    print(len(fvs), fvs[0].shape)
     fvs=torch.stack(fvs)#, nbins));
     return fvs;
 
