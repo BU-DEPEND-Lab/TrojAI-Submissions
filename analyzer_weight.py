@@ -137,14 +137,13 @@ def analyze(param,nbins=100,szcap=4096):
 
 def run(interface,nbins=100,szcap=4096):
     fvs=[];
-    for i, param in enumerate(interface.model.parameters()):
-        print(i)
-        if i < nbins:
+    for param in enumerate(interface.model.parameters()):
+        if len(fvs) < nbins:
             fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
         else:
             break
-    print(len(fvs), fvs[0].shape)
-    fvs=torch.stack(fvs)#, nbins));
+    #print(len(fvs), fvs[0].shape)
+    fvs=torch.stack(fvs[:nbins])#, nbins));
     return fvs;
 
 #Fuzzing call for TrojAI R9
