@@ -307,3 +307,5 @@ Package `example_trojan_detector.py` into a Singularity container.
     --learned_parameters_dirpath=./new_learned_parameters/
     --scale_parameters_filepath ./scale_params.npy
     ```
+=======
+# TrojAI-Submissions

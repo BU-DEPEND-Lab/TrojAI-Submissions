@@ -2,7 +2,12 @@
 output.txt
 test.txt
 features.csv
-model/id-00000000
+#model/id-00000000
+*.pt
+*.simg
+*.png
+vis/
+sessions/
 
 # Python
 __pychache__
