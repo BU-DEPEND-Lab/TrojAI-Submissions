@@ -1,0 +1,16 @@
+{
+    "model_type": "clean",
+    "arch": "nn",
+    "mal_ratio": -1,
+    "test_ratio": 25,
+    "dataset_size": 10000,
+    "nn_layers": 2,
+    "nn_activation_function": "tanh",
+    "n_samples": 100,
+    "n_interpolations": 50,
+    "lr": 0.01,
+    "epoch": 30,
+    "optimizer": "sgd",
+    "batch_size": 64,
+    "random_state": 3533142270
+}

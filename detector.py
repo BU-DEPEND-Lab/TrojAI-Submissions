@@ -211,6 +211,7 @@ class Detector(AbstractDetector):
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
                 feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
+                print(">>>>>>> Example feature shape: ", feature_vector.shape)
                 feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
 
                 pred = torch.argmax(model(feature_vector).detach()).item()
