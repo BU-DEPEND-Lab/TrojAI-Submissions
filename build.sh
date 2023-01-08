@@ -10,8 +10,13 @@ python entrypoint.py infer \
 --schema_filepath=./metaparameters_schema.json \
 --scale_parameters_filepath ./learned_parameters/scale_params.npy
 
-#python trojan_detector.py  --model_filepath=./data/round9-train-dataset/models/id-00000105/model.pt  --tokenizer_filepath=./data/round9-train-dataset/tokenizers/google-electra-small-discriminator.pt  --features_filepath=./features.csv  --result_filepath=./output.txt  --scratch_dirpath=./scratch/  --examples_dirpath=./data/round9-train-dataset/models/id-00000105/clean-example-data.json  --round_training_dataset_dirpath=/path/to/training/dataset/  --metaparameters_filepath=./metaparameters.json  --schema_filepath=./metaparameters_schema.json  --learned_parameters_dirpath=./learned_parameters
-
+python entrypoint.py configure \
+--scratch_dirpath=./scratch/ \
+--metaparameters_filepath=./metaparameters.json \
+--schema_filepath=./metaparameters_schema.json \
+--learned_parameters_dirpath=./new_learned_parameters/ \
+--configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/ \
+--scale_parameters_filepath ./new_learned_parameters/scale_params.npy
 
 sudo singularity build example_trojan_detector.simg example_trojan_detector.def
 #sudo singularity build test-trojai-r12-weight.simg trojan_detector.def 

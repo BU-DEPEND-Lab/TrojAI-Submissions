@@ -11,7 +11,7 @@ from detector import Detector
 warnings.filterwarnings("ignore")
 
 def inference_mode(args):
-    print(os.getcwd())
+   
     # Validate config file against schema
     with open(args.metaparameters_filepath) as config_file:
         config_json = json.load(config_file)
@@ -28,7 +28,7 @@ def inference_mode(args):
     detector.infer(args.model_filepath, args.result_filepath, args.scratch_dirpath, args.examples_dirpath, args.round_training_dataset_dirpath)
 def configure_mode(args):
     # Validate config file against schema
-    print(os.getcwd())
+
     with open(args.metaparameters_filepath) as config_file:
         
         config_json = json.load(config_file)
