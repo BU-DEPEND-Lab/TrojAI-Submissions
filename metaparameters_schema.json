@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "BostonU Trojan Detection Container.",
-  "technique": "BostonU Random Forest Regressor",
+  "technique": "BostonU XGBoost Regressor",
   "technique_description": "Same as example detector",
   "technique_changes": "Same as example detector",
   "commit_id": "fe741eb9090d7e4f48f3a85cfa5f655bb9e45b5c",
@@ -57,6 +57,61 @@
 		"maximum": 5.0,
 		"suggested_minimum": 0.1,
 		"suggested_maximum": 2.5
+	},
+	"train_xgboost_regressor_param_booster": {
+		"description": "type of booster",
+		"type": "string",
+		"enum": ["gbtree", "gblinear", "dart"]
+	},
+	"train_xgboost_regressor_param_objective": {
+		"description": "objective function.",
+		"type": "string",
+		"enum": ["reg:squarederror", "reg:squaredlogerror", "reg:logistic", "reg:absoluterror", "reg:pseudohubererror", "binary:logistic", "binary:logitraw", "binary:hinge"]
+	},
+	"train_xgboost_regressor_param_max_depth": {
+		"description": "The maximum depth of the tree",
+		"type": "integer",
+		"minimum": 5,
+		"maximum": 20,
+		"suggested_minimum": 5,
+		"suggested_maximum": 20
+	},
+	"train_xgboost_regressor_param_max_leaves": {
+		"description": "The maximum number of leaves. Not used by exact tree method",
+		"type": "integer",
+		"minimum": 0,
+		"maximum": 5,
+		"suggested_minimum": 0,
+		"suggested_maximum": 5
+	},
+	"train_xgboost_regressor_param_max_bin": {
+		"description": "Only used if tree_method is set to hist, approx or gpu_hist. Maximum number of discrete bins to bucket continuous features.",
+		"type": "integer",
+		"minimum": 128,
+		"maximum": 512,
+		"suggested_minimum": 128,
+		"suggested_maximum": 256
+	},
+	"train_xgboost_regressor_param_min_child_weight": {
+		"description": "Minimum sum of instance weight (hessian) needed in a child. If the tree partition step results in a leaf node with the sum of instance weight less than min_child_weight, then the building process will give up further partitioning.",
+		"type": "number",
+		"minimum": 0.0,
+		"maximum": 1.0,
+		"suggested_minimum": 0.0,
+		"suggested_maximum": 1.0
+	},
+	"train_xgboost_regressor_param_eval_metric": {
+		"description": "Evaluation metrics for validation data,",
+		"type": "string",
+		"enum": ["rmse", "rmsle", "mae", "mape", "mphe", "logloss", "auc"]
+	},
+	"train_xgboost_regressor_param_max_delta_step": {
+		"description": "Maximum delta step we allow each leaf output to be.",
+		"type": "number",
+		"minimum": 0.0,
+		"maximum": 10.0,
+		"suggested_minimum": 0.0,
+		"suggested_maximum": 10.0
 	},
 	"train_random_forest_regressor_param_n_estimators": {
 		"description": "Number of trees in the forest.",

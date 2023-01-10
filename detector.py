@@ -6,7 +6,8 @@ from os import listdir, makedirs
 from os.path import join, exists, basename
 
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+#from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 from tqdm import tqdm
 
 from utils.abstract import AbstractDetector
@@ -83,6 +84,33 @@ class Detector(AbstractDetector):
             ],
         }
 
+        self.xgboost_kwargs = {
+            "booster": metaparameters[
+                "train_xgboost_regressor_param_booster"
+            ],
+            "objective": metaparameters[
+                "train_xgboost_regressor_param_objective"
+            ],
+            "max_depth": metaparameters[
+                "train_xgboost_regressor_param_max_depth"
+            ],
+            "max_leaves": metaparameters[
+                "train_xgboost_regressor_param_max_leaves"
+            ],
+            "max_bin": metaparameters[
+                "train_xgboost_regressor_param_max_bin"
+            ],
+            "min_child_weight": metaparameters[
+                "train_xgboost_regressor_param_min_child_weight"
+            ],
+            "eval_metric": metaparameters[
+                "train_xgboost_regressor_param_eval_metric"
+            ],
+            "max_delta_step": metaparameters[
+                "train_xgboost_regressor_param_max_delta_step"
+            ],
+        }
+
     def write_metaparameters(self):
         metaparameters = {
             "infer_cyber_model_skew": self.model_skew["__all__"],
@@ -99,6 +127,14 @@ class Detector(AbstractDetector):
             "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
             "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
             "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
+            "train_xgboost_regressor_param_booster": self.xgboost_kwargs["booster"],
+            "train_xgboost_regressor_param_objective": self.xgboost_kwargs["objective"],
+            "train_xgboost_regressor_param_max_depth": self.xgboost_kwargs["max_depth"],
+            "train_xgboost_regressor_param_max_leaves": self.xgboost_kwargs["max_leaves"],
+            "train_xgboost_regressor_param_max_bin": self.xgboost_kwargs["max_bin"],
+            "train_xgboost_regressor_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
+            "train_xgboost_regressor_param_eval_metric": self.xgboost_kwargs["eval_metric"],
+            "train_xgboost_regressor_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
         }
 
         with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
@@ -179,12 +215,16 @@ class Detector(AbstractDetector):
                     continue
 
                 X = np.vstack((X, model_feats)) * self.model_skew["__all__"]
-
-        logging.info("Training RandomForestRegressor model...")
-        model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+        logging.info("Training XGBoostRegressor model...")
+        # Instantiation
+        model = XGBRegressor(**self.xgboost_kwargs)
+        #logging.info("Training RandomForestRegressor model...")
+        #model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
         model.fit(X, y)
 
-        logging.info("Saving RandomForestRegressor model...")
+        #logging.info("Saving RandomForestRegressor model...")
+        logging.info("Saving XGBoostRegressor model...")
+        
         with open(self.model_filepath, "wb") as fp:
             pickle.dump(model, fp)
 
@@ -283,7 +323,8 @@ class Detector(AbstractDetector):
         )
 
         with open(self.model_filepath, "rb") as fp:
-            regressor: RandomForestRegressor = pickle.load(fp)
+            #regressor: RandomForestRegressor = pickle.load(fp)
+            regressor: XGBoostRegressor = pickle.load(fp)
 
         probability = str(regressor.predict(X)[0])
         with open(result_filepath, "w") as fp:

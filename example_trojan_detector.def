@@ -14,7 +14,7 @@ From: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
     apt update
 
     pip install --upgrade pip
-    pip install tqdm jsonschema jsonargparse scikit-learn
+    pip install tqdm jsonschema jsonargparse scikit-learn xgboost
 
 %runscript
     exec python3 /entrypoint.py "$@"
