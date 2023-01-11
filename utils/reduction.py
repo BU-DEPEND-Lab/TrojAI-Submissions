@@ -103,7 +103,7 @@ def use_feature_reduction_algorithm(layer_transform, model, model_transform):
         #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
         out_model = np.hstack((out_model,  
                 np.expand_dims(np.concatenate((\
-                layer_transform[layer]\([weights])[0], \
+                layer_transform[layer].transform([weights])[0], \
                 layer_features[layer]), axis = None), axis = 0)
                 ))
     print(out_model.shape)
