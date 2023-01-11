@@ -41,7 +41,7 @@ class Detector(AbstractDetector):
         self.scale_parameters_filepath = scale_parameters_filepath
         self.metaparameter_filepath = metaparameter_filepath
         self.learned_parameters_dirpath = learned_parameters_dirpath
-        self.model_filepath = join(self.learned_parameters_dirpath, "model.bin")
+        self.model_filepath = join(self.learned_parameters_dirpath, "model.json")
         self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
@@ -329,7 +329,7 @@ class Detector(AbstractDetector):
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
-        regressor = XGBRegressor().load_model("model.bin");
+        regressor = XGBRegressor().load_model("model.json");
 
         probability = str(regressor.predict(X)[0])
         with open(result_filepath, "w") as fp:
