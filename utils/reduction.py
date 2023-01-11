@@ -54,8 +54,7 @@ def fit_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
-
-from attrdict import AttrDict
+ 
 def model_transformer(outputs):
     
     def transform(model):
@@ -92,19 +91,19 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
             outputs[layer] = int(wt_i)
         print("model transformer outputs:", outputs)
         
-        layer_transform[model_arch] = AttrDict({'transform': model_transformer(outputs)})
+        layer_transform[model_arch] = model_transformer(outputs)
 
     return layer_transform
 
 def use_feature_reduction_algorithm(layer_transform, model, model_transform):
     out_model = np.array([[]])
     
-    layer_features = model_transform.transform(model)
+    layer_features = model_transform(model)
     for (layer, weights) in model.items():
         #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
         out_model = np.hstack((out_model,  
                 np.expand_dims(np.concatenate((\
-                layer_transform[layer].transform([weights])[0], \
+                layer_transform[layer]\([weights])[0], \
                 layer_features[layer]), axis = None), axis = 0)
                 ))
     print(out_model.shape)

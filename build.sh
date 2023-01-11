@@ -38,7 +38,7 @@ sudo singularity build example_trojan_detector.simg example_trojan_detector.def
 # Test run the container in inference mode
  singularity run \
 --bind /mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/ \
---nv ./cyber-pdf-dec2022_train_TrinitySRITrojAI-BostonU.simg \
+--nv ./example_trojan_detector.simg \
 infer --model_filepath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models/id-00000002/model.pt \
 --metaparameters_filepath=/metaparameters.json \
 --schema_filepath=/metaparameters_schema.json \
