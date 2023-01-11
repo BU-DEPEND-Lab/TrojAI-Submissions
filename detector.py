@@ -228,8 +228,9 @@ class Detector(AbstractDetector):
         #logging.info("Saving RandomForestRegressor model...")
         logging.info("Saving XGBoostRegressor model...")
         
-        with open(self.model_filepath, "wb") as fp:
-            pickle.dump(model, fp)
+        #with open(self.model_filepath, "wb") as fp:
+        #    pickle.dump(model, fp)
+        model.save_model(self.model_filepath)
 
         self.write_metaparameters()
         logging.info("Configuration done!")
@@ -325,9 +326,10 @@ class Detector(AbstractDetector):
             * self.model_skew["__all__"]
         )
 
-        with open(self.model_filepath, "rb") as fp:
-            #regressor: RandomForestRegressor = pickle.load(fp)
-            regressor: XGBoostRegressor = pickle.load(fp)
+        #with open(self.model_filepath, "rb") as fp:
+        #    regressor: RandomForestRegressor = pickle.load(fp)
+            
+        regressor = XGBoostRegressor().load_model("model.bin");
 
         probability = str(regressor.predict(X)[0])
         with open(result_filepath, "w") as fp:
