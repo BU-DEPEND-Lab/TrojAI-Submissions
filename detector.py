@@ -329,7 +329,7 @@ class Detector(AbstractDetector):
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
-        regressor = XGBRegressor().load_model(self.model_filepath);
+        regressor = XGBRegressor(**self.xgboost_kwargs).load_model(self.model_filepath);
 
         probability = str(regressor.predict(X)[0])
         with open(result_filepath, "w") as fp:
