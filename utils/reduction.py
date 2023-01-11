@@ -89,7 +89,7 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
                 wt_i = input_features - sum(outputs.values())
             assert wt_i > 0
             outputs[layer] = int(wt_i)
-        print("model transformer outputs:", outputs)
+        #print("model transformer outputs:", outputs)
         
         layer_transform[model_arch] = model_transformer(outputs)
 
@@ -106,6 +106,6 @@ def use_feature_reduction_algorithm(layer_transform, model, model_transform):
                 layer_transform[layer].transform([weights])[0], \
                 layer_features[layer]), axis = None), axis = 0)
                 ))
-    print(out_model.shape)
+    #print(out_model.shape)
     return out_model
  
