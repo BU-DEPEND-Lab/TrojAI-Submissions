@@ -6,15 +6,23 @@ from tqdm import tqdm
 
 def feature_reduction(model, weight_table, max_features):
     outputs = {}
+    # number of features per layer
     tf = max_features / len(model)
+    # number of weights in the model
     sm = sum([l.shape[0] for l in model.values()])
+     
     for (layer, weights) in model.items():
+        # Downsample 100 weights in total
+        # Allocate proportionally to each layer
+        # Each layer is designated for a number of weights < 100
         wt_i = np.round(weights.shape[0] / sm * 100).astype(np.int32)
         out_f = int(weight_table[wt_i] * tf)
+        #print("out_f: ", out_f, "wt_i: ", wt_i, "weight_table[wt_i]: ", weight_table[wt_i], "tf: ", tf)
         if layer == list(model.keys())[-1]:
             out_f = max_features - sum(outputs.values())
         assert out_f > 0
         outputs[layer] = out_f
+    #print("feature_reduction output", outputs)
     return outputs
 
 
@@ -40,17 +48,65 @@ def fit_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
         layers_output = feature_reduction(models[0], weight_table, input_features)
         layer_transform[model_arch] = {}
         for (layers, output) in tqdm(layers_output.items()):
+            
             layer_transform[model_arch][layers] = init_feature_reduction(output)
             s = np.stack([model[layers] for model in models])
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
 
+from attrdict import AttrDict
+def model_transformer(outputs):
+    
+    def transform(model):
+        nonlocal outputs
+        features = {}
+        for (layer, weights) in model.items():
+            features[layer] = [\
+            np.mean(weights),\
+            np.std(weights),\
+            np.linalg.norm(weights, ord = 2)] + sorted(weights, reverse=True)
+            features[layer] = features[layer][:outputs[layer]]
+        return features
+    return transform
 
-def use_feature_reduction_algorithm(layer_transform, model):
+def stat_feature_reduction_algorithm(model_dict, input_features):
+    layer_transform = {}
+    
+    for (model_arch, models) in model_dict.items():
+        outputs = {}
+        # number of features per layer
+        tf = input_features / len(models[0])
+        # number of weights in the model\
+        #sm = sum([l.shape[0] for l in models[0].values()])
+        for (layer, weights) in models[0].items():
+            # Downsample number of weights in total
+            # Allocate proportionally to each layer
+            # Each layer is designated for a number of weights  
+            wt_i = tf
+            #wt_i = np.round(weights.shape[0] / sm * input_features).astype(np.int32)
+            #print("out_f: ", out_f, "wt_i: ", wt_i, "weight_table[wt_i]: ", weight_table[wt_i], "tf: ", tf)
+            if layer == list(models[0].keys())[-1]:
+                wt_i = input_features - sum(outputs.values())
+            assert wt_i > 0
+            outputs[layer] = int(wt_i)
+        print("model transformer outputs:", outputs)
+        
+        layer_transform[model_arch] = AttrDict({'transform': model_transformer(outputs)})
+
+    return layer_transform
+
+def use_feature_reduction_algorithm(layer_transform, model, model_transform):
     out_model = np.array([[]])
-
+    
+    layer_features = model_transform.transform(model)
     for (layer, weights) in model.items():
-        out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
-
+        #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
+        out_model = np.hstack((out_model,  
+                np.expand_dims(np.concatenate((\
+                layer_transform[layer].transform([weights])[0], \
+                layer_features[layer]), axis = None), axis = 0)
+                ))
+    print(out_model.shape)
     return out_model
+ 

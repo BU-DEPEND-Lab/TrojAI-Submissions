@@ -19,6 +19,7 @@ from utils.padding import create_models_padding, pad_model
 from utils.reduction import (
     fit_feature_reduction_algorithm,
     use_feature_reduction_algorithm,
+    stat_feature_reduction_algorithm
 )
 
 from sklearn.preprocessing import StandardScaler
@@ -51,6 +52,7 @@ class Detector(AbstractDetector):
         }
 
         self.input_features = metaparameters["train_input_features"]
+        self.ICA_features = metaparameters["train_ICA_features"]
         self.weight_table_params = {
             "random_seed": metaparameters["train_weight_table_random_state"],
             "mean": metaparameters["train_weight_table_params_mean"],
@@ -115,6 +117,7 @@ class Detector(AbstractDetector):
         metaparameters = {
             "infer_cyber_model_skew": self.model_skew["__all__"],
             "train_input_features": self.input_features,
+            "train_ICA_features": self.ICA_features,
             "train_weight_table_random_state": self.weight_table_params["random_seed"],
             "train_weight_table_params_mean": self.weight_table_params["mean"],
             "train_weight_table_params_std": self.weight_table_params["std"],
@@ -191,8 +194,8 @@ class Detector(AbstractDetector):
         del model_repr_dict
         logging.info("Models flattened. Fitting feature reduction...")
 
-        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.input_features)
-
+        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
+        model_transform = stat_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
         logging.info("Feature reduction applied. Creating feature file...")
         X = None
         y = []
@@ -208,7 +211,7 @@ class Detector(AbstractDetector):
                 model_index += 1
 
                 model_feats = use_feature_reduction_algorithm(
-                    layer_transform[model_arch], model
+                    layer_transform[model_arch], model, model_transform[model_arch]
                 )
                 if X is None:
                     X = model_feats
@@ -307,8 +310,8 @@ class Detector(AbstractDetector):
         del model_repr_dict
         logging.info("Models flattened. Fitting feature reduction...")
 
-        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.input_features)
-
+        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
+        model_transform = stat_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
         model, model_repr, model_class = load_model(model_filepath)
         model_repr = pad_model(model_repr, model_class, models_padding_dict)
         flat_model = flatten_model(model_repr, model_layer_map[model_class])
@@ -318,7 +321,7 @@ class Detector(AbstractDetector):
         self.inference_on_example_data(model, examples_dirpath)
 
         X = (
-            use_feature_reduction_algorithm(layer_transform[model_class], flat_model)
+            use_feature_reduction_algorithm(layer_transform[model_class], flat_model, model_transform[model_class])
             * self.model_skew["__all__"]
         )
 
