@@ -275,8 +275,8 @@ class Detector(AbstractDetector):
                     grad = [param.grad for param in model.parameters()]
 
                     print("Gradients: ", model.parameters(), grad)
-                grads.append(grad)
-            return grads
+                grads.append(grad)    
+        return grads
                 
     def infer(
         self,
