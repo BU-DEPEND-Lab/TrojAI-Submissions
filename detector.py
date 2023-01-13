@@ -335,7 +335,7 @@ class Detector(AbstractDetector):
         for grad_repr in grad_reprs:
             grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
             flat_grad = flatten_model(model_repr, model_layer_map[model_class])
-            grad_layer_transform = fit_feature_reduction_algorithm([], self.weight_table_params, self.ICA_features)
+            #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
             flat_grads.append(flat_grad)
         
         X = (
