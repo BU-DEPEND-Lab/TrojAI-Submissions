@@ -99,7 +99,6 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
 
 def use_feature_reduction_algorithm(layer_transform, layer_features, flat_models):
     out_models = []
-    print(flat_models)
     for flat_model in flat_models:
         out_model = np.array([[]])
 

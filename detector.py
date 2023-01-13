@@ -347,7 +347,7 @@ class Detector(AbstractDetector):
         print(len(flat_grads))
         X = (
             np.hstack(\
-                (use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model),\
+                (use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], [flat_model]),\
                     use_feature_reduction_algorithm(grad_model_transform[model_class], grad_layer_transform[model_class], flat_grads))),
             * self.model_skew["__all__"]
         )
