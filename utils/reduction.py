@@ -66,8 +66,8 @@ def model_transformer(outputs, layer):
         std = np.std(weights)
         l2_norm = np.linalg.norm(weights, ord = 2)
         if num_eigen_vals > 0:
-            eigen_vals, _ = np.linalg.eig(np.asarray(weights).T * np.asarray(weights))[:num_eigen_vals]
-        return [mean, std, l2_norm] + eigen_vals.tolist()
+            eigen_vals, _ = np.linalg.eig(np.asarray(weights).T * np.asarray(weights))
+        return [mean, std, l2_norm] + eigen_vals.tolist()[:num_eigen_vals]
     return transform
 
 def stat_feature_reduction_algorithm(model_dict, input_features):
