@@ -350,7 +350,7 @@ class Detector(AbstractDetector):
                     use_feature_reduction_algorithm(grad_model_transform[model_class], grad_layer_transform[model_class], flat_grads))),
             * self.model_skew["__all__"]
         )
-
+        logging.info("Start fitting regressor ...")
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
