@@ -21,7 +21,7 @@ from utils.reduction import (
     use_feature_reduction_algorithm,
     stat_feature_reduction_algorithm
 )
-
+from attrdict import AttrDict
 from sklearn.preprocessing import StandardScaler
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 import torch
@@ -340,8 +340,9 @@ class Detector(AbstractDetector):
             #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
             flat_grads.append(flat_grad)
         logging.info(f"Flattened grads: {[weights for (layer, weights) in flat_grads[0].items()]}")
-        grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
-        grad_model_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, self.input_features - self.ICA_features)
+        #grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
+        grad_layer_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, 0)
+        grad_model_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, self.input_features)
         logging.info("Grad transformer fitted")
         X = (
             np.hstack(\
