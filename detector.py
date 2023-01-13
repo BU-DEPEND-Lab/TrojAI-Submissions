@@ -270,8 +270,7 @@ class Detector(AbstractDetector):
                 print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
             
                 if grad:
-                    print(logits, torch.LongTensor(ground_truth))
-                    loss = F.cross_entropy(logits, torch.LongTensor(ground_truth))
+                    loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
                     loss.backwards();
                     grad = [param.grad for param in model.parameters()]
 
