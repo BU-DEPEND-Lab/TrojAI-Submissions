@@ -337,9 +337,14 @@ class Detector(AbstractDetector):
             flat_grad = flatten_model(model_repr, model_layer_map[model_class])
             #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
             flat_grads.append(flat_grad)
-        
+        print("Flattened grads")
+        grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
+        grad_model_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, self.input_features - self.ICA_features)
+        print("Grad transformer fitted")
         X = (
-            use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model, flat_grads)
+            np.hstack(\
+                (use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model),\
+                    use_feature_reduction_algorithm(grad_model_transform[model_class], grad_layer_transform[model_class], flat_grads))),
             * self.model_skew["__all__"]
         )
 

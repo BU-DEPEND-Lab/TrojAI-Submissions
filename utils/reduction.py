@@ -96,31 +96,18 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
             layer_transform[model_arch][layer] = AttrDict({'transform': model_transformer(outputs, layer)})
     return layer_transform
 
-def use_feature_reduction_algorithm(layer_transform, layer_features, flat_model, flat_grads = None):
-    out_model = np.array([[]])
+def use_feature_reduction_algorithm(layer_transform, layer_features, flat_models):
+    out_models = []
+    for flat_model in flat_models:
+        out_model = np.array([[]])
+        for (layer, weights) in flat_model.items():
+            #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
+            out_model = np.hstack((out_model,  
+                    np.expand_dims(np.concatenate((\
+                    layer_transform[layer].transform([weights])[0], \
+                    layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
+                    ))
+        out_models.append(out_model)
+    return np.mean(out_models, axis = 0)
     
- 
-    for (layer, weights) in flat_model.items():
-        #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
-        out_model = np.hstack((out_model,  
-                np.expand_dims(np.concatenate((\
-                layer_transform[layer].transform([weights])[0], \
-                layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
-                ))
-    #print(out_model.shape)
-    
-    if flat_grads is not None:
-        out_model_ = np.array([[]])
-        for flat_grad in flat_grads:
-            for (layer, weights) in flat_grad.items():
-                #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
-                out_model_ = np.hstack((out_model,  
-                        np.expand_dims(np.concatenate((\
-                        layer_transform[layer].transform([weights])[0], \
-                        layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
-                        ))
-        out_model_ = np.mean(out_model_, axis = 0)
-        out_model = np.hstack((out_model, out_model_))
-        
-    return out_model
  
