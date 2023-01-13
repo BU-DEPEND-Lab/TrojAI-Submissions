@@ -339,11 +339,12 @@ class Detector(AbstractDetector):
             flat_grad = flatten_model(grad_repr, model_layer_map[model_class])
             #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
             flat_grads.append(flat_grad)
-        
+        logging.info(f"Flattened grads: {[weights for (layer, weights) in flat_grads[0].items()]}")
         #grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
         grad_layer_transform = {model_class: None}
         grad_model_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, self.input_features)
         logging.info("Grad transformer fitted")
+        print(flat_grads[0])
         X = (
             np.hstack(\
                 (use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model),\
