@@ -1,7 +1,7 @@
 {
 	"infer_cyber_model_skew": 0.95,
 	"train_ICA_features": 9,
-	"train_input_features": 109,
+	"train_input_features": 79,
 	"train_weight_table_random_state": 101,
 	"train_weight_table_params_mean": 0.5,
 	"train_weight_table_params_std": 0.03,
