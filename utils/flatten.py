@@ -39,7 +39,7 @@ def flatten_model(input_model, model_layers):
         assert len(new_model[layer].shape) == 1
     return new_model
 
-
+ 
 def flatten_models(model_repr_dict, model_layer_map):
     """Flatten a list of models
 
