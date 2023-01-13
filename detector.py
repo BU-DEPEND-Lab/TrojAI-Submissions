@@ -242,7 +242,7 @@ class Detector(AbstractDetector):
             model: the pytorch model
             examples_dirpath: the directory path for the round example data
         """
-
+        print("Inference on example data")
         # Setup scaler
         scaler = StandardScaler()
 
