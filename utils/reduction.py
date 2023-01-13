@@ -99,7 +99,7 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
 
 def use_feature_reduction_algorithm(layer_transform, layer_features, flat_models):
     out_models = []
-    logging.info(f"Flattened grads: {[weights for (layer, weights) in flat_models[0].items()]}")
+    print(f"Flattened grads: {[weights for (layer, weights) in flat_models[0].items()]}")
     for flat_model in flat_models:
         out_model = np.array([[]])
 
