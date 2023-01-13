@@ -4,7 +4,7 @@ import os
 import pickle
 from os import listdir, makedirs
 from os.path import join, exists, basename
-
+from collections import OrderedDict
 import numpy as np
 #from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
@@ -252,7 +252,7 @@ class Detector(AbstractDetector):
         scaler.scale_ = scale_params[1]
 
         
-        grads = []
+        grad_reprs = []
         # Inference on models
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
@@ -272,10 +272,11 @@ class Detector(AbstractDetector):
                 if grad:
                     loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
                     loss.backward();
-                    grad = [param.data.shape for param in model.parameters()]
-                    print("Gradients: ", model.parameters(), grad)
-                grads.append(grad)    
-        return grads
+                    grad_repr = OrderedDict(
+                        {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
+                    ) 
+                grad_reprs.append(grad_repr)    
+        return grad_reprs
                 
     def infer(
         self,
@@ -329,11 +330,16 @@ class Detector(AbstractDetector):
 
         # Inferences on examples to demonstrate how it is done for a round
         # This is not needed for the random forest classifier
-        grads = self.inference_on_example_data(model, examples_dirpath, grad = True)
-        flat_grads = flatten_grads(model_repr, grads)
-
+        grad_reprs = self.inference_on_example_data(model, examples_dirpath, grad = True)
+        flat_grads = []
+        for grad_repr in grad_reprs:
+            grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
+            flat_grad = flatten_model(model_repr, model_layer_map[model_class])
+            grad_layer_transform = fit_feature_reduction_algorithm([], self.weight_table_params, self.ICA_features)
+            flat_grads.append(flat_grad)
+        
         X = (
-            use_feature_reduction_algorithm(layer_transform[model_class], flat_model, model_transform[model_class])
+            use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model, flat_grads)
             * self.model_skew["__all__"]
         )
 

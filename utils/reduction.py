@@ -2,6 +2,8 @@ import importlib
 
 import numpy as np
 from tqdm import tqdm
+import torch
+from attrdict import AttrDict
 
 
 def feature_reduction(model, weight_table, max_features):
@@ -55,18 +57,16 @@ def fit_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
 
     return layer_transform
  
-def model_transformer(outputs):
-    
-    def transform(model):
-        nonlocal outputs
-        features = {}
-        for (layer, weights) in model.items():
-            features[layer] = [\
-            np.mean(weights),\
-            np.std(weights),\
-            np.linalg.norm(weights, ord = 2)] + sorted(weights, reverse=True)
-            features[layer] = features[layer][:outputs[layer]]
-        return features
+def model_transformer(outputs, layer):
+    num_eigen_vals = outputs[layer] - 3
+    def transform(weights):
+        nonlocal num_eigen_vals
+        mean = np.mean(weights)
+        std = np.std(weights)
+        l2_norm = np.linalg.norm(weights, ord = 2)
+        if num_eigen_vals > 0:
+            eigen_vals = np.linalg.eig(np.asarrary(weights).T * np.asarray(weights))[:num_eigen_vals]
+        return [mean, std, l2_norm] + eigen_vals.tolist()
     return transform
 
 def stat_feature_reduction_algorithm(model_dict, input_features):
@@ -91,21 +91,36 @@ def stat_feature_reduction_algorithm(model_dict, input_features):
             outputs[layer] = int(wt_i)
         #print("model transformer outputs:", outputs)
         
-        layer_transform[model_arch] = model_transformer(outputs)
-
+        layer_transform[model_arch] = {}
+        for (layer, weights) in models[0].items():
+            layer_transform[model_arch][layer] = AttrDict({'transform': model_transformer(outputs, layer)})
     return layer_transform
 
-def use_feature_reduction_algorithm(layer_transform, model, model_transform):
+def use_feature_reduction_algorithm(layer_transform, layer_features, flat_model, flat_grads = None):
     out_model = np.array([[]])
     
-    layer_features = model_transform(model)
-    for (layer, weights) in model.items():
+ 
+    for (layer, weights) in flat_model.items():
         #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
         out_model = np.hstack((out_model,  
                 np.expand_dims(np.concatenate((\
                 layer_transform[layer].transform([weights])[0], \
-                layer_features[layer]), axis = None), axis = 0)
+                layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
                 ))
     #print(out_model.shape)
+    
+    if flat_grads is not None:
+        out_model_ = np.array([[]])
+        for flat_grad in flat_grads:
+            for (layer, weights) in flat_grad.items():
+                #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
+                out_model_ = np.hstack((out_model,  
+                        np.expand_dims(np.concatenate((\
+                        layer_transform[layer].transform([weights])[0], \
+                        layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
+                        ))
+        out_model_ = np.mean(out_model_, axis = 0)
+        out_model = np.hstack((out_model, out_model_))
+        
     return out_model
  
