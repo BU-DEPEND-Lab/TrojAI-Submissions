@@ -344,7 +344,6 @@ class Detector(AbstractDetector):
         grad_layer_transform = {model_class: None}
         grad_model_transform = stat_feature_reduction_algorithm({model_class: flat_grads}, self.input_features)
         logging.info("Grad transformer fitted")
-        print(flat_grads[0].items())
         X = (
             np.hstack(\
                 (use_feature_reduction_algorithm(model_transform[model_class], layer_transform[model_class], flat_model),\
