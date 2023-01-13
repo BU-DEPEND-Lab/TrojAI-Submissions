@@ -327,7 +327,7 @@ class Detector(AbstractDetector):
         model_transform = stat_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
         model, model_repr, model_class = load_model(model_filepath)
         
-        model_repr = pad_model(model_repr, model_class, models_padding_dict)
+        #model_repr = pad_model(model_repr, model_class, models_padding_dict)
         flat_model = flatten_model(model_repr, model_layer_map[model_class])
         logging.info(f"Flattened model: {[weights.shape for (layer, weights) in flat_model.items()]}")
         # Inferences on examples to demonstrate how it is done for a round
