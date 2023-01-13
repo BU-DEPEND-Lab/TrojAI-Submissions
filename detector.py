@@ -11,7 +11,7 @@ from xgboost import XGBRegressor
 from tqdm import tqdm
 
 from utils.abstract import AbstractDetector
-from utils.flatten import flatten_model, flatten_models
+from utils.flatten import flatten_model, flatten_models, flatten_grads
 from utils.healthchecks import check_models_consistency
 from utils.models import create_layer_map, load_model, \
     load_models_dirpath
@@ -25,7 +25,7 @@ from utils.reduction import (
 from sklearn.preprocessing import StandardScaler
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 import torch
-
+import torch.nn.functional as F
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
@@ -235,7 +235,7 @@ class Detector(AbstractDetector):
         self.write_metaparameters()
         logging.info("Configuration done!")
 
-    def inference_on_example_data(self, model, examples_dirpath):
+    def inference_on_example_data(self, model, examples_dirpath, grad = False):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -251,22 +251,33 @@ class Detector(AbstractDetector):
         scaler.mean_ = scale_params[0]
         scaler.scale_ = scale_params[1]
 
+        
+        grads = []
         # Inference on models
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
                 feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
                 print(">>>>>>> Example feature shape: ", feature_vector.shape)
                 feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
-
-                pred = torch.argmax(model(feature_vector).detach()).item()
-
+                model.zero_grad()
+                #pred = torch.argmax(model(feature_vector).detach()).item()
+                scores = model(feature_vector)
+                pred = torch.argmax(scores).detach()
+                logits = F.log_softmax(scores, dim = 1)
                 ground_tuth_filepath = examples_dir_entry.path + ".json"
-
                 with open(ground_tuth_filepath, 'r') as ground_truth_file:
                     ground_truth =  ground_truth_file.readline()
-
                 print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
+            
+                if grad:
+                    loss = F.cross_entropy(logits, torch.LongTensor(ground_truth))
+                    loss.backwards();
+                    grad = [param.grad for param in model.parameters()]
 
+                    print(model.parameters(), grad)
+                grads.append(grad)
+            return grads
+                
     def infer(
         self,
         model_filepath,
@@ -319,7 +330,8 @@ class Detector(AbstractDetector):
 
         # Inferences on examples to demonstrate how it is done for a round
         # This is not needed for the random forest classifier
-        self.inference_on_example_data(model, examples_dirpath)
+        grads = self.inference_on_example_data(model, examples_dirpath, grad = True)
+        flat_grads = flatten_grads(model_repr, grads)
 
         X = (
             use_feature_reduction_algorithm(layer_transform[model_class], flat_model, model_transform[model_class])

@@ -64,3 +64,24 @@ def flatten_models(model_repr_dict, model_layer_map):
             )
 
     return flat_models
+
+
+def flatten_grads(model_repr_dict, grads):
+    """"Flatten a list of model grads
+
+    Args:
+        model_repr_dict
+        grads
+
+    Returns:
+    """
+
+    flat_grads = {}
+    for _ in range(len(model_repr_dict)):
+        (model_arch, models) = model_repr_dict.popitem()
+        if model_arch not in flat_grads.keys():
+            flat_grads[model_arch] = []
+        for _ in tqdm(range(len(grads))):
+            grad = grads.pop(0)
+            flat_grads[model_arch].append(flatten_grad(grad))
+
