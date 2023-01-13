@@ -274,7 +274,7 @@ class Detector(AbstractDetector):
                     loss.backwards();
                     grad = [param.grad for param in model.parameters()]
 
-                    print(model.parameters(), grad)
+                    print("Gradients: ", model.parameters(), grad)
                 grads.append(grad)
             return grads
                 
