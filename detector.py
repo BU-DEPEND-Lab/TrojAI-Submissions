@@ -310,12 +310,12 @@ class Detector(AbstractDetector):
         model_repr_dict, _ = load_models_dirpath(model_path_list)
         logging.info("Loaded models. Flattenning...")
 
-        with open(self.models_padding_dict_filepath, "rb") as fp:
-            models_padding_dict = pickle.load(fp)
+        #with open(self.models_padding_dict_filepath, "rb") as fp:
+        #    models_padding_dict = pickle.load(fp)
 
-        for model_class, model_repr_list in model_repr_dict.items():
-            for index, model_repr in enumerate(model_repr_list):
-                model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
+        #for model_class, model_repr_list in model_repr_dict.items():
+        #    for index, model_repr in enumerate(model_repr_list):
+        #        model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
 
         # Flatten model
         flat_models = flatten_models(model_repr_dict, model_layer_map)
