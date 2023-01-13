@@ -101,7 +101,7 @@ def use_feature_reduction_algorithm(layer_transform, layer_features, flat_models
     out_models = []
     for flat_model in flat_models:
         out_model = np.array([[]])
-        print(flat_model)
+
         for (layer, weights) in flat_model.items():
             #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
             if layer_transform is None:
