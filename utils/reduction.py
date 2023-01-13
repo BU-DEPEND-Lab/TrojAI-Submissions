@@ -53,6 +53,7 @@ def fit_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
             
             layer_transform[model_arch][layers] = init_feature_reduction(output)
             s = np.stack([model[layers] for model in models])
+            print("Need to fit matrix size: ", s.shape)
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
