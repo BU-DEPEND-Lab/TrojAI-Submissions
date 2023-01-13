@@ -272,7 +272,7 @@ class Detector(AbstractDetector):
                 if grad:
                     loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
                     loss.backward();
-                    grad = [param for param in model.parameters()]
+                    grad = [param.data.shape for param in model.parameters()]
                     print("Gradients: ", model.parameters(), grad)
                 grads.append(grad)    
         return grads
