@@ -57,17 +57,39 @@ def fit_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
- 
+
+
+def hist_v(w,bins=100):
+    s,_=w.sort(dim=0);
+    wmin=float(w.min());
+    wmax=float(w.max());
+    
+    n=s.shape[0];
+    hist=torch.Tensor(bins);
+    for i in range(bins):
+        x=math.floor((n-1)/(bins-1)*i)
+        x=max(min(x,n),0);
+        v=float(s[x]);
+        hist[i]=v;
+    
+    return hist
+
 def model_transformer(outputs, layer):
     num_eigen_vals = outputs[layer] - 3
     def transform(weights):
         nonlocal num_eigen_vals
-        mean = np.mean(weights)
-        std = np.std(weights)
-        l2_norm = np.linalg.norm(weights, ord = 2)
+        weights = np.reshape(weights, [1, -1])
+        #mean = np.mean(weights)
+        #std = np.std(weights)
+        #l2_norm = np.linalg.norm(weights, ord = 2)
         if num_eigen_vals > 0:
             eigen_vals, _ = np.linalg.eig(np.asarray(weights).T * np.asarray(weights))
-        return [mean, std, l2_norm] + eigen_vals.tolist()[:num_eigen_vals]
+            eigen_sqrt = (eigen_vals.real**2 + eigen_vals.imag**2)**0.5
+            eigen_hist = histv(eigen_sqrt, num_eigen_vals)
+            eigen_real_hist = histv(eigen_vals.real, num_eigen_vals)
+            eigen_img_hist = histv(eigen_vals.imag, num_eigen_vals)
+            
+        return eigen_hist.tolist() + eigen_real_hist.tolist() + eigen_img_hist.tolist()
     return transform
 
 def stat_feature_reduction_algorithm(model_dict, input_features):
@@ -103,10 +125,13 @@ def use_feature_reduction_algorithm(layer_transform, layer_features, flat_models
         out_model = np.array([[]])
 
         for (layer, weights) in flat_model.items():
+            print(layer)
             #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
             if layer_transform is None:
+                print("layer_transform:", np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
                 out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
             elif layer_features is None:
+                print("layer_feature:", np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
                 out_model = np.hstack((out_model,  np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0)))
             else:
                 out_model = np.hstack((out_model,  
