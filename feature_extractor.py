@@ -162,6 +162,7 @@ class FeatureExtractor(object):
                 #)
 
                 feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
+                print(feats)
                 df.loc[len(df.index)] = [model_class, i, feats] 
         df.to_csv("round12_features.csv")
 
