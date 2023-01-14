@@ -124,7 +124,7 @@ def load_models_dirpath(models_dirpath):
     return model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
-def inference_on_example_data(model, examples, ground_truth, scale_parameters_filepath, grad = np.mean):
+def inference_on_example_data(model, ground_truth, sexamples, cale_parameters_filepath, grad = np.mean):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
