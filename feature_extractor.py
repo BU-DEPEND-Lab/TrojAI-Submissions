@@ -123,11 +123,11 @@ class FeatureExtractor(object):
         # Build model layer map to know how to flatten
         logging.info("Generating model layer map...")
         model_layer_map = create_layer_map(model_repr_dict)
-        print(model_repr_dict)
+        
         with open(self.model_layer_map_filepath, "wb") as fp:
             pickle.dump(model_layer_map, fp)
         logging.info("Generated model layer map. Flattenning models...")
-        
+        print(model_repr_dict)
         flat_models = flatten_models(model_repr_dict, model_layer_map)
      
         logging.info("Models flattened. Fitting weight feature reduction...")
