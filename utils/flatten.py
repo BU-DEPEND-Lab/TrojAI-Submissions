@@ -51,8 +51,8 @@ def flatten_models(model_repr_dict, model_layer_map):
     """
     flat_models = {}
 
-    for (model_arch, models) in range(len(model_repr_dict)):
-        #(model_arch, models) = model_repr_dict.popitem()
+    for _ in range(len(model_repr_dict)):
+        (model_arch, models) = model_repr_dict.popitem()
         if model_arch not in flat_models.keys():
             flat_models[model_arch] = []
 

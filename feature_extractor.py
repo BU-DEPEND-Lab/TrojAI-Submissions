@@ -124,16 +124,6 @@ class FeatureExtractor(object):
         logging.info("Generating model layer map...")
         model_layer_map = create_layer_map(model_repr_dict)
         
-        with open(self.model_layer_map_filepath, "wb") as fp:
-            pickle.dump(model_layer_map, fp)
-        logging.info("Generated model layer map. Flattenning models...")
-        
-        flat_models = flatten_models(model_repr_dict, model_layer_map)
-        print(model_repr_dict)
-        logging.info("Models flattened. Fitting weight feature reduction...")
-        layer_transform = fit_ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
-        logging.info("Weight feature reduction done...")
-        #del flat_models
         flat_clean_grad_repr_dict = {}
         #flat_poisoned_grad_repr_dict= {}
         
@@ -156,12 +146,23 @@ class FeatureExtractor(object):
         #poisoned_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_poisoned_grad_repr_dict, self.weight_table_params, self.ICA_features)
         #logging.info("Models flattened. Fitting feature reduction...")
         
+
+        with open(self.model_layer_map_filepath, "wb") as fp:
+            pickle.dump(model_layer_map, fp)
+        logging.info("Generated model layer map. Flattenning models...")
+        
+        flat_models = flatten_models(model_repr_dict, model_layer_map)
+        print(model_repr_dict)
+        logging.info("Models flattened. Fitting weight feature reduction...")
+        layer_transform = fit_ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
+        logging.info("Weight feature reduction done...")
+        #del flat_models
+        
         df = pd.DataFrame(columns=['model_class','index','features'])
-        for (model_class, models) in model_repr_dict:
-            
+        for (model_class, models) in flat_models:
             for i, model in enumerate(models):
                 model_feats = use_feature_reduction_algorithm(
-                    layer_transform[model_class], flat_models[model_class][i]
+                    layer_transform[model_class], models[i]
                 )
                 clean_grad_feats = use_feature_reduction_algorithm(
                     clean_grad_layer_transform[model_class], flat_clean_grad_repr_dict[model_class][i]
