@@ -135,7 +135,7 @@ class FeatureExtractor(object):
         #del flat_models
         flat_clean_grad_repr_dict = {}
         flat_poisoned_grad_repr_dict= {}
-        print(model_repr_dict)
+        print("??????", model_repr_dict)
         for (model_class, models) in model_repr_dict:
             flat_clean_grad_repr_dict[model_class] = []
             #flat_poisoned_grad_repr_dict[model_class] = []
