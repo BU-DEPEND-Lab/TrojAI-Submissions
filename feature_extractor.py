@@ -109,7 +109,7 @@ class FeatureExtractor(object):
         logging.info(f"Loading %d models...", len(model_path_list))
 
         model_repr_dict, _, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
-
+        print(model_repr_dict)
         #models_padding_dict = create_models_padding(model_repr_dict)
         #with open(self.models_padding_dict_filepath, "wb") as fp:
         #    pickle.dump(models_padding_dict, fp)
@@ -128,14 +128,14 @@ class FeatureExtractor(object):
         logging.info("Generated model layer map. Flattenning models...")
         
         flat_models = flatten_models(model_repr_dict, model_layer_map)
-        #del model_repr_dict
+     
         logging.info("Models flattened. Fitting weight feature reduction...")
         layer_transform = fit_ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
         logging.info("Weight feature reduction done...")
         #del flat_models
         flat_clean_grad_repr_dict = {}
-        flat_poisoned_grad_repr_dict= {}
-        print("??????", model_repr_dict)
+        #flat_poisoned_grad_repr_dict= {}
+        
         for (model_class, models) in model_repr_dict:
             flat_clean_grad_repr_dict[model_class] = []
             #flat_poisoned_grad_repr_dict[model_class] = []
