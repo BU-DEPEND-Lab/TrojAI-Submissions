@@ -146,7 +146,7 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
         scaler.scale_ = scale_params[1]
 
         
-        grad_reprs = []
+         
         # Inference on models
         
         print(">>>>>>> Example feature shape: ", example.shape)
@@ -166,9 +166,5 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
             grad_repr = OrderedDict(
                 {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
             ) 
-        grad_reprs.append(grad_repr)
-        grad_repr_dict = {}
-        if grad is not None:
-            for (layer, _) in model.state_dict().items():
-                grad_repr_dict[layer] = np.mean([grad_repr[layer] for grad_repr in grad_reprs], axis = -1)
-        return grad_repr_dict
+         
+            return grad_repr

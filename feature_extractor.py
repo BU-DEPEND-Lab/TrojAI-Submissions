@@ -134,12 +134,12 @@ class FeatureExtractor(object):
                 clean_examples = clean_example_dict[model_class][i]
                 ground_truth = model_ground_truth_dict[model_class][i]
                 print(f"Model class: {model_class}; Index: {i}")
-                clean_grads = inference_on_example_data(model, ground_truth, clean_examples, self.scale_parameters_filepath, grad = True)
-                flat_clean_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: clean_grads}, model_layer_map)[model_class], axis = 0))
+                clean_grad = inference_on_example_data(model, ground_truth, clean_examples, self.scale_parameters_filepath, grad = True)
+                flat_clean_grad_repr_dict[model_class].append(flatten_models({model_class: clean_grad}, model_layer_map)[model_class])
                 print(flat_clean_grad_repr_dict[model_class][-1])
                 #poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
-                #poisoned_grads = inference_on_example_data(model, poisoned_examples_dirpath, self.scale_parameters_filepath, grad = True)
-                #flat_poisoned_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: poisoned_grads}, model_layer_map)[model_class], axis = 0))
+                #poisoned_grad = inference_on_example_data(model, poisoned_examples_dirpath, self.scale_parameters_filepath, grad = True)
+                #flat_poisoned_grad_repr_dict[model_class].append(flatten_models({model_class: poisoned_grad}, model_layer_map)[model_class])
         
         
         logging.info("Models flattened. Fitting grad feature reduction...")
