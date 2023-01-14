@@ -108,7 +108,7 @@ class FeatureExtractor(object):
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
 
-        model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
+        model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
         
         #models_padding_dict = create_models_padding(model_repr_dict)
         #with open(self.models_padding_dict_filepath, "wb") as fp:
@@ -126,8 +126,8 @@ class FeatureExtractor(object):
         
         flat_clean_grad_repr_dict = {}
         #flat_poisoned_grad_repr_dict= {}
-        
-        for (model_class, models) in model_repr_dict.items():
+        for _ in range(len(model_dict)):
+            (model_class, models) = model_dict.popitem()
             flat_clean_grad_repr_dict[model_class] = []
             #flat_poisoned_grad_repr_dict[model_class] = []
             for i, model in enumerate(models):

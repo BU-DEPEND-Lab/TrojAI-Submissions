@@ -95,6 +95,7 @@ def load_examples(model_dirpath: str, clean = True):
     return examples
 
 def load_models_dirpath(models_dirpath):
+    model_dict = {}
     model_repr_dict = {}
     model_ground_truth_dict = {}
     clean_example_dict = {}
@@ -108,11 +109,12 @@ def load_models_dirpath(models_dirpath):
         
         # Build the list of models
         if model_class not in model_repr_dict.keys():
+            model_dict[model_class] = []
             model_repr_dict[model_class] = []
             model_ground_truth_dict[model_class] = []
             clean_example_dict[model_class] = []
             poisoned_example_dict[model_class] = []
-
+        model_dict[model_class].append(model)
         model_repr_dict[model_class].append(model_repr)
         model_ground_truth_dict[model_class].append(model_ground_truth)
 
@@ -124,7 +126,7 @@ def load_models_dirpath(models_dirpath):
         except:
             print("No poisoned example")
  
-    return model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
+    return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
 def inference_on_example_data(model, ground_truth, example, scale_parameters_filepath, grad = np.mean):
