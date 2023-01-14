@@ -167,5 +167,5 @@ class FeatureExtractor(object):
 
 
 if __name__ == "__main__":
-    extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters" "./metaparameters_schema.json")
+    extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")
     extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models")
