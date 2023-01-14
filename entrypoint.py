@@ -22,7 +22,7 @@ def extraction_mode(args):
     jsonschema.validate(instance=config_json, schema=schema_json)
 
     # Create the detector instance and loads the metaparameters.
-    extractor = FeatureExtractor(args.metaparameters_filepath, args.scale_parameters_filepath)
+    extractor = FeatureExtractor(args.metaparameters_filepath, args.learned_parameters_dirpath, args.scale_parameters_filepath)
 
     logging.info("Calling the trojan detector")
     extractor.manual_configure(args.round_training_dataset_dirpath)

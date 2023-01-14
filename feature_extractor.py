@@ -30,7 +30,7 @@ import torch
 import torch.nn.functional as F
 
 class FeatureExtractor(object):
-    def __init__(self, metaparameter_filepath, scale_parameters_filepath):
+    def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
         """Detector initialization function.
 
         Args:
@@ -39,7 +39,8 @@ class FeatureExtractor(object):
             scale_parameters_filepath: str - File path to the scale_parameters file.
         """
         metaparameters = json.load(open(metaparameter_filepath, "r"))
-
+        self.metaparameter_filepath = metaparameter_filepath
+        self.learned_parameters_dirpath = learned_parameters_dirpath
         self.scale_parameters_filepath = scale_parameters_filepath
         self.metaparameter_filepath = metaparameter_filepath
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
@@ -166,5 +167,5 @@ class FeatureExtractor(object):
 
 
 if __name__ == "__main__":
-    extractor = FeatureExtractor("./metaparameters.json", "./metaparameters_schema.json")
+    extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters" "./metaparameters_schema.json")
     extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models")
