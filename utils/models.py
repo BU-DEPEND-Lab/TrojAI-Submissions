@@ -124,7 +124,7 @@ def load_models_dirpath(models_dirpath):
     return model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
-def inference_on_example_data(self, model, examples_dirpath, grad = np.mean):
+def inference_on_example_data(model, examples_dirpath, scale_parameters_filepath, grad = np.mean):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -135,7 +135,7 @@ def inference_on_example_data(self, model, examples_dirpath, grad = np.mean):
         # Setup scaler
         scaler = StandardScaler()
 
-        scale_params = np.load(self.scale_parameters_filepath)
+        scale_params = np.load(scale_parameters_filepath)
 
         scaler.mean_ = scale_params[0]
         scaler.scale_ = scale_params[1]
