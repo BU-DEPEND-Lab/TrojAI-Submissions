@@ -20,8 +20,7 @@ from utils.reduction import (
     fit_feature_reduction_algorithm,
     use_feature_reduction_algorithm,
     grad_feature_reduction_algorithm,
-    fit_ICA_feature_reduction_algorithm,
-    run_ICA_feature_reduction_algorithm
+    fit_ICA_feature_reduction_algorithm 
 )
 import pandas as pd
 from attrdict import AttrDict
