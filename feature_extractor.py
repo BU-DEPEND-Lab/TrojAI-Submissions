@@ -166,4 +166,4 @@ class FeatureExtractor(object):
 
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./metaparameters_schema.json")
-    extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/")
+    extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models")
