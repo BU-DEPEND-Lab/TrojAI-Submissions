@@ -127,9 +127,9 @@ class FeatureExtractor(object):
         with open(self.model_layer_map_filepath, "wb") as fp:
             pickle.dump(model_layer_map, fp)
         logging.info("Generated model layer map. Flattenning models...")
-        print(model_repr_dict)
+        
         flat_models = flatten_models(model_repr_dict, model_layer_map)
-     
+        print(model_repr_dict)
         logging.info("Models flattened. Fitting weight feature reduction...")
         layer_transform = fit_ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
         logging.info("Weight feature reduction done...")
