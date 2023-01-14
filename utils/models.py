@@ -131,7 +131,7 @@ def inference_on_example_data(model, examples, ground_truth, scale_parameters_fi
             model: the pytorch model
             examples_dirpath: the directory path for the round example data
         """
-        print("Inference on example data")
+        print(f"Inference on example data {examples}")
         # Setup scaler
         scaler = StandardScaler()
 
