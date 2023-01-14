@@ -161,7 +161,7 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
         print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
     
         if grad is not None:
-            loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
+            loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
             loss.backward();
             grad_repr = OrderedDict(
                 {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
