@@ -29,6 +29,12 @@ from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r
 import torch
 import torch.nn.functional as F
 
+
+logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s",
+        )
+
 class FeatureExtractor(object):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
         """Detector initialization function.
