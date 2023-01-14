@@ -124,7 +124,7 @@ def load_models_dirpath(models_dirpath):
     return model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
-def inference_on_example_data(model, examples_dirpath, scale_parameters_filepath, grad = np.mean):
+def inference_on_example_data(model, examples, ground_truth, scale_parameters_filepath, grad = np.mean):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -143,28 +143,24 @@ def inference_on_example_data(model, examples_dirpath, scale_parameters_filepath
         
         grad_reprs = []
         # Inference on models
-        for examples_dir_entry in os.scandir(examples_dirpath):
-            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
-                feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
-                print(">>>>>>> Example feature shape: ", feature_vector.shape)
-                feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
-                model.zero_grad()
-                #pred = torch.argmax(model(feature_vector).detach()).item()
-                scores = model(feature_vector)
-                pred = torch.argmax(scores).detach()
-                logits = F.log_softmax(scores, dim = 1)
-                ground_tuth_filepath = examples_dir_entry.path + ".json"
-                with open(ground_tuth_filepath, 'r') as ground_truth_file:
-                    ground_truth =  ground_truth_file.readline()
-                print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
-            
-                if grad is not None:
-                    loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
-                    loss.backward();
-                    grad_repr = OrderedDict(
-                        {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
-                    ) 
-                grad_reprs.append(grad_repr)
+        
+        print(">>>>>>> Example feature shape: ", examples.shape)
+        feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
+        model.zero_grad()
+        #pred = torch.argmax(model(feature_vector).detach()).item()
+        scores = model(feature_vector)
+        pred = torch.argmax(scores).detach()
+        logits = F.log_softmax(scores, dim = 1)
+         
+        print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
+    
+        if grad is not None:
+            loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
+            loss.backward();
+            grad_repr = OrderedDict(
+                {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
+            ) 
+        grad_reprs.append(grad_repr)
         grad_repr_dict = {}
         if grad is not None:
             for (layer, _) in model.items():

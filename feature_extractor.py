@@ -108,7 +108,7 @@ class FeatureExtractor(object):
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
 
-        model_repr_dict, _, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
+        model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
         
         #models_padding_dict = create_models_padding(model_repr_dict)
         #with open(self.models_padding_dict_filepath, "wb") as fp:
@@ -131,9 +131,10 @@ class FeatureExtractor(object):
             flat_clean_grad_repr_dict[model_class] = []
             #flat_poisoned_grad_repr_dict[model_class] = []
             for i, model in enumerate(models):
-                clean_examples_dirpath = clean_example_dict[model_class][i]
-                print(clean_examples_dirpath)
-                clean_grads = inference_on_example_data(model, clean_examples_dirpath, self.scale_parameters_filepath, grad = True)
+                clean_examples = clean_example_dict[model_class][i]
+                ground_truth = model_ground_truth_dict[model_class][i]
+                print(f"Model class: {model_class}; Index: {i}")
+                clean_grads = inference_on_example_data(model, ground_truth, clean_examples, self.scale_parameters_filepath, grad = True)
                 flat_clean_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: clean_grads}, model_layer_map)[model_class], axis = 0))
                 print(flat_clean_grad_repr_dict[model_class][-1])
                 #poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
