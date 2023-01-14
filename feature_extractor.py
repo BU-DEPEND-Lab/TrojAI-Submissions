@@ -127,7 +127,7 @@ class FeatureExtractor(object):
         flat_clean_grad_repr_dict = {}
         #flat_poisoned_grad_repr_dict= {}
         
-        for (model_class, models) in model_repr_dict:
+        for (model_class, models) in model_repr_dict.items():
             flat_clean_grad_repr_dict[model_class] = []
             #flat_poisoned_grad_repr_dict[model_class] = []
             for i, model in enumerate(models):
@@ -152,14 +152,15 @@ class FeatureExtractor(object):
         logging.info("Generated model layer map. Flattenning models...")
         
         flat_models = flatten_models(model_repr_dict, model_layer_map)
-        print(model_repr_dict)
+         
         logging.info("Models flattened. Fitting weight feature reduction...")
         layer_transform = fit_ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
         logging.info("Weight feature reduction done...")
         #del flat_models
         
         df = pd.DataFrame(columns=['model_class','index','features'])
-        for (model_class, models) in flat_models:
+        for _ in range(len(flat_models)):
+            (model_class, models) = flat_models.popitem()
             for i, model in enumerate(models):
                 model_feats = use_feature_reduction_algorithm(
                     layer_transform[model_class], models[i]
@@ -172,7 +173,6 @@ class FeatureExtractor(object):
                 #)
 
                 feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
-                print(feats)
                 df.loc[len(df.index)] = [model_class, i, feats] 
         df.to_csv("round12_features.csv")
 
