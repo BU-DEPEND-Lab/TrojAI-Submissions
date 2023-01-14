@@ -42,7 +42,8 @@ class FeatureExtractor(object):
 
         self.scale_parameters_filepath = scale_parameters_filepath
         self.metaparameter_filepath = metaparameter_filepath
-         
+        self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
+        self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
 
         # TODO: Update skew parameters per round
         self.model_skew = {
