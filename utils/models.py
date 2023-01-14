@@ -169,6 +169,6 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
         grad_reprs.append(grad_repr)
         grad_repr_dict = {}
         if grad is not None:
-            for (layer, _) in model.items():
+            for (layer, _) in model.state_dict().items():
                 grad_repr_dict[layer] = np.mean([grad_repr[layer] for grad_repr in grad_reprs], axis = -1)
         return grad_repr_dict
