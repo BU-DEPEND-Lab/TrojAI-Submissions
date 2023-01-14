@@ -145,6 +145,7 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
         # Inference on models
         
         print(">>>>>>> Example feature shape: ", example.shape)
+        print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
         feature_vector = torch.from_numpy(scaler.transform(np.asarray(example).astype(float))).float()
         model.zero_grad()
         #pred = torch.argmax(model(feature_vector).detach()).item()
