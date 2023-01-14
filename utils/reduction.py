@@ -103,7 +103,7 @@ def grad_feature_reduction_algorithm(model_dict, weight_table_params, input_feat
             layer_transform[model_arch][layers] = init_feature_reduction(grad)
             s = np.mean([model[layers] for model in models], axis = 0).reshape(1, -1)
             s = np.dot(s.T, s)
-            print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
+            #print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
             layer_transform[model_arch][layers].fit(s)
 
         #for (layer, weights) in models[0].items():
@@ -116,7 +116,7 @@ def use_feature_reduction_algorithm(layer_features, flat_model):
     out_model = np.array([[]])
 
     for (layer, weights) in flat_model.items():
-        print(layer)
+        #print(layer)
         out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
         """
         #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
@@ -146,7 +146,7 @@ def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_f
         for (layers, output) in tqdm(layers_output.items()):
             layer_transform[model_arch][layers] = init_feature_reduction(output)
             s = np.stack([model[layers] for model in models])
-            print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
+            #print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
