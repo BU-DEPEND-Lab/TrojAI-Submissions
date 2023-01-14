@@ -111,33 +111,32 @@ def grad_feature_reduction_algorithm(model_dict, weight_table_params, input_feat
         
     return layer_transform
 
-def use_feature_reduction_algorithm(layer_features, flat_models):
-    out_models = []
-    for flat_model in flat_models:
-        out_model = np.array([[]])
-
-        for (layer, weights) in flat_model.items():
-            print(layer)
-            out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
-            """
-            #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
-            if layer_transform is None:
-                print("layer_transform:", np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
-                out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
-            elif layer_features is None:
-                print("layer_feature:", np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
-                out_model = np.hstack((out_model,  np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0)))
-            else:
-                out_model = np.hstack((out_model,  
-                        np.expand_dims(np.concatenate((\
-                        layer_transform[layer].transform([weights])[0], \
-                        layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
-                        ))
-            """
-        out_models.append(out_model)
-    return np.mean(out_models, axis = 0)
+def use_feature_reduction_algorithm(layer_features, flat_model):
     
-def ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_features):
+    out_model = np.array([[]])
+
+    for (layer, weights) in flat_model.items():
+        print(layer)
+        out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
+        """
+        #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
+        if layer_transform is None:
+            print("layer_transform:", np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
+            out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
+        elif layer_features is None:
+            print("layer_feature:", np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0).shape, out_model.shape)
+            out_model = np.hstack((out_model,  np.expand_dims(layer_transform[layer].transform([weights])[0], axis = 0)))
+        else:
+            out_model = np.hstack((out_model,  
+                    np.expand_dims(np.concatenate((\
+                    layer_transform[layer].transform([weights])[0], \
+                    layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
+                    ))
+        """
+         
+    return out_model
+    
+def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_features):
     layer_transform = {}
     weight_table = init_weight_table(**weight_table_params)
 
@@ -151,3 +150,5 @@ def ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_featu
             layer_transform[model_arch][layers].fit(s)
 
     return layer_transform
+
+ 
