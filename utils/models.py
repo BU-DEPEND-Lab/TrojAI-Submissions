@@ -87,7 +87,7 @@ def load_examples(model_dirpath: str, clean = True):
     for examples_dir_entry in os.scandir(join(model_dirpath, "clean-example-data" if clean else "poisoned-example-data")):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
                 feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
-                examples = np.hstack((examples, feature_vector), axis = 0)
+                examples = np.hstack((examples, feature_vector))
 
     return examples
 
