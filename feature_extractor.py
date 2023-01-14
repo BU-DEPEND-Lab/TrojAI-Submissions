@@ -132,6 +132,7 @@ class FeatureExtractor(object):
             #flat_poisoned_grad_repr_dict[model_class] = []
             for i, model in enumerate(models):
                 clean_examples_dirpath = clean_example_dict[model_class][i]
+                print(clean_examples_dirpath)
                 clean_grads = inference_on_example_data(model, clean_examples_dirpath, self.scale_parameters_filepath, grad = True)
                 flat_clean_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: clean_grads}, model_layer_map)[model_class], axis = 0))
                 print(flat_clean_grad_repr_dict[model_class][-1])
