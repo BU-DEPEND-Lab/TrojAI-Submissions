@@ -129,21 +129,21 @@ class FeatureExtractor(object):
         flat_poisoned_grad_repr_dict= {}
         for (model_class, models) in model_repr_dict:
             flat_clean_grad_repr_dict[model_class] = []
-            flat_poisoned_grad_repr_dict[model_class] = []
+            #flat_poisoned_grad_repr_dict[model_class] = []
             for i, model in enumerate(models):
                 clean_examples_dirpath = clean_example_dict[model_class][i]
                 clean_grads = inference_on_example_data(model, clean_examples_dirpath, grad = True)
                 flat_clean_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: clean_grads}, model_layer_map)[model_class], axis = 0))
                 
-                poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
-                poisoned_grads = inference_on_example_data(model, poisoned_examples_dirpath, grad = True)
-                flat_poisoned_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: poisoned_grads}, model_layer_map)[model_class], axis = 0))
+                #poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
+                #poisoned_grads = inference_on_example_data(model, poisoned_examples_dirpath, grad = True)
+                #flat_poisoned_grad_repr_dict[model_class].append(np.mean(flatten_models({model_class: poisoned_grads}, model_layer_map)[model_class], axis = 0))
         
         
         clean_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_clean_grad_repr_dict, self.weight_table_params, self.ICA_features)
         logging.info("Models flattened. Fitting feature reduction...")
-        poisoned_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_poisoned_grad_repr_dict, self.weight_table_params, self.ICA_features)
-        logging.info("Models flattened. Fitting feature reduction...")
+        #poisoned_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_poisoned_grad_repr_dict, self.weight_table_params, self.ICA_features)
+        #logging.info("Models flattened. Fitting feature reduction...")
         
         df = pd.DataFrame(columns=['model_class','index','features'])
         for (model_class, models) in model_repr_dict:
@@ -155,11 +155,11 @@ class FeatureExtractor(object):
                 clean_grad_feats = use_feature_reduction_algorithm(
                     clean_grad_layer_transform[model_class], flat_clean_grad_repr_dict[model_class][i]
                 )
-                poisoned_grad_feats = use_feature_reduction_algorithm(
-                    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
-                )
+                #poisoned_grad_feats = use_feature_reduction_algorithm(
+                #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
+                #)
 
-                feats = np.hstack((model_feats, clean_grad_feats, poisoned_grad_feats)).tolist()
+                feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
                 df.loc[len(df.index)] = [model_class, i, feats] 
         df.to_csv("round12_features.csv")
 

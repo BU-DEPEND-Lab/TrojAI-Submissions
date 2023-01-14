@@ -103,8 +103,12 @@ def load_models_dirpath(models_dirpath):
         )
         model_ground_truth = load_ground_truth(model_path)
         clean_examples = load_examples(model_path)
-        poisoned_examples = load_examples(model_path, False)
-
+        clean_example_dict[model_class].append(clean_examples)
+        try:
+            poisoned_examples = load_examples(model_path, False)
+            poisoned_examples[model_class].append(poisoned_examples)
+        except:
+            print("No poisoned example")
         # Build the list of models
         if model_class not in model_repr_dict.keys():
             model_repr_dict[model_class] = []
@@ -114,9 +118,7 @@ def load_models_dirpath(models_dirpath):
 
         model_repr_dict[model_class].append(model_repr)
         model_ground_truth_dict[model_class].append(model_ground_truth)
-        clean_example_dict[model_class].append(clean_examples)
-        poisoned_examples[model_class].append(poisoned_examples)
-
+ 
     return model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
