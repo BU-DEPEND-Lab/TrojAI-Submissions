@@ -14,12 +14,13 @@ from utils.abstract import AbstractDetector
 from utils.flatten import flatten_model, flatten_models, flatten_grads
 from utils.healthchecks import check_models_consistency
 from utils.models import create_layer_map, load_model, \
-    load_models_dirpath
+    load_models_dirpath, inference_on_example_data
 from utils.padding import create_models_padding, pad_model
 from utils.reduction import (
     fit_feature_reduction_algorithm,
     use_feature_reduction_algorithm,
-    grad_feature_reduction_algorithm
+    grad_feature_reduction_algorithm,
+    ICA_feature_reduction_algorithm
 )
 from attrdict import AttrDict
 from sklearn.preprocessing import StandardScaler
@@ -27,7 +28,7 @@ from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r
 import torch
 import torch.nn.functional as F
 
-class Detector(AbstractDetector):
+class FeatureDetector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
         """Detector initialization function.
 
@@ -40,11 +41,7 @@ class Detector(AbstractDetector):
 
         self.scale_parameters_filepath = scale_parameters_filepath
         self.metaparameter_filepath = metaparameter_filepath
-        self.learned_parameters_dirpath = learned_parameters_dirpath
-        self.model_filepath = join(self.learned_parameters_dirpath, "model.json")
-        self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
-        self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
-        self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
+         
 
         # TODO: Update skew parameters per round
         self.model_skew = {
@@ -59,59 +56,7 @@ class Detector(AbstractDetector):
             "std": metaparameters["train_weight_table_params_std"],
             "scaler": metaparameters["train_weight_table_params_scaler"],
         }
-        self.random_forest_kwargs = {
-            "n_estimators": metaparameters[
-                "train_random_forest_regressor_param_n_estimators"
-            ],
-            "criterion": metaparameters[
-                "train_random_forest_regressor_param_criterion"
-            ],
-            "max_depth": metaparameters[
-                "train_random_forest_regressor_param_max_depth"
-            ],
-            "min_samples_split": metaparameters[
-                "train_random_forest_regressor_param_min_samples_split"
-            ],
-            "min_samples_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_samples_leaf"
-            ],
-            "min_weight_fraction_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_weight_fraction_leaf"
-            ],
-            "max_features": metaparameters[
-                "train_random_forest_regressor_param_max_features"
-            ],
-            "min_impurity_decrease": metaparameters[
-                "train_random_forest_regressor_param_min_impurity_decrease"
-            ],
-        }
-
-        self.xgboost_kwargs = {
-            "booster": metaparameters[
-                "train_xgboost_regressor_param_booster"
-            ],
-            "objective": metaparameters[
-                "train_xgboost_regressor_param_objective"
-            ],
-            "max_depth": metaparameters[
-                "train_xgboost_regressor_param_max_depth"
-            ],
-            "max_leaves": metaparameters[
-                "train_xgboost_regressor_param_max_leaves"
-            ],
-            "max_bin": metaparameters[
-                "train_xgboost_regressor_param_max_bin"
-            ],
-            "min_child_weight": metaparameters[
-                "train_xgboost_regressor_param_min_child_weight"
-            ],
-            "eval_metric": metaparameters[
-                "train_xgboost_regressor_param_eval_metric"
-            ],
-            "max_delta_step": metaparameters[
-                "train_xgboost_regressor_param_max_delta_step"
-            ],
-        }
+         
 
     def write_metaparameters(self):
         metaparameters = {
@@ -122,22 +67,6 @@ class Detector(AbstractDetector):
             "train_weight_table_params_mean": self.weight_table_params["mean"],
             "train_weight_table_params_std": self.weight_table_params["std"],
             "train_weight_table_params_scaler": self.weight_table_params["scaler"],
-            "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
-            "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
-            "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
-            "train_random_forest_regressor_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
-            "train_random_forest_regressor_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
-            "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
-            "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
-            "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
-            "train_xgboost_regressor_param_booster": self.xgboost_kwargs["booster"],
-            "train_xgboost_regressor_param_objective": self.xgboost_kwargs["objective"],
-            "train_xgboost_regressor_param_max_depth": self.xgboost_kwargs["max_depth"],
-            "train_xgboost_regressor_param_max_leaves": self.xgboost_kwargs["max_leaves"],
-            "train_xgboost_regressor_param_max_bin": self.xgboost_kwargs["max_bin"],
-            "train_xgboost_regressor_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
-            "train_xgboost_regressor_param_eval_metric": self.xgboost_kwargs["eval_metric"],
-            "train_xgboost_regressor_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
         }
 
         with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
@@ -163,24 +92,24 @@ class Detector(AbstractDetector):
             models_dirpath: str - Path to the list of model to use for training
         """
         # Create the learned parameter folder if needed
-        if not exists(self.learned_parameters_dirpath):
-            makedirs(self.learned_parameters_dirpath)
+        #if not exists(self.learned_parameters_dirpath):
+        #    makedirs(self.learned_parameters_dirpath)
 
         # List all available model
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
 
-        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
+        model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
 
-        models_padding_dict = create_models_padding(model_repr_dict)
-        with open(self.models_padding_dict_filepath, "wb") as fp:
-            pickle.dump(models_padding_dict, fp)
+        #models_padding_dict = create_models_padding(model_repr_dict)
+        #with open(self.models_padding_dict_filepath, "wb") as fp:
+        #    pickle.dump(models_padding_dict, fp)
 
-        for model_class, model_repr_list in model_repr_dict.items():
-            for index, model_repr in enumerate(model_repr_list):
-                model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
+        #for model_class, model_repr_list in model_repr_dict.items():
+        #    for index, model_repr in enumerate(model_repr_list):
+        #        model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
 
-        check_models_consistency(model_repr_dict)
+        #check_models_consistency(model_repr_dict)
 
         # Build model layer map to know how to flatten
         logging.info("Generating model layer map...")
@@ -188,14 +117,57 @@ class Detector(AbstractDetector):
         with open(self.model_layer_map_filepath, "wb") as fp:
             pickle.dump(model_layer_map, fp)
         logging.info("Generated model layer map. Flattenning models...")
-
-        # Flatten models
+        
         flat_models = flatten_models(model_repr_dict, model_layer_map)
         del model_repr_dict
         logging.info("Models flattened. Fitting feature reduction...")
 
+        layer_transform = ICA_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
+
+        clean_flat_grads = {}
+        poisoned_flat_grads = {}
+        clean_grad_repr_dict = {}
+        poisoned_grad_repr_dict = {}
+        for (model_class, models) in model_repr_dict:
+            clean_grad_reprs[model_class] = []
+            poisoned_grad_repr_dict[model_class] = []
+            for i, model in enumerate(models):
+                clean_examples_dirpath = clean_example_dict[model_class][i]
+                poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
+                clean_grad_repr_dict[model_class].append(self.inference_on_example_data(model, clean_examples_dirpath, grad = True))
+                poisoned_grad_repr_dict[model_class].append(self.inference_on_example_data(model, poisoned_examples_dirpath, grad = True))
+        
+        flat_clean_grad_repr_dict = flatten_models(clean_grad_repr_dict, model_layer_map)
+        del clean_grad_repr_dict
+        logging.info("Models flattened. Fitting feature reduction...")
+
+        flat_poisoned_grad_repr_dict = flatten_models(poisoned_grad_repr_dict, model_layer_map)
+        del poisoned_grad_repr_dict
+        logging.info("Models flattened. Fitting feature reduction...")
+
+
+        clean_grad_layer_transform = ICA_feature_reduction_algorithm(clean_grad_repr_dict, self.weight_table_params, self.ICA_features)
+        poisoned_grad_layer_transform = ICA_feature_reduction_algorithm(poisoned_grad_repr_dict, self.weight_table_params, self.ICA_features)
+        
+
+        # Flatten models
+        
         layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
-        model_transform = stat_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
+
+        
+        for (model_class, models) in model_repr_dict: 
+            
+            for model in models:
+                
+            poisoned_flat_grads = 
+                grad_reprs = self.inference_on_example_data(model, examples_dirpath, grad = True)
+      
+        for grad_repr in grad_reprs:
+            #grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
+            flat_grad = flatten_model(grad_repr, model_layer_map[model_class])
+            #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
+            flat_grads.append(flat_grad)
+        grad_layer_transform = grad_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
         logging.info("Feature reduction applied. Creating feature file...")
         X = None
         y = []
@@ -235,48 +207,7 @@ class Detector(AbstractDetector):
         self.write_metaparameters()
         logging.info("Configuration done!")
 
-    def inference_on_example_data(self, model, examples_dirpath, grad = False):
-        """Method to demonstrate how to inference on a round's example data.
-
-        Args:
-            model: the pytorch model
-            examples_dirpath: the directory path for the round example data
-        """
-        print("Inference on example data")
-        # Setup scaler
-        scaler = StandardScaler()
-
-        scale_params = np.load(self.scale_parameters_filepath)
-
-        scaler.mean_ = scale_params[0]
-        scaler.scale_ = scale_params[1]
-
-        
-        grad_reprs = []
-        # Inference on models
-        for examples_dir_entry in os.scandir(examples_dirpath):
-            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
-                feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
-                print(">>>>>>> Example feature shape: ", feature_vector.shape)
-                feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
-                model.zero_grad()
-                #pred = torch.argmax(model(feature_vector).detach()).item()
-                scores = model(feature_vector)
-                pred = torch.argmax(scores).detach()
-                logits = F.log_softmax(scores, dim = 1)
-                ground_tuth_filepath = examples_dir_entry.path + ".json"
-                with open(ground_tuth_filepath, 'r') as ground_truth_file:
-                    ground_truth =  ground_truth_file.readline()
-                print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
-            
-                if grad:
-                    loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
-                    loss.backward();
-                    grad_repr = OrderedDict(
-                        {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
-                    ) 
-                grad_reprs.append(grad_repr)    
-        return grad_reprs
+    
                 
     def infer(
         self,
@@ -332,7 +263,7 @@ class Detector(AbstractDetector):
         logging.info(f"Flattened model: {[weights.shape for (layer, weights) in flat_model.items()]}")
         # Inferences on examples to demonstrate how it is done for a round
         # This is not needed for the random forest classifier
-        grad_reprs = self.inference_on_example_data(model, examples_dirpath, grad = True)
+        grad_repr_dict = self.inference_on_example_data(model, examples_dirpath, grad = True)
         flat_grads = []
         for grad_repr in grad_reprs:
             #grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
