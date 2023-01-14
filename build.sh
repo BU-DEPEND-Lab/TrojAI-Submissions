@@ -1,3 +1,10 @@
+# Feature extraction mode
+python entrypoint.py extract \
+--round_training_dataset_dirpath /mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/ \
+--metaparameters_filepath ./metaparameters.json \
+--schema_filepath ./metaparameters_schema.json \
+--scale_parameters_filepath ./learned_parameters/scale_params.npy
+
 #inference mode
 python entrypoint.py infer \
 --model_filepath ./model/id-00000002/model.pt \
