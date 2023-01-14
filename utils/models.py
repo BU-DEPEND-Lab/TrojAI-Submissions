@@ -83,7 +83,7 @@ def load_examples(model_dirpath: str, clean = True):
     Returns:
 
     """  
-    examples = np.arrary([[]])
+    examples = np.array([[]])
     for examples_dir_entry in os.scandir(join(model_dirpath, "clean-example-data" if clean else "poisoned-example-data")):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
                 feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
