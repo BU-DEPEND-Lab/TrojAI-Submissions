@@ -109,7 +109,7 @@ class FeatureExtractor(object):
         logging.info(f"Loading %d models...", len(model_path_list))
 
         model_repr_dict, _, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
-        print(model_repr_dict)
+        
         #models_padding_dict = create_models_padding(model_repr_dict)
         #with open(self.models_padding_dict_filepath, "wb") as fp:
         #    pickle.dump(models_padding_dict, fp)
@@ -123,6 +123,7 @@ class FeatureExtractor(object):
         # Build model layer map to know how to flatten
         logging.info("Generating model layer map...")
         model_layer_map = create_layer_map(model_repr_dict)
+        print(model_repr_dict)
         with open(self.model_layer_map_filepath, "wb") as fp:
             pickle.dump(model_layer_map, fp)
         logging.info("Generated model layer map. Flattenning models...")
