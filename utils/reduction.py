@@ -154,7 +154,7 @@ def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_f
             s = np.stack([model[layers] for model in models])
             print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
             layer_transform[model_arch][layers].fit(s)
-            print(f"Model class {model_arch} layer {layers} target number of ICA components {layer_transform[model_arch][layers].components_.shape}")
+            print(f"Model class {model_arch} layer {layers} fit ICA components {layer_transform[model_arch][layers].components_.shape}")
         print(f"Feature reduction to {sum(list(layers_output.values()))} number of features")
 
     return layer_transform
