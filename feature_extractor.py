@@ -60,8 +60,8 @@ class FeatureExtractor(object):
 
         self.input_features = metaparameters["train_input_features"]
         self.ICA_features = metaparameters["train_ICA_features"]
-        print(self.ICA_features)
-        exit(0)
+ 
+ 
         self.weight_table_params = {
             "random_seed": metaparameters["train_weight_table_random_state"],
             "mean": metaparameters["train_weight_table_params_mean"],

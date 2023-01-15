@@ -25,6 +25,7 @@ def feature_reduction(model, weight_table, max_features):
         assert out_f > 0
         outputs[layer] = out_f
     #print("feature_reduction output", outputs)
+    print(f"Feature reduction to {sum(list(outputs.values()))} number of features")
     return outputs
 
 
