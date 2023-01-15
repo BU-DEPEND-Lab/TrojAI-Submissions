@@ -164,17 +164,18 @@ class FeatureExtractor(object):
         df = pd.DataFrame(columns=['model_class','index','features'])
         for _ in range(len(flat_models)):
             (model_class, models) = flat_models.popitem()
+            (_, grads) = flat_clean_grad_repr_dict.popitem()
             for i, model in enumerate(models):
                 logging.info(f"\
                     Model class: {model_class} || \
                         Index: {i} || \
                             Model layers shapes: {[(layer, weight.shape) for (layer, weight) in models[i].items()]} || \
-                                Model grad shapes: {[(layer, len(grad)) for (layer, grad) in flat_clean_grad_repr_dict.items()]}")
+                                Model grad shapes: {[(layer, len(grad)) for (layer, grad) in grads[i].items()]}")
                 model_feats = use_feature_reduction_algorithm(
                     layer_transform[model_class], models[i]
                 )
                 clean_grad_feats = use_feature_reduction_algorithm(
-                    clean_grad_layer_transform[model_class], flat_clean_grad_repr_dict[model_class][i]
+                    clean_grad_layer_transform[model_class], grads[i]
                 )
                 #poisoned_grad_feats = use_feature_reduction_algorithm(
                 #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
