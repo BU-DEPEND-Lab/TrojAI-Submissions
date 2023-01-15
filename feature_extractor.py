@@ -188,6 +188,7 @@ class FeatureExtractor(object):
                 logging.info(f" ICA feature size: {feats.shape}\n")
                 feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
                 feats = [list(models[i].values())[-1][:self.ICA_features].tolist() + list(grads[i].values())[-1][:self.ICA_features]]
+                print(feats)
                 assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
 
                 
