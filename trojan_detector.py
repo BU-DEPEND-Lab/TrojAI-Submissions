@@ -246,7 +246,7 @@ class Detector(AbstractDetector):
         print('x_train', x_train.shape)
         print('x_test', x_test.shape)
 
-
+        """
         model_name = "svm grid search"
         logging.info("Training probable SVM model...")
         clf = svm.SVC(kernel='linear', probability=True)
@@ -254,14 +254,14 @@ class Detector(AbstractDetector):
         fpr, tpr, thresholds = roc_curve(y_test, probas_[:, 1])
         roc_auc = auc(fpr, tpr)
         print("Test auc : %f" % roc_auc)
-
+        """
         
         model_name = "svm grid search"
         logging.info("Grid searching SVM model...")
         svm_kwargs_grid = {'C': [0.1, 1, 10, 100, 1000, 10000], 
               'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
               'kernel': ['linear', 'rbf']} 
-        grid = GridSearchCV(svm.SVC(), svm_kwargs_grid, refit = True, verbose = 3)
+        grid = GridSearchCV(svm.SVC(probability=True), svm_kwargs_grid, refit = True, verbose = 3)
         grid.fit(x_train, y_train)
         clf = grid.best_estimator_
         #
