@@ -222,8 +222,10 @@ class FeatureExtractor(object):
                 #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
                 #)
 
-        feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
-        return feats  
+        feats = np.hstack((model_feats, clean_grad_feats)) #, poisoned_grad_feats)).tolist()
+        feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
+        assert feats.shape[-1] == 2 * self.ICA_features
+        return feats.tolist()
            
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")
