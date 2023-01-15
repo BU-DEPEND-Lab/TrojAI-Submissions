@@ -188,7 +188,7 @@ class FeatureExtractor(object):
                 logging.info(f" ICA feature size: {feats.shape}\n")
                 feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
                 feats = [list(models[i].values())[-1][:self.ICA_features].tolist() + list(grads[i].values())[-1][:self.ICA_features]]
-                assert np.asarrary(feats).shape[-1] == 2 * self.ICA_features
+                assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
 
                 
                 df.loc[len(df.index)] = [model_class, i, feats] 
@@ -228,7 +228,7 @@ class FeatureExtractor(object):
         feats = np.hstack((model_feats, clean_grad_feats)) #, poisoned_grad_feats)).tolist()
         feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
         feats = [list(flat_model.values())[-1][:self.ICA_features].tolist() + list(flat_grad.values())[-1][:self.ICA_features]]
-        assert np.asarrary(feats).shape[-1] == 2 * self.ICA_features
+        assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
         return feats.tolist()
            
 if __name__ == "__main__":
