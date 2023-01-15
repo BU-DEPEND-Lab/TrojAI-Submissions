@@ -256,7 +256,7 @@ class Detector(AbstractDetector):
         print("Test auc : %f" % roc_auc)
         """
         
-        model_name = "svm grid search"
+        model_name = "svm"
         logging.info("Grid searching SVM model...")
         svm_kwargs_grid = {'C': [0.1, 1, 10, 100, 1000, 10000], 
               'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
