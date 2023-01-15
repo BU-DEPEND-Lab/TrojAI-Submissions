@@ -187,7 +187,10 @@ class FeatureExtractor(object):
                 feats = np.hstack((model_feats, clean_grad_feats))#, poisoned_grad_feats)).tolist()
                 logging.info(f" ICA feature size: {feats.shape}\n")
                 feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
-                assert feats.shape[-1] == 2 * self.ICA_features
+                feats = [models[i].values()[-1][:self.ICA_features].tolist() + grads[i].values()[-1][:self.ICA_features]]
+                assert np.asarrary(feats).shape[-1] == 2 * self.ICA_features
+
+                
                 df.loc[len(df.index)] = [model_class, i, feats] 
         pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
         pickle.dump(clean_grad_layer_transform, open(self.clean_grad_layer_transform_filepath, 'wb'))
@@ -224,7 +227,8 @@ class FeatureExtractor(object):
 
         feats = np.hstack((model_feats, clean_grad_feats)) #, poisoned_grad_feats)).tolist()
         feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
-        assert feats.shape[-1] == 2 * self.ICA_features
+        feats = [flat_model.values()[-1][:self.ICA_features].tolist() + flat_grad.values()[-1][:self.ICA_features]]
+        assert np.asarrary(feats).shape[-1] == 2 * self.ICA_features
         return feats.tolist()
            
 if __name__ == "__main__":
