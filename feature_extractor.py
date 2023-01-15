@@ -167,10 +167,7 @@ class FeatureExtractor(object):
             (_, grads) = flat_clean_grad_repr_dict.popitem()
             for i, model in enumerate(models):
                 logging.info(f"\
-                    Model class: {model_class} || \
-                        Index: {i} || \
-                            Model layers shapes: {[(layer, weight.shape) for (layer, weight) in models[i].items()]} || \
-                                Model grad shapes: {[(layer, len(grad)) for (layer, grad) in grads[i].items()]}")
+                    Model class: {model_class} || Index: {i} || Model layers shapes: {[(layer, weight.shape) for (layer, weight) in models[i].items()]} || Model grad shapes: {[(layer, len(grad)) for (layer, grad) in grads[i].items()]}")
                 model_feats = use_feature_reduction_algorithm(
                     layer_transform[model_class], models[i]
                 )
@@ -182,7 +179,7 @@ class FeatureExtractor(object):
                 #)
 
                 feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
-                logging.info(f" ICA feature size: {len(feats)}")
+                logging.info(f" ICA feature size: {len(feats)}\n")
                 assert len(feats) == 2 * self.ICA_features
                 df.loc[len(df.index)] = [model_class, i, feats] 
         pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
