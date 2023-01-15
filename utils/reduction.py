@@ -150,8 +150,8 @@ def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_f
         assert sum(list(layers_output.values())) == input_features
         layer_transform[model_arch] = {}
         for (layers, output) in tqdm(layers_output.items()):
-            print(f"Model class {model_arch} layer {layers} target number of ICA components {output}")
             layer_transform[model_arch][layers] = init_feature_reduction(output)
+            print(f"Model class {model_arch} layer {layers} target number of ICA components {layer_transform[model_arch][layers].components_.shape}")
             s = np.stack([model[layers] for model in models])
             #print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
             layer_transform[model_arch][layers].fit(s)
