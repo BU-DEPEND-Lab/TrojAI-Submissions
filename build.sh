@@ -22,9 +22,9 @@ python entrypoint.py configure \
 --scratch_dirpath=./scratch/ \
 --metaparameters_filepath=./metaparameters.json \
 --schema_filepath=./metaparameters_schema.json \
---learned_parameters_dirpath=./new_learned_parameters/ \
+--learned_parameters_dirpath=./learned_parameters/ \
 --configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models \
---scale_parameters_filepath=./new_learned_parameters/scale_params.npy
+--scale_parameters_filepath=./learned_parameters/scale_params.npy
 
 # test run self-configured model
 python entrypoint.py infer \

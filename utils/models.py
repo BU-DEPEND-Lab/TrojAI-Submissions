@@ -105,8 +105,10 @@ def load_models_dirpath(models_dirpath):
         model, model_repr, model_class = load_model(
             join(model_path, "model.pt")
         )
-        model_ground_truth = load_ground_truth(model_path)
-        
+        try:
+            model_ground_truth = load_ground_truth(model_path)
+        except:
+            print("Can't find ground truth")
         # Build the list of models
         if model_class not in model_repr_dict.keys():
             model_dict[model_class] = []
@@ -118,8 +120,11 @@ def load_models_dirpath(models_dirpath):
         model_repr_dict[model_class].append(model_repr)
         model_ground_truth_dict[model_class].append(model_ground_truth)
 
-        clean_examples = load_examples(model_path)
-        clean_example_dict[model_class].append(clean_examples)
+        try:
+            clean_examples = load_examples(model_path)
+            clean_example_dict[model_class].append(clean_examples)
+        except:
+            print("No clean example")
         try:
             poisoned_examples = load_examples(model_path, False)
             poisoned_examples[model_class].append(poisoned_examples)
@@ -136,7 +141,7 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
             model: the pytorch model
             examples_dirpath: the directory path for the round example data
         """
-        print(f"Inference on example data {example}")
+        #print(f"Inference on example data {example}")
         # Setup scaler
         scaler = StandardScaler()
 

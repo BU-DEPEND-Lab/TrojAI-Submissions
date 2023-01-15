@@ -6,7 +6,7 @@ import warnings
 
 import jsonschema
 
-from detector import Detector
+from svm_detector import SVMDetector as Detector
 from feature_extractor import FeatureExtractor
 
 warnings.filterwarnings("ignore")
@@ -76,10 +76,8 @@ if __name__ == "__main__":
     subparser = parser.add_subparsers(dest='cmd', required=True)
 
     feature_parser = subparser.add_parser('extract', help='Execute feature extractor for TrojAI detection.')
-
-    inf_parser = subparser.add_parser('infer', help='Execute container in inference mode for TrojAI detection.')
-
-    inf_parser.add_argument(
+ 
+    feature_parser.add_argument(
         "--round_training_dataset_dirpath",
         type=str,
         help="File path to the directory containing id-xxxxxxxx models of the current "
@@ -87,14 +85,14 @@ if __name__ == "__main__":
         required=True
     )
 
-    inf_parser.add_argument(
+    feature_parser.add_argument(
         "--metaparameters_filepath",
         help="Path to JSON file containing values of tunable paramaters to be used "
         "when evaluating models.",
         type=str,
         required=True,
     )
-    inf_parser.add_argument(
+    feature_parser.add_argument(
         "--schema_filepath",
         type=str,
         help="Path to a schema file in JSON Schema format against which to validate "
@@ -102,7 +100,7 @@ if __name__ == "__main__":
         required=True,
     )
      
-    inf_parser.add_argument(
+    feature_parser.add_argument(
         "--scale_parameters_filepath",
         type=str,
         help="Path to a .npy file containing the mean and scale which are used to "
@@ -110,7 +108,9 @@ if __name__ == "__main__":
         required=True,
     )
 
-    inf_parser.set_defaults(func=extraction_mode)
+    feature_parser.set_defaults(func=extraction_mode)
+
+    inf_parser = subparser.add_parser('infer', help='Execute container in inference mode for TrojAI detection.')
 
     inf_parser.add_argument(
         "--model_filepath",

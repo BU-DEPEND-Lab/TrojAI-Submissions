@@ -51,6 +51,7 @@ class FeatureExtractor(object):
         self.metaparameter_filepath = metaparameter_filepath
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
+        self.grad_layer_transform_filepath = join(self.learned_parameters_dirpath, "grad_layer_transform.bin")
 
         # TODO: Update skew parameters per round
         self.model_skew = {
@@ -124,6 +125,10 @@ class FeatureExtractor(object):
         logging.info("Generating model layer map...")
         model_layer_map = create_layer_map(model_repr_dict)
         
+        with open(self.model_layer_map_filepath, "wb") as fp:
+            pickle.dump(model_layer_map, fp)
+        logging.info("Generated model layer map. Flattenning model grads...")
+
         flat_clean_grad_repr_dict = {}
         #flat_poisoned_grad_repr_dict= {}
         for _ in range(len(model_dict)):
@@ -133,25 +138,21 @@ class FeatureExtractor(object):
             for i, model in enumerate(models):
                 clean_examples = clean_example_dict[model_class][i]
                 ground_truth = model_ground_truth_dict[model_class][i]
-                print(f"Model class: {model_class}; Index: {i}")
+                #print(f"Model class: {model_class}; Index: {i}")
                 clean_grad = inference_on_example_data(model, ground_truth, clean_examples, self.scale_parameters_filepath, grad = True)
                 flat_clean_grad_repr_dict[model_class].append(flatten_model(clean_grad, model_layer_map[model_class]))
-                print(flat_clean_grad_repr_dict[model_class][-1])
+                #print(flat_clean_grad_repr_dict[model_class][-1])
                 #poisoned_examples_dirpath = poisoned_example_dict[model_class][i]
                 #poisoned_grad = inference_on_example_data(model, poisoned_examples_dirpath, self.scale_parameters_filepath, grad = True)
                 #flat_poisoned_grad_repr_dict[model_class].append(flatten_model(poisoned_grad, model_layer_map[model_class]))
         
         
-        logging.info("Models flattened. Fitting grad feature reduction...")
+        logging.info("Model grads flattened. Fitting grad feature reduction...")
         clean_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_clean_grad_repr_dict, self.weight_table_params, self.ICA_features)
         logging.info("Grad feature reduction done...")
         #poisoned_grad_layer_transform = fit_ICA_feature_reduction_algorithm(flat_poisoned_grad_repr_dict, self.weight_table_params, self.ICA_features)
         #logging.info("Models flattened. Fitting feature reduction...")
-        
-
-        with open(self.model_layer_map_filepath, "wb") as fp:
-            pickle.dump(model_layer_map, fp)
-        logging.info("Generated model layer map. Flattenning models...")
+    
         
         flat_models = flatten_models(model_repr_dict, model_layer_map)
          
@@ -176,9 +177,43 @@ class FeatureExtractor(object):
 
                 feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
                 df.loc[len(df.index)] = [model_class, i, feats] 
+        pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
+        pickle.dump(clean_grad_layer_transform, open(self.layer_transform_filepath, 'wb'))
         df.to_csv("round12_features.csv")
 
 
+    def infer_one_model(self, model_filepath):
+        layer_transform = pickle.load(open(self.layer_transform_filepath, 'rb'))
+        clean_grad_layer_transform = pickle.load(open(self.layer_transform_filepath, 'rb'))
+        model_layer_map = pickle.load(open(self.model_layer_map_filepath, 'rb'))
+
+        model_dict, model_repr_dict, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
+        model_class, [model] = model_dict.popitem()
+        _, [clean_example] = clean_example_dict.popitem()
+        _, [model_repr] = model_repr_dict.popitem()
+        
+        flat_model = flatten_model(model_repr, model_layer_map[model_class])
+        del model_repr
+
+        clean_grad_repr = inference_on_example_data(model, '1', clean_example, self.scale_parameters_filepath, grad = True)
+        del model
+        flat_grad = flatten_model(clean_grad_repr, model_layer_map[model_class])
+        del clean_grad_repr
+        
+        model_feats = use_feature_reduction_algorithm(
+                    layer_transform[model_class], flat_model
+                )
+        clean_grad_feats = use_feature_reduction_algorithm(
+                    clean_grad_layer_transform[model_class], flat_grad
+                )
+                #poisoned_grad_feats = use_feature_reduction_algorithm(
+                #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
+                #)
+
+        feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
+        return feats  
+           
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")
     extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models")
+    print(extractor.infer_one_model("./model/id-00000002/"))
