@@ -177,9 +177,9 @@ class FeatureExtractor(object):
                 #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
                 #)
 
-                feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
-                logging.info(f" ICA feature size: {len(feats)}\n")
-                assert len(feats[0]) == 2 * self.ICA_features
+                feats = np.hstack((model_feats, clean_grad_feats))#, poisoned_grad_feats)).tolist()
+                logging.info(f" ICA feature size: {feats.shape}\n")
+                assert feats.shape[-1] == 2 * self.ICA_features
                 df.loc[len(df.index)] = [model_class, i, feats] 
         pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
         pickle.dump(clean_grad_layer_transform, open(self.layer_transform_filepath, 'wb'))
