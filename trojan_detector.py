@@ -249,7 +249,7 @@ class Detector(AbstractDetector):
         
         model_name = "svm"
         logging.info("Training SVM model...")
-        svm_kwargs_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000], 
+        svm_kwargs_grid = {'C': [0.1, 1, 10, 100, 1000, 10000], 
               'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
               'kernel': ['linear', 'rbf']} 
         grid = GridSearchCV(svm.SVC(), svm_kwargs_grid, refit = True, verbose = 3)
