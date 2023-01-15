@@ -170,8 +170,8 @@ class FeatureExtractor(object):
             (_, grads) = flat_clean_grad_repr_dict.popitem()
             for i, model in enumerate(models):
                 logging.info(f"Model class: {model_class} || Index: {i} || Model layers shapes: {[(layer, weight.shape) for (layer, weight) in models[i].items()]} || Model grad shapes: {[(layer, len(grad)) for (layer, grad) in grads[i].items()]}")
-                logging.info(f"layer_transformer components: {[(layer, layer_transform[model_class][layer].components_) for (layer, _) in models[i].items()]}")
-                logging.info(f"clean grad layer_transformer components: {[(layer, clean_grad_layer_transform[model_class][layer].components_) for (layer, _) in models[i].items()]}")
+                logging.info(f"layer_transformer components: {[(layer, layer_transform[model_class][layer].components_.shape) for (layer, _) in models[i].items()]}")
+                logging.info(f"clean grad layer_transformer components: {[(layer, clean_grad_layer_transform[model_class][layer].components_.shape) for (layer, _) in models[i].items()]}")
                 model_feats = use_feature_reduction_algorithm(
                     layer_transform[model_class], models[i]
                 )
