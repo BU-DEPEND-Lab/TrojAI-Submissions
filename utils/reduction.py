@@ -141,6 +141,7 @@ def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_f
     weight_table = init_weight_table(**weight_table_params)
 
     for (model_arch, models) in model_dict.items():
+        print(f"Model class {model_arch}")
         layers_output = feature_reduction(models[0], weight_table, input_features)
         print(f"Feature reduction to {sum(list(layers_output.values()))} number of features")
         assert sum(list(layers_output.values())) == input_features
