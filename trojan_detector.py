@@ -283,6 +283,8 @@ class Detector(AbstractDetector):
         y_pred_ = clf.predict(x_test)
         print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
         print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
+        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_, pos_label=2)
+        print('test auc', metrics.auc(fpr, tpr))
         logging.info("Saving model...")
         dump(clf, f'round12_{model_name}.joblib') 
         
