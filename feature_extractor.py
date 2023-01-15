@@ -184,13 +184,13 @@ class FeatureExtractor(object):
                 assert feats.shape[-1] == 2 * self.ICA_features
                 df.loc[len(df.index)] = [model_class, i, feats] 
         pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
-        pickle.dump(clean_grad_layer_transform, open(self.layer_transform_filepath, 'wb'))
+        pickle.dump(clean_grad_layer_transform, open(self.clean_grad_layer_transform_filepath, 'wb'))
         df.to_csv("round12_features.csv")
 
 
     def infer_one_model(self, model_filepath):
         layer_transform = pickle.load(open(self.layer_transform_filepath, 'rb'))
-        clean_grad_layer_transform = pickle.load(open(self.layer_transform_filepath, 'rb'))
+        clean_grad_layer_transform = pickle.load(open(self.clean_grad_layer_transform_filepath, 'rb'))
         model_layer_map = pickle.load(open(self.model_layer_map_filepath, 'rb'))
 
         model_dict, model_repr_dict, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
