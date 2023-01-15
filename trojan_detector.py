@@ -292,7 +292,7 @@ class Detector(AbstractDetector):
         print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
         print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
         y_pred_probs = clf.predict_proba(x_test)
-        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs)
+        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs[:, 1])
         print(f'test fpr {fpr}')
         print(f'tpr {tpr}')
         print('test auc', metrics.auc(fpr, tpr))
