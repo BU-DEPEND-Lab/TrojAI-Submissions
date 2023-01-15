@@ -117,7 +117,9 @@ def use_feature_reduction_algorithm(layer_features, flat_model):
 
     for (layer, weights) in flat_model.items():
         #print(layer)
-        out_model = np.hstack((out_model,  np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)))
+        f = np.expand_dims(layer_features[layer].transform([weights])[0], axis = 0)
+        print(f"Layer {layer} number of features {out_model}")
+        out_model = np.hstack((out_model,  f))
         """
         #out_model = np.hstack((out_model, layer_transform[layer].transform([weights])))
         if layer_transform is None:
@@ -133,7 +135,8 @@ def use_feature_reduction_algorithm(layer_features, flat_model):
                     layer_features[layer].transform([weights])[0]), axis = None), axis = 0)
                     ))
         """
-         
+    print(f"Amount to feature shape {out_model.shape}")
+    
     return out_model
     
 def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_features):
