@@ -246,7 +246,7 @@ class Detector(AbstractDetector):
         print('x_test', x_test.shape)
 
         # Instantiation
-        """
+        
         model_name = "svm"
         logging.info("Training SVM model...")
         svm_kwargs_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000], 
@@ -257,12 +257,12 @@ class Detector(AbstractDetector):
         clf = grid.best_estimator_
         #clf = svm.SVC(kernel='linear')
         
-        
+        """
         model_name = "xgboost_classifier"
         logging.info("Training XGBoostClassifier model...")
         clf = XGBClassifier(**self.xgboost_kwargs)
         
-        """
+        
         model_name = "xgboost_classifier_k_folds"
         logging.info("Training XGBoostClassifier mode with k_folds...")
         data_dmatrix = xgboost.DMatrix(data=X,label=Y)
@@ -270,11 +270,11 @@ class Detector(AbstractDetector):
                     num_boost_round=50, early_stopping_rounds=10, metrics="auc", as_pandas=True, seed=123)
         print(xgb_cv)
         
-        """
+        
         model_name = "randomforest_classifier"
         logging.info("Training RandomForestClassifier model...")
         clf = RandomForestClassifier(**self.random_forest_classifier_kwargs, random_state=0)
-        
+        """
 
         clf.fit(x_train, y_train)
         y_pred = clf.predict(x_train)
