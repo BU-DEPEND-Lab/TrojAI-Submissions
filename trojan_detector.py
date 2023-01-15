@@ -39,7 +39,7 @@ from sklearn import svm
 from feature_extractor import FeatureExtractor
 
 
-class SVMDetector(AbstractDetector):
+class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
         """Detector initialization function.
 
