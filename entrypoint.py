@@ -6,7 +6,7 @@ import warnings
 
 import jsonschema
 
-from svm_detector import SVMDetector as Detector
+from trojan_detector import SVMDetector as Detector
 from feature_extractor import FeatureExtractor
 
 warnings.filterwarnings("ignore")
