@@ -275,7 +275,7 @@ class Detector(AbstractDetector):
         logging.info("Training RandomForestClassifier model...")
         clf = RandomForestClassifier(**self.random_forest_classifier_kwargs, random_state=0)
         
-
+        """ 
         clf.fit(x_train, y_train)
         y_pred = clf.predict(x_train)
         print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred)
@@ -285,7 +285,7 @@ class Detector(AbstractDetector):
         print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
         logging.info("Saving model...")
         dump(clf, f'round12_{model_name}.joblib') 
-        """ 
+        
        
         
 
