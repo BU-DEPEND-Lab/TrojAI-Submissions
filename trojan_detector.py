@@ -29,8 +29,9 @@ import torch
 import torch.nn.functional as F
 
 
+from sklearn.linear_model import SGDClassifier 
 import sklearn.model_selection
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_curve, auc
 from sklearn.model_selection import GridSearchCV
 from joblib import dump, load
 from sklearn import metrics
@@ -245,18 +246,25 @@ class Detector(AbstractDetector):
         print('x_train', x_train.shape)
         print('x_test', x_test.shape)
 
-        # Instantiation
+
+        model_name = "svm grid search"
+        logging.info("Training probable SVM model...")
+        clf = svm.SVC(kernel='linear', probability=True)
+        probas_ = clf.fit(x_train, y_train).predict_proba(x_test)
+        fpr, tpr, thresholds = roc_curve(y_test, probas_[:, 1])
+        roc_auc = auc(fpr, tpr)
+        print("Test auc : %f" % roc_auc)
+
         
-        model_name = "svm"
-        logging.info("Training SVM model...")
+        model_name = "svm grid search"
+        logging.info("Grid searching SVM model...")
         svm_kwargs_grid = {'C': [0.1, 1, 10, 100, 1000, 10000], 
               'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
               'kernel': ['linear', 'rbf']} 
         grid = GridSearchCV(svm.SVC(), svm_kwargs_grid, refit = True, verbose = 3)
         grid.fit(x_train, y_train)
         clf = grid.best_estimator_
-        #clf = svm.SVC(kernel='linear')
-        
+        #
         """
         model_name = "xgboost_classifier"
         logging.info("Training XGBoostClassifier model...")
