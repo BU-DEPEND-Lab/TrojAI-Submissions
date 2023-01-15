@@ -113,8 +113,8 @@ class FeatureExtractor(object):
         logging.info(f"Loading %d models...", len(model_path_list))
 
         model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict = load_models_dirpath(model_path_list)
-        for (model_class, models_repr) in model_repr_dict.items():
-            logging.info(f"Model class {model_class} || Number Of models {len(model_dict[model_class])} || Numbers Of Examples {[clean_example.shape for clean_example in clean_example_dict[model_class]]}")
+        #for (model_class, models_repr) in model_repr_dict.items():
+            #logging.info(f"Model class {model_class} || Number Of models {len(model_dict[model_class])} || Numbers Of Examples {[clean_example.shape for clean_example in clean_example_dict[model_class]]}")
  
         #models_padding_dict = create_models_padding(model_repr_dict)
         #with open(self.models_padding_dict_filepath, "wb") as fp:
@@ -184,8 +184,9 @@ class FeatureExtractor(object):
                 #    poisoned_grad_layer_transform[model_class], flat_poisoned_grad_repr_dict[model_class][i]
                 #)
 
-                feats = np.hstack((model_feats, clean_grad_feats))#, poisoned_grad_feats)).tolist()
+                feats = np.hstack((model_feats, clean_grad_feats)).tolist()#, poisoned_grad_feats)).tolist()
                 logging.info(f" ICA feature size: {feats.shape}\n")
+                feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
                 assert feats.shape[-1] == 2 * self.ICA_features
                 df.loc[len(df.index)] = [model_class, i, feats] 
         pickle.dump(layer_transform, open(self.layer_transform_filepath, 'wb'))
