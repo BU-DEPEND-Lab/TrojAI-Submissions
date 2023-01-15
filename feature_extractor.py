@@ -230,9 +230,9 @@ class FeatureExtractor(object):
 
         feats = np.hstack((model_feats, clean_grad_feats)) #, poisoned_grad_feats)).tolist()
         feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
-        model_feats = np.hstack(list(flat_model.values())[-1: -2: -1])
-        clean_grad_feats = np.hstack(list(flat_grad.values())[-1: -2: -1])
-        feats = [model_feats[::int(model_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features] + clean_grad_feats[::int(clean_grad_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features]]
+        model_feats = np.hstack(list(flat_model.values())[-1: -2: -1])[-1: 0: -1] #[::int(model_feats.shape[-1] / self.ICA_features)]
+        clean_grad_feats = np.hstack(list(flat_grad.values())[-1: -2: -1])[-1 : 0 : -1] #[::int(clean_grad_feats.shape[-1] / self.ICA_features)]
+        feats = [model_feats.tolist()[:self.ICA_features] + clean_grad_feats.tolist()[:self.ICA_features]]
         assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
         return np.asarray(feats).tolist()
            
