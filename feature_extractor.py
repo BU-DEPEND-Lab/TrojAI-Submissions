@@ -230,7 +230,7 @@ class FeatureExtractor(object):
         feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
         feats = [list(flat_model.values())[-1][:self.ICA_features].tolist() + list(flat_grad.values())[-1][:self.ICA_features].tolist()]
         assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
-        return feats.tolist()
+        return np.asarray(feats).tolist()
            
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")
