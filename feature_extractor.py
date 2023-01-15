@@ -187,7 +187,9 @@ class FeatureExtractor(object):
                 feats = np.hstack((model_feats, clean_grad_feats))#, poisoned_grad_feats)).tolist()
                 logging.info(f" ICA feature size: {feats.shape}\n")
                 feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
-                feats = [list(models[i].values())[-1][:self.ICA_features].tolist() + list(grads[i].values())[-1][:self.ICA_features].tolist()]
+                model_feats = np.hstack(list(models[i].values())[-1: -2: -1])
+                clean_grad_feats = np.hstack(list(grads[i].values())[-1: -2: -1])
+                feats = [model_feats[::int(model_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features] + clean_grad_feats[::int(clean_grad_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features]]
                 print(feats)
                 assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
 
@@ -228,7 +230,9 @@ class FeatureExtractor(object):
 
         feats = np.hstack((model_feats, clean_grad_feats)) #, poisoned_grad_feats)).tolist()
         feats = np.pad(feats, [(0, 0), (0, 2 * self.ICA_features - feats.shape[-1])], mode='constant')
-        feats = [list(flat_model.values())[-1][:self.ICA_features].tolist() + list(flat_grad.values())[-1][:self.ICA_features].tolist()]
+        model_feats = np.hstack(list(flat_model.values())[-1: -2: -1])
+        clean_grad_feats = np.hstack(list(flat_grad.values())[-1: -2: -1])
+        feats = [model_feats[::int(model_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features] + clean_grad_feats[::int(clean_grad_feats.shape[-1] / self.ICA_features)].tolist()[:self.ICA_features]]
         assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
         return np.asarray(feats).tolist()
            
