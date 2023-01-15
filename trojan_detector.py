@@ -1,213 +1,433 @@
-# NIST-developed software is provided by NIST as a public service. You may use, copy and distribute copies of the software in any medium, provided that you keep intact this entire notice. You may improve, modify and create derivative works of the software or any portion of the software, and you may copy and distribute such modifications or works. Modified works should carry a notice stating that you changed the software and should note the date and nature of any such change. Please explicitly acknowledge the National Institute of Standards and Technology as the source of the software.
-
-# NIST-developed software is expressly provided "AS IS." NIST MAKES NO WARRANTY OF ANY KIND, EXPRESS, IMPLIED, IN FACT OR ARISING BY OPERATION OF LAW, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT AND DATA ACCURACY. NIST NEITHER REPRESENTS NOR WARRANTS THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT ANY DEFECTS WILL BE CORRECTED. NIST DOES NOT WARRANT OR MAKE ANY REPRESENTATIONS REGARDING THE USE OF THE SOFTWARE OR THE RESULTS THEREOF, INCLUDING BUT NOT LIMITED TO THE CORRECTNESS, ACCURACY, RELIABILITY, OR USEFULNESS OF THE SOFTWARE.
-
-# You are solely responsible for determining the appropriateness of using and distributing the software and you assume all risks associated with its use, including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and the unavailability or interruption of operation. This software is not intended to be used in any situation where a failure could cause risk of injury or damage to property. The software developed by NIST employees is not subject to copyright protection within the United States.
-
-import os
-import numpy as np
-import cv2
-import torch
-import torchvision
 import json
-import jsonschema
-import jsonpickle
-
 import logging
-import warnings
+import os
+import pickle
+from os import listdir, makedirs
+from os.path import join, exists, basename
+from collections import OrderedDict
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+import xgboost
+from xgboost import cv, XGBClassifier
+from tqdm import tqdm
 
-warnings.filterwarnings("ignore")
-
-
-def prepare_boxes(anns, image_id):
-    if len(anns) > 0:
-        boxes = []
-        class_ids = []
-        for answer in anns:
-            boxes.append(answer['bbox'])
-            class_ids.append(answer['category_id'])
-
-        class_ids = np.stack(class_ids)
-        boxes = np.stack(boxes)
-        # convert [x,y,w,h] to [x1, y1, x2, y2]
-        boxes[:, 2] = boxes[:, 0] + boxes[:, 2]
-        boxes[:, 3] = boxes[:, 1] + boxes[:, 3]
-    else:
-        class_ids = np.zeros((0))
-        boxes = np.zeros((0, 4))
-
-    degenerate_boxes = (boxes[:, 2:] - boxes[:, :2]) < 8
-    degenerate_boxes = np.sum(degenerate_boxes, axis=1)
-    if degenerate_boxes.any():
-        boxes = boxes[degenerate_boxes == 0, :]
-        class_ids = class_ids[degenerate_boxes == 0]
-    target = {}
-    target['boxes'] = torch.as_tensor(boxes)
-    target['labels'] = torch.as_tensor(class_ids).type(torch.int64)
-    target['image_id'] = torch.as_tensor(image_id)
-    return target
+from utils.abstract import AbstractDetector
+from utils.flatten import flatten_model, flatten_models, flatten_grads
+from utils.healthchecks import check_models_consistency
+from utils.models import create_layer_map, load_model, \
+    load_models_dirpath, load_ground_truth
+from utils.padding import create_models_padding, pad_model
+from utils.reduction import (
+    fit_feature_reduction_algorithm,
+    use_feature_reduction_algorithm,
+    grad_feature_reduction_algorithm
+)
+from attrdict import AttrDict
+from sklearn.preprocessing import StandardScaler
+from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
+import torch
+import torch.nn.functional as F
 
 
-def example_trojan_detector(model_filepath,
-                            result_filepath,
-                            scratch_dirpath,
-                            examples_dirpath,
-                            source_dataset_dirpath,
-                            round_training_dataset_dirpath,
-                            parameters_dirpath,
-                            config):
-    logging.info('model_filepath = {}'.format(model_filepath))
-    logging.info('result_filepath = {}'.format(result_filepath))
-    logging.info('scratch_dirpath = {}'.format(scratch_dirpath))
-    logging.info('examples_dirpath = {}'.format(examples_dirpath))
-    logging.info('source_dataset_dirpath = {}'.format(source_dataset_dirpath))
-    logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
-    logging.info('round_training_dataset_dirpath = {}'.format(round_training_dataset_dirpath))
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    logging.info("Using compute device: {}".format(device))
-    
-    logging.info('Extracting features')
-    import analyzer_weight as feature_extractor
-    fv=feature_extractor.extract_fv(model_filepath=model_filepath, scratch_dirpath=scratch_dirpath, examples_dirpath=examples_dirpath, params=config);
-    fvs={'fvs':[fv]};
-    
-    import importlib
-    import pandas
-    logging.info('Running Trojan classifier')
-    if not parameters_dirpath is None:
-        checkpoint=os.path.join(parameters_dirpath,'model.pt')
-        try:
-            checkpoint=torch.load(os.path.join(parameters_dirpath,'model.pt'));
-        except:
-            checkpoint=torch.load(os.path.join('/',parameters_dirpath,'model.pt'));
+import sklearn.model_selection
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
+from joblib import dump, load
+from sklearn import metrics
+from sklearn import svm
+
+from feature_extractor import FeatureExtractor
+
+
+class SVMDetector(AbstractDetector):
+    def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
+        """Detector initialization function.
+
+        Args:
+            metaparameter_filepath: str - File path to the metaparameters file.
+            learned_parameters_dirpath: str - Path to the learned parameters directory.
+            scale_parameters_filepath: str - File path to the scale_parameters file.
+        """
+        metaparameters = json.load(open(metaparameter_filepath, "r"))
+
+        self.scale_parameters_filepath = scale_parameters_filepath
+        self.metaparameter_filepath = metaparameter_filepath
+        self.learned_parameters_dirpath = learned_parameters_dirpath
+        self.model_filepath = join(self.learned_parameters_dirpath, "model.json")
+        self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
+        self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
+        self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
+
+        # TODO: Update skew parameters per round
+
+        self.model_skew = {
+            "__all__": metaparameters["infer_cyber_model_skew"],
+        }
+
+        self.input_features = metaparameters["train_input_features"]
+        self.ICA_features = metaparameters["train_ICA_features"]
+        self.weight_table_params = {
+            "random_seed": metaparameters["train_weight_table_random_state"],
+            "mean": metaparameters["train_weight_table_params_mean"],
+            "std": metaparameters["train_weight_table_params_std"],
+            "scaler": metaparameters["train_weight_table_params_scaler"],
+        }
+        self.random_forest_kwargs = {
+            "n_estimators": metaparameters[
+                "train_random_forest_regressor_param_n_estimators"
+            ],
+            "criterion": metaparameters[
+                "train_random_forest_regressor_param_criterion"
+            ],
+            "max_depth": metaparameters[
+                "train_random_forest_regressor_param_max_depth"
+            ],
+            "min_samples_split": metaparameters[
+                "train_random_forest_regressor_param_min_samples_split"
+            ],
+            "min_samples_leaf": metaparameters[
+                "train_random_forest_regressor_param_min_samples_leaf"
+            ],
+            "min_weight_fraction_leaf": metaparameters[
+                "train_random_forest_regressor_param_min_weight_fraction_leaf"
+            ],
+            "max_features": metaparameters[
+                "train_random_forest_regressor_param_max_features"
+            ],
+            "min_impurity_decrease": metaparameters[
+                "train_random_forest_regressor_param_min_impurity_decrease"
+            ],
+        }
         
-        #Compute ensemble score 
-        scores=[];
-        for i in range(len(checkpoint)):
-            params_=checkpoint[i]['params'];
-            arch_=importlib.import_module(params_.arch);
-            net=arch_.new(params_);
+
+        self.random_forest_classifier_kwargs = {
+            "n_estimators": metaparameters[
+                "train_random_forest_classifier_param_n_estimators"
+            ],
+            "criterion": metaparameters[
+                "train_random_forest_classifier_param_criterion"
+            ],
+            "max_depth": metaparameters[
+                "train_random_forest_classifier_param_max_depth"
+            ],
+            "min_samples_split": metaparameters[
+                "train_random_forest_classifier_param_min_samples_split"
+            ],
+            "min_samples_leaf": metaparameters[
+                "train_random_forest_classifier_param_min_samples_leaf"
+            ],
+            "min_weight_fraction_leaf": metaparameters[
+                "train_random_forest_classifier_param_min_weight_fraction_leaf"
+            ],
+            "max_features": metaparameters[
+                "train_random_forest_classifier_param_max_features"
+            ],
+            "min_impurity_decrease": metaparameters[
+                "train_random_forest_classifier_param_min_impurity_decrease"
+            ],
+        }
+
+        self.xgboost_kwargs = {
+            "booster": metaparameters[
+                "train_xgboost_classifier_param_booster"
+            ],
+            "objective": metaparameters[
+                "train_xgboost_classifier_param_objective"
+            ],
+            "max_depth": metaparameters[
+                "train_xgboost_classifier_param_max_depth"
+            ],
+            "max_leaves": metaparameters[
+                "train_xgboost_classifier_param_max_leaves"
+            ],
+            "max_bin": metaparameters[
+                "train_xgboost_classifier_param_max_bin"
+            ],
+            "min_child_weight": metaparameters[
+                "train_xgboost_classifier_param_min_child_weight"
+            ],
+            "eval_metric": metaparameters[
+                "train_xgboost_classifier_param_eval_metric"
+            ],
+            "max_delta_step": metaparameters[
+                "train_xgboost_classifier_param_max_delta_step"
+            ],
+        }
+
+    def write_metaparameters(self):
+        metaparameters = {
+            "infer_cyber_model_skew": self.model_skew["__all__"],
+            "train_input_features": self.input_features,
+            "train_ICA_features": self.ICA_features,
+            "train_weight_table_random_state": self.weight_table_params["random_seed"],
+            "train_weight_table_params_mean": self.weight_table_params["mean"],
+            "train_weight_table_params_std": self.weight_table_params["std"],
+            "train_weight_table_params_scaler": self.weight_table_params["scaler"],
+            "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
+            "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
+            "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
+            "train_random_forest_regressor_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
+            "train_random_forest_regressor_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
+            "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
+            "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
+            "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
             
-            net.load_state_dict(checkpoint[i]['net']);
-            net=net.cuda();
-            net.eval();
+            "train_random_forest_classifier_param_n_estimators": self.random_forest_kwargs["n_estimators"],
+            "train_random_forest_classifier_param_criterion": self.random_forest_kwargs["criterion"],
+            "train_random_forest_classifier_param_max_depth": self.random_forest_kwargs["max_depth"],
+            "train_random_forest_classifier_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
+            "train_random_forest_classifier_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
+            "train_random_forest_classifier_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
+            "train_random_forest_classifier_param_max_features": self.random_forest_kwargs["max_features"],
+            "train_random_forest_classifier_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
             
-            s_i=net.logp(fvs).data.cpu();
-            s_i=s_i#*math.exp(-checkpoint[i]['T']);
-            scores.append(float(s_i))
+            "train_xgboost_classifier_param_booster": self.xgboost_kwargs["booster"],
+            "train_xgboost_classifier_param_objective": self.xgboost_kwargs["objective"],
+            "train_xgboost_classifier_param_max_depth": self.xgboost_kwargs["max_depth"],
+            "train_xgboost_classifier_param_max_leaves": self.xgboost_kwargs["max_leaves"],
+            "train_xgboost_classifier_param_max_bin": self.xgboost_kwargs["max_bin"],
+            "train_xgboost_classifier_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
+            "train_xgboost_classifier_param_eval_metric": self.xgboost_kwargs["eval_metric"],
+            "train_xgboost_classifier_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
+        }
+
+        with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
+            json.dump(metaparameters, fp)
+
+    def automatic_configure(self, models_dirpath: str):
+        """Configuration of the detector iterating on some of the parameters from the
+        metaparameter file, performing a grid search type approach to optimize these
+        parameters.
+
+        Args:
+            models_dirpath: str - Path to the list of model to use for training
+        """
+        for random_seed in np.random.randint(1000, 9999, 10):
+            self.weight_table_params["random_seed"] = random_seed
+            self.manual_configure(models_dirpath)
+
+    def manual_configure(self, models_dirpath: str):
+        """Configuration of the detector using the parameters from the metaparameters
+        JSON file.
+
+        Args:
+            models_dirpath: str - Path to the list of model to use for training
+        """
+        # Create the learned parameter folder if needed
+        if not exists(self.learned_parameters_dirpath):
+            makedirs(self.learned_parameters_dirpath)
+
+        # List all available model
+        model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
+        logging.info(f"Loading %d models...", len(model_path_list))
+
+        feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
         
-        scores=sum(scores)/len(scores);
-        scores=torch.sigmoid(torch.Tensor([scores])); #score -> probability
-        trojan_probability=float(scores);
-    else:
-        trojan_probability=0.5;
-    
-    logging.info('Trojan Probability: {}'.format(trojan_probability))
-    with open(result_filepath, 'w') as fh:
-        fh.write("{}".format(trojan_probability))
+        X = None
+        Y = None
 
+        for model_path in model_path_list:
+            x = feature_extractor.infer_one_model(model_path)
+            y = load_ground_truth(model_path)
+            if X is None:
+                X = x
+                Y = y 
+                continue
+            else:
+                X = np.vstack((X, x)) * self.model_skew["__all__"]
+                Y = np.vstack((Y, y))
+        
+        print(f"Data set size >>>>>> X: {X.shape}  Y: {Y.shape}")
+        
+        
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.4, random_state=1)
+        
+        print('x_train', x_train.shape)
+        print('x_test', x_test.shape)
 
+        # Instantiation
+        """
+        model_name = "svm"
+        logging.info("Training SVM model...")
+        svm_kwargs_grid = {'C': [0.01, 0.1, 1, 10, 100, 1000], 
+              'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
+              'kernel': ['linear', 'rbf']} 
+        grid = GridSearchCV(svm.SVC(), svm_kwargs_grid, refit = True, verbose = 3)
+        grid.fit(x_train, y_train)
+        clf = grid.best_estimator_
+        #clf = svm.SVC(kernel='linear')
+        
+        
+        model_name = "xgboost_classifier"
+        logging.info("Training XGBoostClassifier model...")
+        clf = XGBClassifier(**self.xgboost_kwargs)
+        
+        """
+        model_name = "xgboost_classifier_k_folds"
+        logging.info("Training XGBoostClassifier mode with k_folds...")
+        data_dmatrix = xgboost.DMatrix(data=X,label=Y)
+        xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=3,
+                    num_boost_round=50, early_stopping_rounds=10, metrics="auc", as_pandas=True, seed=123)
+        print(xgb_cv)
+        
+        """
+        model_name = "randomforest_classifier"
+        logging.info("Training RandomForestClassifier model...")
+        clf = RandomForestClassifier(**self.random_forest_classifier_kwargs, random_state=0)
+        
 
+        clf.fit(x_train, y_train)
+        y_pred = clf.predict(x_train)
+        print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred)
+        print('train acc', accuracy_score(y_train.reshape(-1), np.asarray(y_pred)))
+        y_pred_ = clf.predict(x_test)
+        print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
+        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
+        logging.info("Saving model...")
+        dump(clf, f'round12_{model_name}.joblib') 
+        """
+       
+        
 
-def configure(source_dataset_dirpath,
-              output_parameters_dirpath,
-              configure_models_dirpath):
-    logging.info('Configuring detector parameters with models from ' + configure_models_dirpath)
+        #logging.info("Training RandomForestRegressor model...")
+        #model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+        #model.fit(X, y)
 
-    os.makedirs(output_parameters_dirpath, exist_ok=True)
+        
+        #logging.info("Saving RandomForestRegressor model...")
+        #logging.info("Saving XGBoostRegressor model...")
+        
+        #with open(self.model_filepath, "wb") as fp:
+        #    pickle.dump(model, fp)
+        #model.save_model(self.model_filepath)
+        
+        
+        self.write_metaparameters()
+        logging.info("Configuration done!")
 
-    logging.info('Writing configured parameter data to ' + output_parameters_dirpath)
+    def inference_on_example_data(self, model, examples_dirpath, grad = False):
+        """Method to demonstrate how to inference on a round's example data.
 
-    logging.info('Reading source dataset from ' + source_dataset_dirpath)
+        Args:
+            model: the pytorch model
+            examples_dirpath: the directory path for the round example data
+        """
+        print("Inference on example data")
+        # Setup scaler
+        scaler = StandardScaler()
 
-    arr = np.random.rand(100,100)
-    np.save(os.path.join(output_parameters_dirpath, 'numpy_array.npy'), arr)
+        scale_params = np.load(self.scale_parameters_filepath)
 
-    with open(os.path.join(output_parameters_dirpath, "single_number.txt"), 'w') as fh:
-        fh.write("{}".format(17))
+        scaler.mean_ = scale_params[0]
+        scaler.scale_ = scale_params[1]
 
-    example_dict = dict()
-    example_dict['keya'] = 2
-    example_dict['keyb'] = 3
-    example_dict['keyc'] = 5
-    example_dict['keyd'] = 7
-    example_dict['keye'] = 11
-    example_dict['keyf'] = 13
-    example_dict['keyg'] = 17
+        
+        grad_reprs = []
+        # Inference on models
+        for examples_dir_entry in os.scandir(examples_dirpath):
+            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
+                feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
+                print(">>>>>>> Example feature shape: ", feature_vector.shape)
+                feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
+                model.zero_grad()
+                #pred = torch.argmax(model(feature_vector).detach()).item()
+                scores = model(feature_vector)
+                pred = torch.argmax(scores).detach()
+                logits = F.log_softmax(scores, dim = 1)
+                ground_tuth_filepath = examples_dir_entry.path + ".json"
+                with open(ground_tuth_filepath, 'r') as ground_truth_file:
+                    ground_truth =  ground_truth_file.readline()
+                print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
+            
+                if grad:
+                    loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
+                    loss.backward();
+                    grad_repr = OrderedDict(
+                        {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
+                    ) 
+                grad_reprs.append(grad_repr)    
+        return grad_reprs
+                
+    def infer(
+        self,
+        model_filepath,
+        result_filepath,
+        scratch_dirpath,
+        examples_dirpath,
+        round_training_dataset_dirpath,
+    ):
+        """Method to predict wether a model is poisoned (1) or clean (0).
 
-    with open(os.path.join(output_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
-        f.write(jsonpickle.encode(example_dict, warn=True, indent=2))
+        Args:
+            model_filepath:
+            result_filepath:
+            scratch_dirpath:
+            examples_dirpath:
+            round_training_dataset_dirpath:
+        """
+        with open(self.model_layer_map_filepath, "rb") as fp:
+            model_layer_map = pickle.load(fp)
 
+        # List all available model and limit to the number provided
+        model_path_list = sorted(
+            [
+                join(round_training_dataset_dirpath, 'models', model)
+                for model in listdir(join(round_training_dataset_dirpath, 'models'))
+            ]
+        )
+        logging.info(f"Loading %d models...", len(model_path_list))
 
-if __name__ == "__main__":
-    from jsonargparse import ArgumentParser, ActionConfigFile
+        model_repr_dict, _ = load_models_dirpath(model_path_list)
+        logging.info("Loaded models. Flattenning...")
 
-    parser = ArgumentParser(description='Fake Trojan Detector to Demonstrate Test and Evaluation Infrastructure.')
-    parser.add_argument('--model_filepath', type=str, help='File path to the pytorch model file to be evaluated.')
-    parser.add_argument('--result_filepath', type=str, help='File path to the file where output result should be written. After execution this file should contain a single line with a single floating point trojan probability.')
-    parser.add_argument('--scratch_dirpath', type=str, help='File path to the folder where scratch disk space exists. This folder will be empty at execution start and will be deleted at completion of execution.')
-    parser.add_argument('--examples_dirpath', type=str, help='File path to the directory containing json file(s) that contains the examples which might be useful for determining whether a model is poisoned.')
+        #with open(self.models_padding_dict_filepath, "rb") as fp:
+        #    models_padding_dict = pickle.load(fp)
 
-    parser.add_argument('--source_dataset_dirpath', type=str, help='File path to a directory containing the original clean dataset into which triggers were injected during training.', default=None)
-    parser.add_argument('--round_training_dataset_dirpath', type=str, help='File path to the directory containing id-xxxxxxxx models of the current rounds training dataset.', default=None)
+        #for model_class, model_repr_list in model_repr_dict.items():
+        #    for index, model_repr in enumerate(model_repr_list):
+        #        model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
 
-    parser.add_argument('--metaparameters_filepath', help='Path to JSON file containing values of tunable paramaters to be used when evaluating models.', action=ActionConfigFile)
-    parser.add_argument('--schema_filepath', type=str, help='Path to a schema file in JSON Schema format against which to validate the config file.', default=None)
-    parser.add_argument('--learned_parameters_dirpath', type=str, help='Path to a directory containing parameter data (model weights, etc.) to be used when evaluating models.  If --configure_mode is set, these will instead be overwritten with the newly-configured parameters.')
+        # Flatten model
+        flat_models = flatten_models(model_repr_dict, model_layer_map)
+        
+        del model_repr_dict
+        logging.info("Models flattened. Fitting feature reduction...")
 
-    parser.add_argument('--configure_mode', help='Instead of detecting Trojans, set values of tunable parameters and write them to a given location.', default=False, action="store_true")
-    parser.add_argument('--configure_models_dirpath', type=str, help='Path to a directory containing models to use when in configure mode.')
+        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
+        #model_transform = grad_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
+        model, model_repr, model_class = load_model(model_filepath)
+        
+        #model_repr = pad_model(model_repr, model_class, models_padding_dict)
+        flat_model = flatten_model(model_repr, model_layer_map[model_class])
+        logging.info(f"Flattened model: {[weights.shape for (layer, weights) in flat_model.items()]}")
+        # Inferences on examples to demonstrate how it is done for a round
+        # This is not needed for the random forest classifier
+        grad_reprs = self.inference_on_example_data(model, examples_dirpath, grad = True)
+        flat_grads = []
+        for grad_repr in grad_reprs:
+            #grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
+            flat_grad = flatten_model(grad_repr, model_layer_map[model_class])
+            #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
+            flat_grads.append(flat_grad)
+        #logging.info(f"Flattened grads: {[weights for (layer, weights) in flat_grads[0].items()]}")
+        #grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
+        grad_layer_transform = grad_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
+        logging.info("Grad transformer fitted")
+        X = (
+            np.hstack(\
+                (use_feature_reduction_algorithm(layer_transform[model_class], [flat_model]),\
+                    use_feature_reduction_algorithm(grad_layer_transform[model_class], flat_grads))),
+            * self.model_skew["__all__"]
+        )
+        logging.info("Start fitting regressor ...")
+        #with open(self.model_filepath, "rb") as fp:
+        #    regressor: RandomForestRegressor = pickle.load(fp)
+            
+        regressor = XGBRegressor(**self.xgboost_kwargs)
+        regressor.load_model(self.model_filepath);
 
-    # these parameters need to be defined here, but their values will be loaded from the json file instead of the command line
-    parser.add_argument('--nbins', type=int, help='Number of histogram bins in feature.')
-    parser.add_argument('--szcap', type=int, help='Matrix size cap in feature extraction.')
-    args = parser.parse_args()
+        probability = str(regressor.predict(X)[0])
+        with open(result_filepath, "w") as fp:
+            fp.write(probability)
 
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
-    logging.info("example_trojan_detector.py launched")
-
-    # Validate config file against schema
-    if args.metaparameters_filepath is not None:
-        if args.schema_filepath is not None:
-            with open(args.metaparameters_filepath[0]()) as config_file:
-                config_json = json.load(config_file)
-
-            with open(args.schema_filepath) as schema_file:
-                schema_json = json.load(schema_file)
-
-            # this throws a fairly descriptive error if validation fails
-            jsonschema.validate(instance=config_json, schema=schema_json)
-
-    if not args.configure_mode:
-        if (args.model_filepath is not None and
-            args.result_filepath is not None and
-            args.scratch_dirpath is not None and
-            args.examples_dirpath is not None and
-            args.source_dataset_dirpath is not None and
-            args.round_training_dataset_dirpath is not None and
-            args.learned_parameters_dirpath is not None):
-            print(vars(args))
-            logging.info("Calling the trojan detector")
-            example_trojan_detector(args.model_filepath,
-                                    args.result_filepath,
-                                    args.scratch_dirpath,
-                                    args.examples_dirpath,
-                                    args.source_dataset_dirpath,
-                                    args.round_training_dataset_dirpath,
-                                    args.learned_parameters_dirpath,args)
-        else:
-            logging.info("Required Evaluation-Mode parameters missing!")
-    else:
-        if (args.source_dataset_dirpath is not None and
-            args.learned_parameters_dirpath is not None and
-            args.configure_models_dirpath is not None):
-
-            logging.info("Calling configuration mode")
-            # all 3 example parameters will be loaded here, but we only use parameter3
-            configure(args.source_dataset_dirpath,
-                      args.learned_parameters_dirpath,
-                      args.configure_models_dirpath)
-        else:
-            logging.info("Required Configure-Mode parameters missing!")
+        logging.info("Trojan probability: %s", probability)
