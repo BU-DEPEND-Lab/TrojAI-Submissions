@@ -53,7 +53,7 @@ logging.basicConfig(
         )
 
 class FeatureExtractor(object):
-    def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
+    def __init__(self, learned_parameters_dirpath, scale_parameters_filepath, metaparameters):
         """Detector initialization function.
 
         Args:
@@ -61,11 +61,9 @@ class FeatureExtractor(object):
             learned_parameters_dirpath: str - Path to the learned parameters directory.
             scale_parameters_filepath: str - File path to the scale_parameters file.
         """
-        metaparameters = json.load(open(metaparameter_filepath, "r"))
-        self.metaparameter_filepath = metaparameter_filepath
+         
         self.learned_parameters_dirpath = learned_parameters_dirpath
         self.scale_parameters_filepath = scale_parameters_filepath
-        self.metaparameter_filepath = metaparameter_filepath
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
         self.clean_grad_layer_transform_filepath = join(self.learned_parameters_dirpath, "clean_grad_layer_transform.bin")
@@ -99,8 +97,7 @@ class FeatureExtractor(object):
             "train_weight_table_params_scaler": self.weight_table_params["scaler"],
         }
 
-        with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
-            json.dump(metaparameters, fp)
+        return metaparameters
 
     def automatic_configure(self, models_dirpath: str):
         """Configuration of the detector iterating on some of the parameters from the

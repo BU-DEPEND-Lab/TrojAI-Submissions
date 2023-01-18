@@ -24,12 +24,12 @@
 	"train_random_forest_classifier_param_max_features": 1.0,
 	"train_random_forest_classifier_param_min_impurity_decrease": 0.0,
 
-	"train_xgboost_classifier_param_booster": "gbtree",
-	"train_xgboost_classifier_param_objective": "binary:logistic",
-	"train_xgboost_classifier_param_max_depth": 10,
-	"train_xgboost_classifier_param_max_leaves": 0,
-	"train_xgboost_classifier_param_max_bin": 256,
-	"train_xgboost_classifier_param_min_child_weight": 1,
-	"train_xgboost_classifier_param_eval_metric": "auc",
-	"train_xgboost_classifier_param_max_delta_step": 0
+	"train_xgboost_regressor_param_booster": "gbtree",
+	"train_xgboost_regressor_param_objective": "binary:logistic",
+	"train_xgboost_regressor_param_max_depth": 10,
+	"train_xgboost_regressor_param_max_leaves": 0,
+	"train_xgboost_regressor_param_max_bin": 256,
+	"train_xgboost_regressor_param_min_child_weight": 1,
+	"train_xgboost_regressor_param_eval_metric": "auc",
+	"train_xgboost_regressor_param_max_delta_step": 0
 }

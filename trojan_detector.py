@@ -130,33 +130,33 @@ class Detector(AbstractDetector):
 
         self.xgboost_kwargs = {
             "booster": metaparameters[
-                "train_xgboost_classifier_param_booster"
+                "train_xgboost_regressor_param_booster"
             ],
             "objective": metaparameters[
-                "train_xgboost_classifier_param_objective"
+                "train_xgboost_regressor_param_objective"
             ],
             "max_depth": metaparameters[
-                "train_xgboost_classifier_param_max_depth"
+                "train_xgboost_regressor_param_max_depth"
             ],
             "max_leaves": metaparameters[
-                "train_xgboost_classifier_param_max_leaves"
+                "train_xgboost_regressor_param_max_leaves"
             ],
             "max_bin": metaparameters[
-                "train_xgboost_classifier_param_max_bin"
+                "train_xgboost_regressor_param_max_bin"
             ],
             "min_child_weight": metaparameters[
-                "train_xgboost_classifier_param_min_child_weight"
+                "train_xgboost_regressor_param_min_child_weight"
             ],
             "eval_metric": metaparameters[
-                "train_xgboost_classifier_param_eval_metric"
+                "train_xgboost_regressor_param_eval_metric"
             ],
             "max_delta_step": metaparameters[
-                "train_xgboost_classifier_param_max_delta_step"
+                "train_xgboost_regressor_param_max_delta_step"
             ],
         }
 
-    def write_metaparameters(self):
-        metaparameters = {
+    def write_metaparameters(self, *metaparameters):
+        metaparameters_base = {
             "infer_cyber_model_skew": self.model_skew["__all__"],
             "train_input_features": self.input_features,
             "train_ICA_features": self.ICA_features,
@@ -182,18 +182,21 @@ class Detector(AbstractDetector):
             "train_random_forest_classifier_param_max_features": self.random_forest_kwargs["max_features"],
             "train_random_forest_classifier_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
             
-            "train_xgboost_classifier_param_booster": self.xgboost_kwargs["booster"],
-            "train_xgboost_classifier_param_objective": self.xgboost_kwargs["objective"],
-            "train_xgboost_classifier_param_max_depth": self.xgboost_kwargs["max_depth"],
-            "train_xgboost_classifier_param_max_leaves": self.xgboost_kwargs["max_leaves"],
-            "train_xgboost_classifier_param_max_bin": self.xgboost_kwargs["max_bin"],
-            "train_xgboost_classifier_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
-            "train_xgboost_classifier_param_eval_metric": self.xgboost_kwargs["eval_metric"],
-            "train_xgboost_classifier_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
+            "train_xgboost_regressor_param_booster": self.xgboost_kwargs["booster"],
+            "train_xgboost_regressor_param_objective": self.xgboost_kwargs["objective"],
+            "train_xgboost_regressor_param_max_depth": self.xgboost_kwargs["max_depth"],
+            "train_xgboost_regressor_param_max_leaves": self.xgboost_kwargs["max_leaves"],
+            "train_xgboost_regressor_param_max_bin": self.xgboost_kwargs["max_bin"],
+            "train_xgboost_regressor_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
+            "train_xgboost_regressor_param_eval_metric": self.xgboost_kwargs["eval_metric"],
+            "train_xgboost_regressor_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
         }
+        if len(metaparameters) > 0:
+            for metaparameter in metaparameters:
+                metaparameters_base.update(metaparameter)
 
         with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
-            json.dump(metaparameters, fp)
+            json.dump(metaparameters_base, fp)
 
     def automatic_configure(self, models_dirpath: str):
         """Configuration of the detector iterating on some of the parameters from the
@@ -360,8 +363,8 @@ class Detector(AbstractDetector):
         if "xgboost_regressor" in model_name:
             clf.save_model(self.model_filepath)
     
-        self.write_metaparameters()
-        feature_extractor.write_metaparameters()
+        self.write_metaparameters(feature_extractor.write_metaparameters())
+        
         logging.info("Configuration done!")
 
     def inference_on_example_data(self, model, examples_dirpath, grad = False):
@@ -437,6 +440,7 @@ class Detector(AbstractDetector):
         probability = str(clf.predict(X)[0])
 
         with open(result_filepath, "w") as fp:
+            print(result_filepath)
             fp.write(probability)
 
         logging.info("Trojan probability: %s", probability)
