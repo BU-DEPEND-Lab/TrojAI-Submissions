@@ -121,7 +121,7 @@ def load_models_dirpath(models_dirpath):
             model_ground_truth_dict[model_class].append(model_ground_truth)
         except:
             print("Can't find ground truth")
-        
+            pass
         try:
             clean_examples = load_examples(model_path)
             clean_example_dict[model_class].append(clean_examples)
