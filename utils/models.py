@@ -124,13 +124,14 @@ def load_models_dirpath(models_dirpath):
             clean_examples = load_examples(model_path)
             clean_example_dict[model_class].append(clean_examples)
         except:
-            print("No clean example")
+            #print("No clean example")
+            pass
         try:
             poisoned_examples = load_examples(model_path, False)
             poisoned_examples[model_class].append(poisoned_examples)
         except:
-            print("No poisoned example")
- 
+            #print("No poisoned example")
+            pass
     return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
@@ -154,8 +155,8 @@ def inference_on_example_data(model, ground_truth, examples, scale_parameters_fi
          
         # Inference on models
         grad_reprs = []
-        print(">>>>>>> Example feature shape: ", examples.shape)
-        print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
+        #print(">>>>>>> Example feature shape: ", examples.shape)
+        #print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
         for example in examples:
             feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
             model.zero_grad()
@@ -164,7 +165,7 @@ def inference_on_example_data(model, ground_truth, examples, scale_parameters_fi
             pred = torch.argmax(scores).detach()
             logits = F.log_softmax(scores, dim = 1)
             
-            print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
+            #print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
         
             if grad is not None:
                 loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))

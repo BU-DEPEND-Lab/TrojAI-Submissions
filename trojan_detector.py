@@ -389,7 +389,7 @@ class Detector(AbstractDetector):
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
                 feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
-                print(">>>>>>> Example feature shape: ", feature_vector.shape)
+                #print(">>>>>>> Example feature shape: ", feature_vector.shape)
                 feature_vector = torch.from_numpy(scaler.transform(feature_vector.astype(float))).float()
                 model.zero_grad()
                 #pred = torch.argmax(model(feature_vector).detach()).item()
@@ -399,7 +399,7 @@ class Detector(AbstractDetector):
                 ground_tuth_filepath = examples_dir_entry.path + ".json"
                 with open(ground_tuth_filepath, 'r') as ground_truth_file:
                     ground_truth =  ground_truth_file.readline()
-                print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
+                #print("Model: {}, Ground Truth: {}, Prediction: {}".format(examples_dir_entry.name, ground_truth, str(pred)))
             
                 if grad:
                     loss = F.cross_entropy(logits, torch.LongTensor([int(ground_truth)]))
@@ -440,7 +440,6 @@ class Detector(AbstractDetector):
         probability = str(clf.predict(X)[0])
 
         with open(result_filepath, "w") as fp:
-            print(result_filepath)
             fp.write(probability)
 
         logging.info("Trojan probability: %s", probability)

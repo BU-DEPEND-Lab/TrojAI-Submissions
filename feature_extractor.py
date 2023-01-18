@@ -53,7 +53,7 @@ logging.basicConfig(
         )
 
 class FeatureExtractor(object):
-    def __init__(self, learned_parameters_dirpath, scale_parameters_filepath, metaparameters):
+    def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
         """Detector initialization function.
 
         Args:
@@ -61,7 +61,7 @@ class FeatureExtractor(object):
             learned_parameters_dirpath: str - Path to the learned parameters directory.
             scale_parameters_filepath: str - File path to the scale_parameters file.
         """
-         
+        metaparameters = json.load(open(metaparameter_filepath, "r"))
         self.learned_parameters_dirpath = learned_parameters_dirpath
         self.scale_parameters_filepath = scale_parameters_filepath
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
