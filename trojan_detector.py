@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 import xgboost
-from xgboost import cv, XGBClassifier
+from xgboost import cv, XGBRegressor, XGBClassifier
 from tqdm import tqdm
 
 from utils.abstract import AbstractDetector
@@ -22,7 +22,7 @@ from utils.reduction import (
     use_feature_reduction_algorithm,
     grad_feature_reduction_algorithm
 )
-from attrdict import AttrDict
+#from attrdict import AttrDict
 from sklearn.preprocessing import StandardScaler
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 import torch
@@ -227,81 +227,123 @@ class Detector(AbstractDetector):
         X = None
         Y = None
 
+        X = np.asarray(feature_extractor.infer_layer_features_from_models(models_dirpath, True))
         for model_path in model_path_list:
-            x = feature_extractor.infer_one_model(model_path)
             y = load_ground_truth(model_path)
+            if Y is None:
+                Y = y 
+                continue
+            else:
+                Y = np.vstack((Y, y))
+        """
+        for model_path in model_path_list:
+            x = np.asarray(feature_extractor.infer_norms_from_one_model(model_path))
+            y = 2 * load_ground_truth(model_path) - 1
+            #y = load_ground_truth(model_path)
             if X is None:
                 X = x
                 Y = y 
                 continue
-            else:
-                X = np.vstack((X, x)) * self.model_skew["__all__"]
+            elif x.shape[-1] == X.shape[-1]:
+                #X = np.vstack((X, x)) * self.model_skew["__all__"]
                 Y = np.vstack((Y, y))
-        
+            else:
+                Y = np.vstack((Y, y))
+        """
         print(f"Data set size >>>>>> X: {X.shape}  Y: {Y.shape}")
         
+        """
+        import matplotlib.pyplot as plt
+        n_bins = 10
+        for i in range(X.shape[-1]):
+            print(f"Generate plot for feature {i}")
+            fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+            axs[0].hist(X[:, i][Y.flatten() > 0], bins=n_bins)
+            axs[1].hist(X[:, i][Y.flatten() < 0], bins=n_bins)
+            plt.savefig(f"./feature_visualization/weight_norm_feature_{i}_histogram")
+        """
         
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.4, random_state=1)
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=5)
         
         print('x_train', x_train.shape)
         print('x_test', x_test.shape)
 
         """
-        model_name = "svm grid search"
+        model_name = "svm"
         logging.info("Training probable SVM model...")
         clf = svm.SVC(kernel='linear', probability=True)
         probas_ = clf.fit(x_train, y_train).predict_proba(x_test)
         fpr, tpr, thresholds = roc_curve(y_test, probas_[:, 1])
         roc_auc = auc(fpr, tpr)
         print("Test auc : %f" % roc_auc)
-        """
         
-        model_name = "svm"
+        
+        model_name = "grid_search_svm"
         logging.info("Grid searching SVM model...")
         svm_kwargs_grid = {'C': [0.1, 1, 10, 100, 1000, 10000], 
-              'gamma': [10, 1, 0.1, 0.01, 0.001, 0.0001],
-              'kernel': ['linear', 'rbf']} 
-        grid = GridSearchCV(svm.SVC(probability=True), svm_kwargs_grid, refit = True, verbose = 3)
+              'gamma': [100, 10, 1, 0.1, 0.01, 0.001, 0.0001],
+              'kernel': ['linear', 'rbf']
+              } 
+        grid = GridSearchCV(svm.SVC(probability=True), svm_kwargs_grid,  scoring = 'roc_auc', cv = 3, refit = True, verbose = 3)
         grid.fit(x_train, y_train)
         clf = grid.best_estimator_
+        print(clf.classes_)
         #
+        
+        
         """
-        model_name = "xgboost_classifier"
-        logging.info("Training XGBoostClassifier model...")
-        clf = XGBClassifier(**self.xgboost_kwargs)
         
-        
-        model_name = "xgboost_classifier_k_folds"
-        logging.info("Training XGBoostClassifier mode with k_folds...")
-        data_dmatrix = xgboost.DMatrix(data=X,label=Y)
-        xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=3,
+        model_name = "xgboost_regressor"
+        data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
+        xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=5,
                     num_boost_round=50, early_stopping_rounds=10, metrics="auc", as_pandas=True, seed=123)
         print(xgb_cv)
         
+        logging.info("Training XGBoostClassifier model...")
+        clf = XGBRegressor(**self.xgboost_kwargs)
         
+        """
         model_name = "randomforest_classifier"
         logging.info("Training RandomForestClassifier model...")
         clf = RandomForestClassifier(**self.random_forest_classifier_kwargs, random_state=0)
+        """
         
-        """ 
         clf.fit(x_train, y_train)
-        y_pred = clf.predict(x_train)
-        print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred)
-        print('train acc', accuracy_score(y_train.reshape(-1), np.asarray(y_pred)))
-        y_pred_ = clf.predict(x_test)
-        print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
-        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
-        if model_name == 'svm':
-            y_pred_probs = clf.predict_proba(x_test)
-            fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs[:, 1])
         
-            print(f'test fpr {fpr}')
-            print(f'tpr {tpr}')
-            print('test auc', metrics.auc(fpr, tpr))
+        y_pred = clf.predict(x_train)
+        if 'svm' in model_name:
+            print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred)
+            print('train acc', accuracy_score(y_train.reshape(-1), np.asarray(y_pred)))
+            y_pred_probs = clf.predict_proba(x_train)
+            fpr, tpr, thresholds = metrics.roc_curve(y_train, y_pred_probs[:, 1])
+        elif "xgboost_regressor" in model_name:
+            print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred >= 0.5)
+            print('train acc', accuracy_score(y_train.reshape(-1), np.asarray(y_pred >= 0.5)))
+            y_pred = clf.predict(x_train)
+            fpr, tpr, thresholds = metrics.roc_curve(y_train, y_pred)
+        print(f'train fpr {fpr}')
+        print(f'tpr {tpr}')
+        print('train auc', metrics.auc(fpr, tpr))
+
+        y_pred_ = clf.predict(x_test)
+        
+        if 'svm' in model_name:
+            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
+            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
+            y_pred_probs_ = clf.predict_proba(x_test)
+            fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
+        elif "xgboost_regressor" in model_name:
+            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
+            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+            y_pred_ = clf.predict(x_test)
+            fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
+        print(f'test fpr {fpr}')
+        print(f'tpr {tpr}')
+        print('test auc', metrics.auc(fpr, tpr))
         logging.info("Saving model...")
         dump(clf, f'round12_{model_name}.joblib') 
         
-       
+         
         
 
         #logging.info("Training RandomForestRegressor model...")
@@ -314,10 +356,12 @@ class Detector(AbstractDetector):
         
         #with open(self.model_filepath, "wb") as fp:
         #    pickle.dump(model, fp)
-        #model.save_model(self.model_filepath)
         
-        
+        if "xgboost_regressor" in model_name:
+            clf.save_model(self.model_filepath)
+    
         self.write_metaparameters()
+        feature_extractor.write_metaparameters()
         logging.info("Configuration done!")
 
     def inference_on_example_data(self, model, examples_dirpath, grad = False):
@@ -380,68 +424,18 @@ class Detector(AbstractDetector):
             examples_dirpath:
             round_training_dataset_dirpath:
         """
-        with open(self.model_layer_map_filepath, "rb") as fp:
-            model_layer_map = pickle.load(fp)
-
-        # List all available model and limit to the number provided
-        model_path_list = sorted(
-            [
-                join(round_training_dataset_dirpath, 'models', model)
-                for model in listdir(join(round_training_dataset_dirpath, 'models'))
-            ]
-        )
-        logging.info(f"Loading %d models...", len(model_path_list))
-
-        model_repr_dict, _ = load_models_dirpath(model_path_list)
-        logging.info("Loaded models. Flattenning...")
-
-        #with open(self.models_padding_dict_filepath, "rb") as fp:
-        #    models_padding_dict = pickle.load(fp)
-
-        #for model_class, model_repr_list in model_repr_dict.items():
-        #    for index, model_repr in enumerate(model_repr_list):
-        #        model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
-
-        # Flatten model
-        flat_models = flatten_models(model_repr_dict, model_layer_map)
-        
-        del model_repr_dict
-        logging.info("Models flattened. Fitting feature reduction...")
-
-        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.ICA_features)
-        #model_transform = grad_feature_reduction_algorithm(flat_models, self.input_features - self.ICA_features)
-        model, model_repr, model_class = load_model(model_filepath)
-        
-        #model_repr = pad_model(model_repr, model_class, models_padding_dict)
-        flat_model = flatten_model(model_repr, model_layer_map[model_class])
-        logging.info(f"Flattened model: {[weights.shape for (layer, weights) in flat_model.items()]}")
-        # Inferences on examples to demonstrate how it is done for a round
-        # This is not needed for the random forest classifier
-        grad_reprs = self.inference_on_example_data(model, examples_dirpath, grad = True)
-        flat_grads = []
-        for grad_repr in grad_reprs:
-            #grad_repr = pad_model(grad_repr, model_class, models_padding_dict)
-            flat_grad = flatten_model(grad_repr, model_layer_map[model_class])
-            #grad_layer_transform = fit_feature_reduction_algorithm(flat_grad, self.weight_table_params, self.ICA_features)
-            flat_grads.append(flat_grad)
-        #logging.info(f"Flattened grads: {[weights for (layer, weights) in flat_grads[0].items()]}")
-        #grad_layer_transform = fit_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
-        grad_layer_transform = grad_feature_reduction_algorithm({model_class: flat_grads}, self.weight_table_params, self.ICA_features)
-        logging.info("Grad transformer fitted")
-        X = (
-            np.hstack(\
-                (use_feature_reduction_algorithm(layer_transform[model_class], [flat_model]),\
-                    use_feature_reduction_algorithm(grad_layer_transform[model_class], flat_grads))),
-            * self.model_skew["__all__"]
-        )
-        logging.info("Start fitting regressor ...")
+        feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
+         
+        X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
+        #print(X.shape)
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
-        regressor = XGBRegressor(**self.xgboost_kwargs)
-        regressor.load_model(self.model_filepath);
+        clf = XGBRegressor(**self.xgboost_kwargs)
+        clf.load_model(self.model_filepath);
 
-        probability = str(regressor.predict(X)[0])
+        probability = str(clf.predict(X)[0])
+
         with open(result_filepath, "w") as fp:
             fp.write(probability)
 

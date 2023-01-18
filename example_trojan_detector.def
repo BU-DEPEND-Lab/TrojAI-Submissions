@@ -3,7 +3,8 @@ From: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
 %files
     ./archs.py /
-    ./detector.py /
+    ./trojan_detector.py /
+    ./feature_extractor.py /
     ./entrypoint.py /
     ./utils /
     ./metaparameters.json /
@@ -14,7 +15,7 @@ From: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
     apt update
 
     pip install --upgrade pip
-    pip install tqdm jsonschema jsonargparse scikit-learn xgboost
+    pip install tqdm jsonschema jsonargparse scikit-learn xgboost pandas
 
 %runscript
     exec python3 /entrypoint.py "$@"
