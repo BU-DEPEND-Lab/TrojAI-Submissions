@@ -105,10 +105,7 @@ def load_models_dirpath(models_dirpath):
         model, model_repr, model_class = load_model(
             join(model_path, "model.pt")
         )
-        try:
-            model_ground_truth = load_ground_truth(model_path)
-        except:
-            print("Can't find ground truth")
+        
         # Build the list of models
         if model_class not in model_repr_dict.keys():
             model_dict[model_class] = []
@@ -118,8 +115,13 @@ def load_models_dirpath(models_dirpath):
             poisoned_example_dict[model_class] = []
         model_dict[model_class].append(model)
         model_repr_dict[model_class].append(model_repr)
-        model_ground_truth_dict[model_class].append(model_ground_truth)
 
+        try:
+            model_ground_truth = load_ground_truth(model_path)
+            model_ground_truth_dict[model_class].append(model_ground_truth)
+        except:
+            print("Can't find ground truth")
+        
         try:
             clean_examples = load_examples(model_path)
             clean_example_dict[model_class].append(clean_examples)
