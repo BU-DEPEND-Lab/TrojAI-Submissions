@@ -126,13 +126,13 @@ def load_models_dirpath(models_dirpath):
             clean_examples = load_examples(model_path)
             clean_example_dict[model_class].append(clean_examples)
         except:
-            #print("No clean example")
+            print("No clean example")
             pass
         try:
             poisoned_examples = load_examples(model_path, False)
             poisoned_examples[model_class].append(poisoned_examples)
         except:
-            #print("No poisoned example")
+            print("No poisoned example")
             pass
     return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
