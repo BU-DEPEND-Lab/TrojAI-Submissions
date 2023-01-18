@@ -75,83 +75,55 @@ class Detector(AbstractDetector):
         }
         self.random_forest_kwargs = {
             "n_estimators": metaparameters[
-                "train_random_forest_regressor_param_n_estimators"
+                "train_random_forest_param_n_estimators"
             ],
             "criterion": metaparameters[
-                "train_random_forest_regressor_param_criterion"
+                "train_random_forest_param_criterion"
             ],
             "max_depth": metaparameters[
-                "train_random_forest_regressor_param_max_depth"
+                "train_random_forest_param_max_depth"
             ],
             "min_samples_split": metaparameters[
-                "train_random_forest_regressor_param_min_samples_split"
+                "train_random_forest_param_min_samples_split"
             ],
             "min_samples_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_samples_leaf"
+                "train_random_forest_param_min_samples_leaf"
             ],
             "min_weight_fraction_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_weight_fraction_leaf"
+                "train_random_forest_param_min_weight_fraction_leaf"
             ],
             "max_features": metaparameters[
-                "train_random_forest_regressor_param_max_features"
+                "train_random_forest_param_max_features"
             ],
             "min_impurity_decrease": metaparameters[
-                "train_random_forest_regressor_param_min_impurity_decrease"
+                "train_random_forest_param_min_impurity_decrease"
             ],
         }
-        
-
-        self.random_forest_classifier_kwargs = {
-            "n_estimators": metaparameters[
-                "train_random_forest_classifier_param_n_estimators"
-            ],
-            "criterion": metaparameters[
-                "train_random_forest_classifier_param_criterion"
-            ],
-            "max_depth": metaparameters[
-                "train_random_forest_classifier_param_max_depth"
-            ],
-            "min_samples_split": metaparameters[
-                "train_random_forest_classifier_param_min_samples_split"
-            ],
-            "min_samples_leaf": metaparameters[
-                "train_random_forest_classifier_param_min_samples_leaf"
-            ],
-            "min_weight_fraction_leaf": metaparameters[
-                "train_random_forest_classifier_param_min_weight_fraction_leaf"
-            ],
-            "max_features": metaparameters[
-                "train_random_forest_classifier_param_max_features"
-            ],
-            "min_impurity_decrease": metaparameters[
-                "train_random_forest_classifier_param_min_impurity_decrease"
-            ],
-        }
-
+     
         self.xgboost_kwargs = {
             "booster": metaparameters[
-                "train_xgboost_regressor_param_booster"
+                "train_xgboost_param_booster"
             ],
             "objective": metaparameters[
-                "train_xgboost_regressor_param_objective"
+                "train_xgboost_param_objective"
             ],
             "max_depth": metaparameters[
-                "train_xgboost_regressor_param_max_depth"
+                "train_xgboost_param_max_depth"
             ],
             "max_leaves": metaparameters[
-                "train_xgboost_regressor_param_max_leaves"
+                "train_xgboost_param_max_leaves"
             ],
             "max_bin": metaparameters[
-                "train_xgboost_regressor_param_max_bin"
+                "train_xgboost_param_max_bin"
             ],
             "min_child_weight": metaparameters[
-                "train_xgboost_regressor_param_min_child_weight"
+                "train_xgboost_param_min_child_weight"
             ],
             "eval_metric": metaparameters[
-                "train_xgboost_regressor_param_eval_metric"
+                "train_xgboost_param_eval_metric"
             ],
             "max_delta_step": metaparameters[
-                "train_xgboost_regressor_param_max_delta_step"
+                "train_xgboost_param_max_delta_step"
             ],
         }
 
@@ -164,32 +136,23 @@ class Detector(AbstractDetector):
             "train_weight_table_params_mean": self.weight_table_params["mean"],
             "train_weight_table_params_std": self.weight_table_params["std"],
             "train_weight_table_params_scaler": self.weight_table_params["scaler"],
-            "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
-            "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
-            "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
-            "train_random_forest_regressor_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
-            "train_random_forest_regressor_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
-            "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
-            "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
-            "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
+            "train_random_forest_param_n_estimators": self.random_forest_kwargs["n_estimators"],
+            "train_random_forest_param_criterion": self.random_forest_kwargs["criterion"],
+            "train_random_forest_param_max_depth": self.random_forest_kwargs["max_depth"],
+            "train_random_forest_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
+            "train_random_forest_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
+            "train_random_forest_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
+            "train_random_forest_param_max_features": self.random_forest_kwargs["max_features"],
+            "train_random_forest_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
             
-            "train_random_forest_classifier_param_n_estimators": self.random_forest_kwargs["n_estimators"],
-            "train_random_forest_classifier_param_criterion": self.random_forest_kwargs["criterion"],
-            "train_random_forest_classifier_param_max_depth": self.random_forest_kwargs["max_depth"],
-            "train_random_forest_classifier_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
-            "train_random_forest_classifier_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
-            "train_random_forest_classifier_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
-            "train_random_forest_classifier_param_max_features": self.random_forest_kwargs["max_features"],
-            "train_random_forest_classifier_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
-            
-            "train_xgboost_regressor_param_booster": self.xgboost_kwargs["booster"],
-            "train_xgboost_regressor_param_objective": self.xgboost_kwargs["objective"],
-            "train_xgboost_regressor_param_max_depth": self.xgboost_kwargs["max_depth"],
-            "train_xgboost_regressor_param_max_leaves": self.xgboost_kwargs["max_leaves"],
-            "train_xgboost_regressor_param_max_bin": self.xgboost_kwargs["max_bin"],
-            "train_xgboost_regressor_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
-            "train_xgboost_regressor_param_eval_metric": self.xgboost_kwargs["eval_metric"],
-            "train_xgboost_regressor_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
+            "train_xgboost_param_booster": self.xgboost_kwargs["booster"],
+            "train_xgboost_param_objective": self.xgboost_kwargs["objective"],
+            "train_xgboost_param_max_depth": self.xgboost_kwargs["max_depth"],
+            "train_xgboost_param_max_leaves": self.xgboost_kwargs["max_leaves"],
+            "train_xgboost_param_max_bin": self.xgboost_kwargs["max_bin"],
+            "train_xgboost_param_min_child_weight": self.xgboost_kwargs["min_child_weight"],
+            "train_xgboost_param_eval_metric": self.xgboost_kwargs["eval_metric"],
+            "train_xgboost_param_max_delta_step": self.xgboost_kwargs["max_delta_step"],
         }
         if len(metaparameters) > 0:
             for metaparameter in metaparameters:
