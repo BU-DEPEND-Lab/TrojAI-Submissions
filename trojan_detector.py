@@ -308,8 +308,9 @@ class Detector(AbstractDetector):
         print('test auc', metrics.auc(fpr, tpr))
         logging.info("Saving model...")
         dump(clf, f'round12_{model_name}.joblib') 
-        
-         
+
+        logging.info("Now train on all dataset")
+        clf.fit(x_train, y_train) 
         
 
         #logging.info("Training RandomForestRegressor model...")
@@ -323,7 +324,7 @@ class Detector(AbstractDetector):
         #with open(self.model_filepath, "wb") as fp:
         #    pickle.dump(model, fp)
         
-        if "xgboost_regressor" in model_name:
+        if "xgboost" in model_name:
             clf.save_model(self.model_filepath)
     
         self.write_metaparameters(feature_extractor.write_metaparameters())
