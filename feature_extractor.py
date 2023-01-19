@@ -266,20 +266,22 @@ class FeatureExtractor(object):
     def infer_layer_features_from_models(self, models_dirpath, train= False):
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
+        all_feats = []
         if train:
             max_num_feats = 0
+            for model_filepath in model_path_list:
+                feats = self.infer_layer_features_from_one_model(model_filepath, train)
+                max_num_feats = len(feats) if len(feats) > max_num_feats else max_num_feats
+                all_feats.append(feats)
+            for i in range(len(all_feats)):
+                all_feats[i] = all_feats[i] + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+            self.input_features = max_num_feats
         else:
             max_num_feats = self.input_features
-        all_feats = []
-        for model_filepath in model_path_list:
-            feats = self.infer_layer_features_from_one_model(model_filepath, train)
-            max_num_feats = len(feats) if len(feats) > max_num_feats else max_num_feats
-            all_feats.append(feats)
-        for i in range(len(all_feats)):
-            all_feats[i] = all_feats[i] + [0. for _ in range(max_num_feats - len(all_feats[i]))]
-        if train:
-            self.input_features = max_num_feats
-        
+            for model_filepath in model_path_list:
+                feats = self.infer_layer_features_from_one_model(model_filepath, train) + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+                all_feats.append(feats)
+             
         return all_feats
 
     def infer_layer_features_from_one_model(self, model_filepath, train = False):
@@ -288,7 +290,7 @@ class FeatureExtractor(object):
          
         _, [clean_example] = clean_example_dict.popitem()
         _, [model_repr] = model_repr_dict.popitem()
-     
+    
         clean_grad_reprs = inference_on_example_data(model, '1', clean_example, self.scale_parameters_filepath, grad = True)
         model_feats = []
         clean_grad_feats = []
@@ -316,7 +318,8 @@ class FeatureExtractor(object):
         m=min(nx,ny);
         z=np.zeros((n,n))
         #z[:min(ny,n),:min(nx,n)]=param[:min(ny,n),:min(nx,n)];
-        z[:min(ny, n), :min(nx, n)] = param[::max(1,int(ny/n)), ::max(1,int(nx/n))][:min(ny, n), :min(nx, n)]
+        #z[:min(ny, n), :min(nx, n)] = param[::max(1,int(ny/n)), ::max(1,int(nx/n))][:min(ny, n), :min(nx, n)]
+        z = np.dot(np.dot(np.random.random([n, param.shape[0]]), param), np.random.random([param.shape[1], n]))
         #fv = np.hstack(z)
         #return [fv]
 

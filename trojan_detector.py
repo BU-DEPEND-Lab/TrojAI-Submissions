@@ -58,7 +58,8 @@ class Detector(AbstractDetector):
         self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
-
+        
+        
         # TODO: Update skew parameters per round
 
         self.model_skew = {
@@ -67,6 +68,8 @@ class Detector(AbstractDetector):
 
         self.input_features = metaparameters["train_input_features"]
         self.ICA_features = metaparameters["train_ICA_features"]
+        self.train_data_augmentation = metaparameters["train_data_augmentation"]
+
         self.weight_table_params = {
             "random_seed": metaparameters["train_weight_table_random_state"],
             "mean": metaparameters["train_weight_table_params_mean"],
@@ -193,14 +196,19 @@ class Detector(AbstractDetector):
         X = None
         Y = None
 
-        X = np.asarray(feature_extractor.infer_layer_features_from_models(models_dirpath, True))
-        for model_path in model_path_list:
-            y = load_ground_truth(model_path)
-            if Y is None:
-                Y = y 
-                continue
+        for i in range(self.train_data_augmentation):
+            logging.info(f"Data augmentation {i}")
+            if X is None:
+                X = np.asarray(feature_extractor.infer_layer_features_from_models(models_dirpath, True))
             else:
-                Y = np.vstack((Y, y))
+                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_models(models_dirpath, True))))
+            for model_path in model_path_list:
+                y = load_ground_truth(model_path)
+                if Y is None:
+                    Y = y 
+                    continue
+                else:
+                    Y = np.vstack((Y, y))
         """
         for model_path in model_path_list:
             x = np.asarray(feature_extractor.infer_norms_from_one_model(model_path))
@@ -229,7 +237,7 @@ class Detector(AbstractDetector):
             plt.savefig(f"./feature_visualization/weight_norm_feature_{i}_histogram")
         """
         
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=5)
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
         
         print('x_train', x_train.shape)
         print('x_test', x_test.shape)

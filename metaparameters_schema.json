@@ -4,7 +4,7 @@
   "technique": "BostonU XGBoost Regressor",
   "technique_description": "Same as example detector",
   "technique_changes": "Same as example detector",
-  "commit_id": "7019fe4b6a55f6ccb1e1021c83d422b3d2f30cdb",
+  "commit_id": "8e7d0097d92792eab09da9ac8ad67d31e3ca7300",
   "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions/",
   "required": [],
   "additionalProperties": false,
@@ -17,6 +17,14 @@
 		"maximum": 5.0,
 		"suggested_minimum": 0.3,
 		"suggested_maximum": 0.75
+	},
+	"train_data_augmentation":  {
+		"description": "The times that the data are repeatedly processed.",
+		"type": "integer",
+		"minimum": 1,
+		"maximum": 100,
+		"suggested_minimum": 1,
+		"suggested_maximum": 100
 	},
 	"train_input_features":  {
 		"description": "The input features for training.",
