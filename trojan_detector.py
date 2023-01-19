@@ -32,7 +32,7 @@ import torch.nn.functional as F
 from sklearn.linear_model import SGDClassifier 
 import sklearn.model_selection
 from sklearn.metrics import accuracy_score, roc_curve, auc
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from joblib import dump, load
 from sklearn import metrics
 from sklearn import svm
@@ -58,18 +58,15 @@ class Detector(AbstractDetector):
         self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
         self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
-        
-        
+
         # TODO: Update skew parameters per round
 
         self.model_skew = {
             "__all__": metaparameters["infer_cyber_model_skew"],
         }
-
+        self.train_data_augmentation = metaparameters["train_data_augmentation"]
         self.input_features = metaparameters["train_input_features"]
         self.ICA_features = metaparameters["train_ICA_features"]
-        self.train_data_augmentation = metaparameters["train_data_augmentation"]
-
         self.weight_table_params = {
             "random_seed": metaparameters["train_weight_table_random_state"],
             "mean": metaparameters["train_weight_table_params_mean"],
@@ -190,34 +187,23 @@ class Detector(AbstractDetector):
         # List all available model
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
-        
-        x_train_ids, x_test_ids, _, _ = sklearn.model_selection.train_test_split(list(range(len(model_path_list))), [0 for _ in range(len(model_path_list))], test_size=0.2, random_state=1)
-        
-        train_model_path_list = [model_path_list[i] for i in x_train_ids]
-        test_model_path_list = [model_path_list[i] for i in x_test_ids]
 
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
         
-        x_train = None
-        y_train = None
-        x_test = None
-        y_test = None
-        
-        
-        for i in range(self.train_data_augmentation):        
-            logging.info(f"Data augmentation {i}")
-            if x_train is None:
-                x_train = np.asarray(feature_extractor.infer_layer_features_from_models(train_model_path_list, True))
+        X = None
+        Y = None
+        for i in range(self.train_data_augmentation):
+            if X is None:
+                X = np.asarray(feature_extractor.infer_layer_features_from_models(model_path_list, True))
             else:
-                x_train = np.vstack((x_train, np.asarray(feature_extractor.infer_layer_features_from_models(train_model_path_list, True))))
-            for model_path in train_model_path_list:
+                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_models(model_path_list, True))))
+            for model_path in model_path_list:
                 y = load_ground_truth(model_path)
-                if y_train is None:
-                    y_train = y 
+                if Y is None:
+                    Y = y 
                     continue
                 else:
-                    y_train = np.vstack((y_train, y))
-        print(f"Train set size >>>>>> X: {x_train.shape}  Y: {y_train.shape}")
+                    Y = np.vstack((Y, y))
         """
         for model_path in model_path_list:
             x = np.asarray(feature_extractor.infer_norms_from_one_model(model_path))
@@ -232,10 +218,10 @@ class Detector(AbstractDetector):
                 Y = np.vstack((Y, y))
             else:
                 Y = np.vstack((Y, y))
-       
+        """
         print(f"Data set size >>>>>> X: {X.shape}  Y: {Y.shape}")
         
-        
+        """
         import matplotlib.pyplot as plt
         n_bins = 10
         for i in range(X.shape[-1]):
@@ -244,7 +230,14 @@ class Detector(AbstractDetector):
             axs[0].hist(X[:, i][Y.flatten() > 0], bins=n_bins)
             axs[1].hist(X[:, i][Y.flatten() < 0], bins=n_bins)
             plt.savefig(f"./feature_visualization/weight_norm_feature_{i}_histogram")
+        """
         
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=5)
+        
+        print('x_train', x_train.shape)
+        print('x_test', x_test.shape)
+
+        """
         model_name = "svm"
         logging.info("Training probable SVM model...")
         clf = svm.SVC(kernel='linear', probability=True)
@@ -271,21 +264,39 @@ class Detector(AbstractDetector):
         
         model_name = "xgboost_regressor"
         data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
-        xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=5,
+        params = { 
+            'max_depth': [10, 15, 20, 30],
+           'learning_rate': [0.01, 0.1, 0.2, 0.3],
+           'subsample': np.arange(0.5, 1.0, 0.1),
+           'colsample_bytree': np.arange(0.4, 1.0, 0.1),
+           'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
+           'n_estimators': [100, 500, 1000]}
+           
+        rand = RandomizedSearchCV(estimator=XGBRegressor(seed = 20),
+                         param_distributions=params,
+                         scoring='neg_mean_squared_error',
+                         n_iter=25, cv = 5, n_jobs = -1, refit = True,
+                         verbose=1)
+        rand.fit(x_train, y_train)
+        clf = rand.best_estimator_ #XGBRegressor(**rand.best_params_)
+
+        """
+        #xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=5,
                     num_boost_round=50, early_stopping_rounds=10, metrics="auc", as_pandas=True, seed=123)
         print(xgb_cv)
         
         logging.info("Training XGBoostClassifier model...")
         clf = XGBRegressor(**self.xgboost_kwargs)
         
-        """
+        
         model_name = "randomforest_classifier"
         logging.info("Training RandomForestClassifier model...")
         clf = RandomForestClassifier(**self.random_forest_classifier_kwargs, random_state=0)
-        """
         
-        clf.fit(x_train, y_train)
         
+        
+        
+
         y_pred = clf.predict(x_train)
         if 'svm' in model_name:
             print("Training comparison:\n", y_train.reshape(-1), "\n", y_pred)
@@ -300,43 +311,18 @@ class Detector(AbstractDetector):
         print(f'train fpr {fpr}')
         print(f'tpr {tpr}')
         print('train auc', metrics.auc(fpr, tpr))
-
-
-        y_pred_ = []
-        y_pred_probs_ = []
-           
-        logging.info(f"Data augmentation {i}")
-        
-        y_pred_ = []
-        y_pred_probs_ = []
-        for model_path in test_model_path_list:
-            y = load_ground_truth(model_path)
-            if y_test is None:
-                y_test = y 
-                continue
-            else:
-                y_test = np.vstack((y_test, y))
-
-        for i in range(self.train_data_augmentation):
-            x_test = np.asarray(feature_extractor.infer_layer_features_from_models(train_model_path_list, False))
-              
-            y_pred_.append(clf.predict(x_test))
-            if 'svm' in model_name:
-                y_pred_probs_.append(clf.predict_proba(x_test))[1]
-
-        y_pred_ = np.mean(y_pred_, axis = 0)
-        if 'svm' in model_name:
-            y_pred_probs_ = np.mean(y_pred_probs_, axis = 0)
-            
-        
+        """
+        y_pred_ = clf.predict(x_test)
         
         if 'svm' in model_name:
             print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
             print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
+            y_pred_probs_ = clf.predict_proba(x_test)
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
         elif "xgboost_regressor" in model_name:
             print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
             print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+            y_pred_ = clf.predict(x_test)
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
         print(f'test fpr {fpr}')
         print(f'tpr {tpr}')
@@ -345,7 +331,8 @@ class Detector(AbstractDetector):
         dump(clf, f'round12_{model_name}.joblib') 
 
         logging.info("Now train on all dataset")
-        #clf.fit(np.x_train, y_train) 
+        
+        clf.fit(X, Y) 
         
 
         #logging.info("Training RandomForestRegressor model...")
@@ -427,21 +414,18 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath:
         """
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
-        X = None
-        for i in range(self.train_data_augmentation):
-            if X is None:
-                X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
-            else:
-                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))))
+         
+        X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
         #print(X.shape)
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
         clf = XGBRegressor(**self.xgboost_kwargs)
         clf.load_model(self.model_filepath);
- 
-        probability = np.mean(clf.predict(X)).item()
+
+        probability = str(clf.predict(X)[0])
+
         with open(result_filepath, "w") as fp:
-            fp.write(str(probability))
+            fp.write(probability)
 
         logging.info("Trojan probability: %s", probability)

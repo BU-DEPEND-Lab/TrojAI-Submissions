@@ -18,7 +18,7 @@
  
 	"train_xgboost_param_booster": "gbtree",
 	"train_xgboost_param_objective": "binary:logistic",
-	"train_xgboost_param_max_depth": 10,
+	"train_xgboost_param_max_depth": 20,
 	"train_xgboost_param_max_leaves": 0,
 	"train_xgboost_param_max_bin": 256,
 	"train_xgboost_param_min_child_weight": 1,

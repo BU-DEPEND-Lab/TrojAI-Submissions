@@ -317,14 +317,13 @@ class FeatureExtractor(object):
         m=min(nx,ny);
         z=np.zeros((n,n))
         #z[:min(ny,n),:min(nx,n)]=param[:min(ny,n),:min(nx,n)];
-        #z[:min(ny, n), :min(nx, n)] = param[::max(1,int(ny/n)), ::max(1,int(nx/n))][:min(ny, n), :min(nx, n)]
-        z = np.dot(np.dot(np.random.random([n, param.shape[0]]), param), np.random.random([param.shape[1], n]))
+        z[:min(ny, n), :min(nx, n)] = param[::max(1,int(ny/n)), ::max(1,int(nx/n))][:min(ny, n), :min(nx, n)]
+        #z = np.dot(np.dot(np.random.random([n, param.shape[0]]), param), np.random.random([param.shape[1], n]))
         #fv = np.hstack(z)
         #return [fv]
-
+        
         #1) Get eigen values
         e,_=np.linalg.eig(z);
-        _, e, _ = np.linalg.svd(param)
         #Get histogram of abs, real, imaginary
         e2=(e.real**2+e.imag**2)**0.5;
         e_hist = hist_v(e, nbins)
@@ -344,6 +343,11 @@ class FeatureExtractor(object):
         w_hist=hist_v(w,nbins);
         wabs_hist=hist_v(np.abs(w),nbins);
 
+        #4) SVD
+        _, s, _ = np.linalg.svd(param)
+        s_hist = hist_v(s, nbins)
+         
+
         #fv=np.hstack((e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist)); # 0.76
         #fv=np.hstack((np.hstack(z), e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist))#
         #fv=np.hstack((er_hist,ec_hist, eig_persist, w_hist)); # 0.69
@@ -352,7 +356,7 @@ class FeatureExtractor(object):
         #fv = np.hstack((e2_hist,er_hist,ec_hist,w_hist, wabs_hist, [np.linalg.norm(param)], [np.mean(param)], [np.median(param)])) #0.71
         #fv = np.hstack((e2_hist,er_hist,ec_hist, [np.linalg.norm(np.abs(param))], [np.mean(np.abs(param))], [np.median(np.abs(param))], [np.linalg.norm(param)], [np.mean(param)], [np.median(param)])) #0.67 xgboost || 0.69 svm
         #fv = np.hstack((e2_hist,er_hist,ec_hist,w_hist, wabs_hist, [np.linalg.norm(np.abs(param))], [np.mean(np.abs(param))], [np.median(np.abs(param))], [np.linalg.norm(param)], [np.mean(param)], [np.median(param)]))  #0.75 xgboost
-        fv = np.hstack((e_hist, w_hist,  [np.linalg.norm(param)]))  #0.76 xgboost
+        fv = np.hstack((s_hist, w_hist, [np.linalg.norm(param)]))  #0.76 xgboost
         
         return [fv];
  
