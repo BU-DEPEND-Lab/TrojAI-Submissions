@@ -4,7 +4,7 @@
   "technique": "BostonU XGBoost Regressor",
   "technique_description": "Same as example detector",
   "technique_changes": "Same as example detector",
-  "commit_id": "8e7d0097d92792eab09da9ac8ad67d31e3ca7300",
+  "commit_id": "bca598308f85a694cc601e7d2b9fcce0dae49fa6",
   "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions/",
   "required": [],
   "additionalProperties": false,

@@ -263,8 +263,7 @@ class FeatureExtractor(object):
         
         return np.asarray(feats).tolist()    
 
-    def infer_layer_features_from_models(self, models_dirpath, train= False):
-        model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
+    def infer_layer_features_from_models(self, model_path_list, train= False):
         logging.info(f"Loading %d models...", len(model_path_list))
         all_feats = []
         if train:
