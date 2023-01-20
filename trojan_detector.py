@@ -414,8 +414,12 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath:
         """
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
-         
-        X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
+        X = None
+        for i in range(self.train_data_augmentation): 
+            if X is None:
+                X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
+            else:
+                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))))
         #print(X.shape)
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
@@ -423,7 +427,7 @@ class Detector(AbstractDetector):
         clf = XGBRegressor(**self.xgboost_kwargs)
         clf.load_model(self.model_filepath);
 
-        probability = str(clf.predict(X)[0])
+        probability = str(np.mean(clf.predict(X)).item())
 
         with open(result_filepath, "w") as fp:
             fp.write(probability)
