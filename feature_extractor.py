@@ -470,7 +470,52 @@ class FeatureExtractor(object):
         
         #assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
         return np.asarray(feats).tolist()
-           
+    
+    def infer_attribution_feature_from_models(self, model_path_list, train= False):
+        logging.info(f"Loading %d models...", len(model_path_list))
+        all_feats = []
+        if train:
+            max_num_feats = 0
+            for model_filepath in model_path_list:
+                feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
+                max_num_feats = len(feats) if len(feats) > max_num_feats else max_num_feats
+                all_feats.append(feats)
+            for i in range(len(all_feats)):
+                all_feats[i] = all_feats[i] + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+            self.input_features = max_num_feats
+        else:
+            max_num_feats = self.input_features
+            for model_filepath in model_path_list:
+                feats = self.infer_attribution_feature_from_one_model(model_filepath, train) + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+                all_feats.append(feats)
+             
+        return all_feats
+
+    def infer_attribution_feature_from_one_model(self, model_filepath, train = False):
+        model_dict, model_repr_dict, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
+        model_class, [model] = model_dict.popitem()
+         
+        _, [clean_example] = clean_example_dict.popitem()
+        _, [model_repr] = model_repr_dict.popitem()
+    
+        clean_grad_reprs = inference_on_example_data(model, '1', clean_example, self.scale_parameters_filepath, grad = True)
+        model_feats = []
+        clean_grad_feats = []
+        for (layer, param) in model_repr_dict.items():
+            if len(param.shape) == 1:
+                param = param.reshape((1, -1))
+            model_feats.append(self.infer_layer_features(param))
+        for clean_grad_repr in clean_grad_reprs:
+            for (layer, param) in clean_grad_repr.items():
+                if len(param.shape) == 1:
+                    param = param.reshape((1, -1))
+                clean_grad_feats.append(self.infer_layer_features(param))
+
+        feats = np.hstack(model_feats + clean_grad_feats).reshape((-1))
+        #print(feats.shape)
+        return feats.tolist() + ([] if train else [0. for _ in range(self.input_features - feats.shape[0])])
+
+
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")
     #extractor.manual_configure("/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models")
