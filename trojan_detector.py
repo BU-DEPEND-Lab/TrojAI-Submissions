@@ -49,6 +49,10 @@ class Detector(AbstractDetector):
             learned_parameters_dirpath: str - Path to the learned parameters directory.
             scale_parameters_filepath: str - File path to the scale_parameters file.
         """
+        logging.info(f"metaparameter_filepath: {metaparameter_filepath}")
+        logging.info(f"learned_parameters_dirpath: {learned_parameters_dirpath}")
+        logging.info(f"scale_parameters_filepath: {scale_parameters_filepath}")
+
         metaparameters = json.load(open(metaparameter_filepath, "r"))
 
         self.scale_parameters_filepath = scale_parameters_filepath
@@ -334,7 +338,12 @@ class Detector(AbstractDetector):
         
         clf.fit(X, Y) 
         
-
+        y_pred = clf.predict(X)
+        fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
+        print(f'all dataset fpr {fpr}')
+        print(f'tpr {tpr}')
+        print('all dataset auc', metrics.auc(fpr, tpr))
+         
         #logging.info("Training RandomForestRegressor model...")
         #model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
         #model.fit(X, y)
@@ -413,6 +422,12 @@ class Detector(AbstractDetector):
             examples_dirpath:
             round_training_dataset_dirpath:
         """
+        logging.info(f"model_filepath: {model_filepath}")
+        logging.info(f"result_filepath: {result_filepath}")
+        logging.info(f"scratch_dirpath: {scratch_dirpath}")
+        logging.info(f"examples_dirpath: {examples_dirpath}")
+        logging.info(f"round_training_dataset_dirpath: {round_training_dataset_dirpath}")
+
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
         X = None
         for i in range(self.train_data_augmentation): 
@@ -420,7 +435,7 @@ class Detector(AbstractDetector):
                 X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
             else:
                 X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))))
-        #print(X.shape)
+        logging.info(f"features: {X}")
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
             
