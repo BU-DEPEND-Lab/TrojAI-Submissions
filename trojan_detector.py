@@ -417,7 +417,7 @@ class Detector(AbstractDetector):
         X = None
         for i in range(self.train_data_augmentation): 
             if X is None:
-                X = np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
             else:
                 X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))))
         #print(X.shape)
