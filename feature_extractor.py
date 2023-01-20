@@ -14,7 +14,7 @@ from utils.abstract import AbstractDetector
 from utils.flatten import flatten_model, flatten_models, flatten_grads
 from utils.healthchecks import check_models_consistency
 from utils.models import create_layer_map, load_model, \
-    load_models_dirpath, inference_on_example_data
+    load_models_dirpath, inference_on_example_data, get_attribution_from_example_data
 from utils.padding import create_models_padding, pad_model
 from utils.reduction import (
     fit_feature_reduction_algorithm,
@@ -498,22 +498,9 @@ class FeatureExtractor(object):
         _, [clean_example] = clean_example_dict.popitem()
         _, [model_repr] = model_repr_dict.popitem()
     
-        clean_grad_reprs = inference_on_example_data(model, '1', clean_example, self.scale_parameters_filepath, grad = True)
-        model_feats = []
-        clean_grad_feats = []
-        for (layer, param) in model_repr_dict.items():
-            if len(param.shape) == 1:
-                param = param.reshape((1, -1))
-            model_feats.append(self.infer_layer_features(param))
-        for clean_grad_repr in clean_grad_reprs:
-            for (layer, param) in clean_grad_repr.items():
-                if len(param.shape) == 1:
-                    param = param.reshape((1, -1))
-                clean_grad_feats.append(self.infer_layer_features(param))
-
-        feats = np.hstack(model_feats + clean_grad_feats).reshape((-1))
-        #print(feats.shape)
-        return feats.tolist() + ([] if train else [0. for _ in range(self.input_features - feats.shape[0])])
+        attrs = get_attribution_from_example_data(model, '1', clean_example, self.scale_parameters_filepath)
+         
+        return attrs.tolist() + ([] if train else [0. for _ in range(self.input_features - feats.shape[0])])
 
 
 if __name__ == "__main__":

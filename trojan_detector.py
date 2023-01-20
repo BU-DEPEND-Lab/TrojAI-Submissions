@@ -194,9 +194,9 @@ class Detector(AbstractDetector):
         Y = None
         for i in range(self.train_data_augmentation):
             if X is None:
-                X = np.asarray(feature_extractor.infer_layer_features_from_models(model_path_list, True))
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))
             else:
-                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_models(model_path_list, True))))
+                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))))
             for model_path in model_path_list:
                 y = load_ground_truth(model_path)
                 if Y is None:

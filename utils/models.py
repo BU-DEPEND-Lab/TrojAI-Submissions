@@ -178,7 +178,7 @@ def inference_on_example_data(model, ground_truth, examples, scale_parameters_fi
                 grad_reprs.append(grad_repr) 
         return grad_reprs
 
-def get_attribution_from_example_data(model, ground_truth, examples, scale_parameters_filepath, grad = np.mean):
+def get_attribution_from_example_data(model, ground_truth, examples, scale_parameters_filepath, grad = np.hstack):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -202,6 +202,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
         #print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
         for example in examples:
             feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
+            feature_vector.requires_grad_()
             model.zero_grad()
             #pred = torch.argmax(model(feature_vector).detach()).item()
             scores = model(feature_vector)
@@ -213,8 +214,5 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
             if grad is not None:
                 loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
                 loss.backward();
-                grad_repr = OrderedDict(
-                    {layer: param.grad.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
-                ) 
-                grad_reprs.append(grad_repr) 
-        return grad_reprs
+                grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
+        return grad(grad_reprs)
