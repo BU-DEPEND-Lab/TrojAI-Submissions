@@ -55,7 +55,7 @@ class Detector(AbstractDetector):
 
         metaparameters = json.load(open(metaparameter_filepath, "r"))
 
-        self.scale_parameters_filepath = scale_parameters_filepath
+        self.scale_parameters_filepath = join(learned_parameters_dirpath, "scale_params.npy") #scale_parameters_filepath
         self.metaparameter_filepath = metaparameter_filepath
         self.learned_parameters_dirpath = learned_parameters_dirpath
         self.model_filepath = join(self.learned_parameters_dirpath, "model.json")
