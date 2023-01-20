@@ -232,7 +232,7 @@ class Detector(AbstractDetector):
             plt.savefig(f"./feature_visualization/weight_norm_feature_{i}_histogram")
         """
         
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=5)
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
         
         print('x_train', x_train.shape)
         print('x_test', x_test.shape)
