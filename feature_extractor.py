@@ -84,6 +84,8 @@ class FeatureExtractor(object):
             "std": metaparameters["train_weight_table_params_std"],
             "scaler": metaparameters["train_weight_table_params_scaler"],
         }
+
+        print(metaparameters)
          
 
     def write_metaparameters(self):
