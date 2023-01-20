@@ -500,7 +500,7 @@ class FeatureExtractor(object):
     
         attrs = get_attribution_from_example_data(model, '1', clean_example, self.scale_parameters_filepath)
          
-        return attrs.tolist() + ([] if train else [0. for _ in range(self.input_features - feats.shape[0])])
+        return attrs.tolist() + ([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
 
 
 if __name__ == "__main__":
