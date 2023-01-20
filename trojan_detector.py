@@ -165,7 +165,8 @@ class Detector(AbstractDetector):
         with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
             json.dump(metaparameters_base, fp)
 
-    def automatic_configure(self, models_dirpath: str):
+     
+    def automatic_configure(self, clf, models_dirpath: str):
         """Configuration of the detector iterating on some of the parameters from the
         metaparameter file, performing a grid search type approach to optimize these
         parameters.
@@ -176,7 +177,21 @@ class Detector(AbstractDetector):
         for random_seed in np.random.randint(1000, 9999, 10):
             self.weight_table_params["random_seed"] = random_seed
             self.manual_configure(models_dirpath)
-
+        X = None
+        Y = None
+        for i in range(self.train_data_augmentation):
+            if X is None:
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))
+            else:
+                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))))
+            for model_path in model_path_list:
+                y = load_ground_truth(model_path)
+                if Y is None:
+                    Y = y 
+                    continue
+                else:
+                    Y = np.vstack((Y, y))
+        
     def manual_configure(self, models_dirpath: str):
         """Configuration of the detector using the parameters from the metaparameters
         JSON file.
@@ -431,7 +446,10 @@ class Detector(AbstractDetector):
         logging.info(f"metaparameter_filepath: {self.metaparameter_filepath}")
         logging.info(f"learned_parameters_dirpath: {self.learned_parameters_dirpath}")
         logging.info(f"scale_parameters_filepath: {self.scale_parameters_filepath}")
-
+        logging.info(f"model_filepath: {self.model_filepath}")    
+        clf = XGBRegressor(seed = 20)
+        clf.load_model(self.model_filepath);
+     
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
         X = None
         for i in range(self.train_data_augmentation): 
@@ -442,10 +460,7 @@ class Detector(AbstractDetector):
         logging.info(f"features: {X}")
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
-            
-        clf = XGBRegressor(**self.xgboost_kwargs)
-        clf.load_model(self.model_filepath);
-
+        
         probability = str(np.mean(clf.predict(X)).item())
 
         with open(result_filepath, "w") as fp:
