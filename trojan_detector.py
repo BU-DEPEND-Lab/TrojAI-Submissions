@@ -428,6 +428,10 @@ class Detector(AbstractDetector):
         logging.info(f"examples_dirpath: {examples_dirpath}")
         logging.info(f"round_training_dataset_dirpath: {round_training_dataset_dirpath}")
 
+        logging.info(f"metaparameter_filepath: {self.metaparameter_filepath}")
+        logging.info(f"learned_parameters_dirpath: {self.learned_parameters_dirpath}")
+        logging.info(f"scale_parameters_filepath: {self.scale_parameters_filepath}")
+
         feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath,  self.scale_parameters_filepath)
         X = None
         for i in range(self.train_data_augmentation): 
