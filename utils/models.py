@@ -203,7 +203,9 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
         print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
         
         for example in examples:
-            print(">>>>>>> Example: ", examples[:10])
+            print(">>>>>>> Example: ")
+            for e in example:
+                print(e)
             feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
             feature_vector.requires_grad_()
             model.zero_grad()
