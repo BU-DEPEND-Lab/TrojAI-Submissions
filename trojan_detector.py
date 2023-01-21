@@ -253,8 +253,27 @@ class Detector(AbstractDetector):
         
         x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
         
+        y_train = y_train.repeat(x_train.shape[1], axis = 1).reshape((-1, 1))
+        x_train = x_train.reshape((-1, x_train.shape[-1]))
+        ids_train = np.arange(x_train.shape[0])
+        np.random.shuffle(ids_train)
+
+        y_train = y_train[ids_train]
+        x_train = x_train[ids_train]
+
+        y_test = y_test.repeat(x_test.shape[1], axis = 1).reshape((-1, 1))
+        x_test = x_test.reshape((-1, x_test.shape[-1]))
+        ids_test = np.arange(x_test.shape[0])
+        np.random.shuffle(ids_test)
+
+        y_test = y_test[ids_test]
+        x_test = x_test[ids_test]
+
+
         print('x_train', x_train.shape)
+        print("y_train", y_train.shape)
         print('x_test', x_test.shape)
+        print('y_test', y_test.shape)
 
         """
         model_name = "svm"
@@ -351,6 +370,8 @@ class Detector(AbstractDetector):
 
         logging.info("Now train on all dataset")
         
+        X = np.vstack((x_train, x_test))
+        Y = np.vstack((y_train, y_test))
         clf.fit(X, Y) 
         
         y_pred = clf.predict(X)
@@ -454,13 +475,15 @@ class Detector(AbstractDetector):
         X = None
         for i in range(self.train_data_augmentation): 
             if X is None:
-                X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath)))
             else:
-                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath))).reshape((1, -1))))
+                X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath)))))
         logging.info(f"features: {X}")
         #with open(self.model_filepath, "rb") as fp:
         #    regressor: RandomForestRegressor = pickle.load(fp)
         
+        X = X.reshape((-1, X.shape[-1]))
+
         probability = str(np.mean(clf.predict(X)).item())
 
         with open(result_filepath, "w") as fp:

@@ -482,13 +482,17 @@ class FeatureExtractor(object):
                 feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
                 max_num_feats = len(feats) if len(feats) > max_num_feats else max_num_feats
                 all_feats.append(feats)
-            for i in range(len(all_feats)):
-                all_feats[i] = all_feats[i] + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+            if len(all_feats[0].shape) == 1 or all_feats[0].shape[0] == 1:
+                 for i in range(len(all_feats)):
+                    all_feats[i] = all_feats[i] + [0. for _ in range(max_num_feats - len(all_feats[i]))]
             self.input_features = max_num_feats
         else:
             max_num_feats = self.input_features
             for model_filepath in model_path_list:
-                feats = self.infer_attribution_feature_from_one_model(model_filepath, train) + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+                feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
+                if len(all_feats[0].shape) == 1 or all_feats[0].shape[0] == 1:
+                    feats = feats + [0. for _ in range(max_num_feats - len(all_feats[i]))]
+          
                 all_feats.append(feats)
              
         return all_feats
@@ -497,12 +501,13 @@ class FeatureExtractor(object):
         model_dict, model_repr_dict, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
         model_class, [model] = model_dict.popitem()
          
-        _, [clean_example] = clean_example_dict.popitem()
+        _, [clean_examples] = clean_example_dict.popitem()
         _, [model_repr] = model_repr_dict.popitem()
     
-        attrs = get_attribution_from_example_data(model, '1', clean_example, self.scale_parameters_filepath)
-         
-        return attrs.tolist() + ([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+        attrs = []
+        for clean_example in clean_examples:
+            attrs.append(get_attribution_from_example_data(model, '1', [clean_example], self.scale_parameters_filepath).reshape((-1)))
+        return np.hstack((clean_examples, attrs)) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
 
 
 if __name__ == "__main__":

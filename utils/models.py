@@ -198,14 +198,14 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
          
         # Inference on models
         grad_reprs = []
-        print(">>>>>>> Example feature shape: ", examples.shape)
+        #print(">>>>>>> Example feature shape: ", examples.shape)
         
-        print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
+        #print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
         
         for example in examples:
-            print(">>>>>>> Example: ")
-            for e in example:
-                print(e)
+            #print(">>>>>>> Example: ")
+            #for e in example:
+            #    print(e)
             feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
             feature_vector.requires_grad_()
             model.zero_grad()
@@ -213,7 +213,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
             scores = model(feature_vector)
             pred = torch.argmax(scores).detach()
             logits = F.log_softmax(scores, dim = 1)
-            print(logits)
+            #print(logits)
             #print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
         
             if grad is not None:
