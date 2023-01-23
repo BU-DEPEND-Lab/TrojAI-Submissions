@@ -3,7 +3,7 @@ import importlib
 import numpy as np
 from tqdm import tqdm
 import torch
-from attrdict import AttrDict
+#from attrdict import AttrDict
 
 
 def feature_reduction(model, weight_table, max_features):
@@ -151,8 +151,8 @@ def fit_ICA_feature_reduction_algorithm(model_dict, weight_table_params, input_f
         layer_transform[model_arch] = {}
         for (layers, output) in tqdm(layers_output.items()):
             layer_transform[model_arch][layers] = init_feature_reduction(output)
-            s = np.stack([model[layers] for model in models])
-            print("Need to fit matrix size: ", [model[layers].shape for model in models], "amounting to ", s.shape)
+            s = np.stack([model[layers] for model in models] * int(output / len(models) + 1))
+            print(f"Need to fit matrix size: {int(output / len(models) + 1)} x ", [model[layers].shape for model in models], "amounting to ", s.shape)
             layer_transform[model_arch][layers].fit(s)
             print(f"Model class {model_arch} layer {layers} fit ICA components {layer_transform[model_arch][layers].components_.shape}")
         print(f"Feature reduction to {sum(list(layers_output.values()))} number of features")

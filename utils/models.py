@@ -105,10 +105,7 @@ def load_models_dirpath(models_dirpath):
         model, model_repr, model_class = load_model(
             join(model_path, "model.pt")
         )
-        try:
-            model_ground_truth = load_ground_truth(model_path)
-        except:
-            print("Can't find ground truth")
+        
         # Build the list of models
         if model_class not in model_repr_dict.keys():
             model_dict[model_class] = []
@@ -118,23 +115,29 @@ def load_models_dirpath(models_dirpath):
             poisoned_example_dict[model_class] = []
         model_dict[model_class].append(model)
         model_repr_dict[model_class].append(model_repr)
-        model_ground_truth_dict[model_class].append(model_ground_truth)
 
+        try:
+            model_ground_truth = load_ground_truth(model_path)
+            model_ground_truth_dict[model_class].append(model_ground_truth)
+        except:
+            print("Can't find ground truth")
+            pass
         try:
             clean_examples = load_examples(model_path)
             clean_example_dict[model_class].append(clean_examples)
         except:
             print("No clean example")
+            pass
         try:
             poisoned_examples = load_examples(model_path, False)
             poisoned_examples[model_class].append(poisoned_examples)
         except:
             print("No poisoned example")
- 
+            pass
     return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
 
-def inference_on_example_data(model, ground_truth, example, scale_parameters_filepath, grad = np.mean):
+def inference_on_example_data(model, ground_truth, examples, scale_parameters_filepath, grad = np.mean):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -153,23 +156,68 @@ def inference_on_example_data(model, ground_truth, example, scale_parameters_fil
         
          
         # Inference on models
+        grad_reprs = []
+        #print(">>>>>>> Example feature shape: ", examples.shape)
+        #print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
+        for example in examples:
+            feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
+            model.zero_grad()
+            #pred = torch.argmax(model(feature_vector).detach()).item()
+            scores = model(feature_vector)
+            pred = torch.argmax(scores).detach()
+            logits = F.log_softmax(scores, dim = 1)
+            
+            #print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
         
-        print(">>>>>>> Example feature shape: ", example.shape)
-        print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
-        feature_vector = torch.from_numpy(scaler.transform(np.asarray(example).astype(float))).float()
-        model.zero_grad()
-        #pred = torch.argmax(model(feature_vector).detach()).item()
-        scores = model(feature_vector)
-        pred = torch.argmax(scores).detach()
-        logits = F.log_softmax(scores, dim = 1)
+            if grad is not None:
+                loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
+                loss.backward();
+                grad_repr = OrderedDict(
+                    {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
+                ) 
+                grad_reprs.append(grad_repr) 
+        return grad_reprs
+
+def get_attribution_from_example_data(model, ground_truth, examples, scale_parameters_filepath, grad = np.hstack):
+        """Method to demonstrate how to inference on a round's example data.
+
+        Args:
+            model: the pytorch model
+            examples_dirpath: the directory path for the round example data
+        """
+        #print(f"Inference on example data {example}")
+        # Setup scaler
+        scaler = StandardScaler()
+
+        scale_params = np.load(scale_parameters_filepath)
+
+        scaler.mean_ = scale_params[0]
+        scaler.scale_ = scale_params[1]
+
+        
          
-        print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
-    
-        if grad is not None:
-            loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
-            loss.backward();
-            grad_repr = OrderedDict(
-                {layer: param.data.numpy() for ((layer, _), param) in zip(model.state_dict().items(), model.parameters())}
-            ) 
-         
-            return grad_repr
+        # Inference on models
+        grad_reprs = []
+        #print(">>>>>>> Example feature shape: ", examples.shape)
+        
+        #print(">>>>>>> Scaler shape: ", scaler.mean_.shape, scaler.scale_.shape)
+        
+        for example in examples:
+            #print(">>>>>>> Example: ")
+            #for e in example:
+            #    print(e)
+            feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
+            feature_vector.requires_grad_()
+            model.zero_grad()
+            #pred = torch.argmax(model(feature_vector).detach()).item()
+            scores = model(feature_vector)
+            pred = torch.argmax(scores).detach()
+            logits = F.log_softmax(scores, dim = 1)
+            #print(logits)
+            #print("Ground Truth: {}, Prediction: {}".format(ground_truth, str(pred)))
+        
+            if grad is not None:
+                loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
+                loss.backward();
+                grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
+        return grad(grad_reprs)
