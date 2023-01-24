@@ -1,11 +1,12 @@
 import os
+import traceback
 import sys
 import torch
 import time
 import json
 import jsonschema
 import jsonpickle
-
+import traceback
 import math
 from sklearn.cluster import AgglomerativeClustering
 
@@ -15,6 +16,8 @@ import util.smartparse as smartparse
 import helper_r10 as helper
 import engine_objdet as engine
 
+import torch
+import torch.nn.functional as F
 
 #value at top x percentile, x in 0~100
 def hist_v(w,bins=100):
@@ -134,16 +137,93 @@ def analyze(param,nbins=100,szcap=4096):
         return [fv_1];
     else:
         return [];
-
 def run(interface,nbins=100,szcap=4096):
-    fvs=[];
-    for param in interface.model.parameters():
-        fvs=fvs+analyze(param.data,nbins=nbins,szcap=szcap);
+    #fvs=[];
+    fvs_attr = []
+    data=interface.load_examples();
+    examples=data['fvs']
+    labels=data['labels']
+    """
+    for i,param in enumerate(interface.model.parameters()):
+        fvs=fvs+analyze(param.data.cuda(),nbins=nbins,szcap=szcap);
         if len(fvs) >= nbins:
             break
     fvs=torch.stack(fvs[:nbins])#, nbins));
-    return fvs;
+    """
+ 
+    activations = {}
+    def get_activation(name):
+        def hook(model, input, output):
+            activations[name] = output 
+            output.retain_grad()
+        return hook
+    
+    def get_attribution(name):
+        activation = activations[name]
+        return torch.mul(activation.grad.data.flatten(), activation.flatten())
+    
+    fc_layers = []
+    #print(interface.model.state_dict().keys())
+    for layer in interface.model.state_dict().keys():
+        #print(layer)
+        #if 'layer' in layer or 'fc' in layer:  
+        #    layer_name = layer.split('.')[0]
+        #    if layer_name in fc_layers:
+        #        continue  
+        layer_name_lst = layer.split('.')
+        layer_name = ""
+        for layer_name_ in layer_name_lst:
+            if layer_name == "":
+                layer_name = layer_name_
+            else:
+                layer_name = '.'.join([layer_name, layer_name_])
+            if layer_name in fc_layers:
+                break
+            try:
+                interface.model.__getattr__(layer_name).register_forward_hook(get_activation(layer_name)) 
+                
+                fc_layers.append(layer_name)
+                #print(fc_layers[-1])
+                break
+            except:
+                continue
 
+                
+    print(f"Fetch the outputs of {fc_layers}")
+    for i in range(len(examples)):
+        fvs_attr_i=[]
+        interface.model.zero_grad()
+        #print(examples[i:i+1])
+        print('Example %d:'%i,examples[i:i+1].view(-1).max());
+        scores,preds=interface.inference(examples[i:i+1].cuda());
+        #print(scores.shape,labels[i:i+1])
+        print('Score %d:'%i,scores.view(-1).max());
+        logp=F.log_softmax(scores,dim=1);
+        loss=F.cross_entropy(logp,torch.LongTensor([labels[i]]).cuda());
+        loss.backward();
+        
+        
+        #grads=[param.grad for param in interface.model.parameters()]
+        attrs = []
+        for layer in activations:
+           #print(activations[layer])
+            f = activations[layer].data            
+            g = activations[layer].grad.data
+    
+            attr = torch.mul(f, g) 
+            attrs.append(attr)
+         
+        for i, attr in enumerate(attrs):
+            fvs_attr_i = fvs_attr_i + analyze(attr.cuda(), nbins, szcap = szcap)
+        
+        fvs_attr.append(torch.stack(fvs_attr_i,dim=0));
+        break
+    
+    #fvs=torch.stack(fvs,dim=0);
+    fvs_attr=torch.stack(fvs_attr,dim=0).detach();
+    print(fvs_attr.shape)
+    return fvs_attr#,fvs_examples;
+ 
 #Fuzzing call for TrojAI R9
 def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirpath=None, params=None):
     t0=time.time();
@@ -209,6 +289,8 @@ if __name__ == "__main__":
                 data.save(fname);
         except AttributeError as e:
             print(f"Skip loading Model-{id}: {e}")
+            print(traceback.format_exc())
+            exit(0)
 
     data.save(params.fname);
 
