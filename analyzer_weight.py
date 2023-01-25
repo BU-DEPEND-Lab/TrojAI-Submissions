@@ -217,8 +217,7 @@ def run(interface,nbins=100,szcap=4096):
             fvs_attr_i = fvs_attr_i + analyze(attr.cuda(), nbins, szcap = szcap)
         
         fvs_attr.append(torch.stack(fvs_attr_i,dim=0));
-        break
-    
+         
     #fvs=torch.stack(fvs,dim=0);
     fvs_attr=torch.stack(fvs_attr,dim=0).detach();
     print(fvs_attr.shape)
@@ -289,8 +288,7 @@ if __name__ == "__main__":
                 data.save(fname);
         except AttributeError as e:
             print(f"Skip loading Model-{id}: {e}")
-            print(traceback.format_exc())
-            exit(0)
+            print(traceback.format_exc()) 
 
     data.save(params.fname);
 
