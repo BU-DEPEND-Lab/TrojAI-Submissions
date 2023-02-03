@@ -11,15 +11,15 @@
   "type": "object",
   "properties": {
 	"num_data_per_model":  {
-		"description": "How many attribution feature vectors each model produce. No higher than the number of pdf inputs in the model's folder",
+		"description": "How many pdf inputs are randomly sampled from the input pdf set in each model's folder.",
 		"type": "integer",
 		"minimum": 1,
-		"maximum": 20,
+		"maximum": 100,
 		"suggested_minimum": 1,
 		"suggested_maximum": 20
 	},
 	"train_data_augmentation":  {
-		"description": "The times that the data are repeatedly processed.",
+		"description": "How many times the attribution feature vectors of a model are repeatedly generated.",
 		"type": "integer",
 		"minimum": 1,
 		"maximum": 100,
