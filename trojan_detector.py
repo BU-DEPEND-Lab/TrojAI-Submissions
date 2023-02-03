@@ -65,10 +65,9 @@ class Detector(AbstractDetector):
 
         # TODO: Update skew parameters per round
 
-        
+        self.num_data_per_model = metaparameters["num_data_per_model"]
         self.train_data_augmentation = metaparameters["train_data_augmentation"]
-        self.input_features = metaparameters["train_input_features"]
-        self.ICA_features = metaparameters["train_ICA_features"]
+
         self.weight_table_params = {
             "random_seed": metaparameters["train_weight_table_random_state"],
             "mean": metaparameters["train_weight_table_params_mean"],
@@ -78,8 +77,7 @@ class Detector(AbstractDetector):
          
     def write_metaparameters(self, *metaparameters):
         metaparameters_base = {
-            "train_input_features": self.input_features,
-            "train_ICA_features": self.ICA_features,
+            "num_data_per_model": self.num_data_per_model
         }
         if len(metaparameters) > 0:
             for metaparameter in metaparameters:
@@ -104,9 +102,9 @@ class Detector(AbstractDetector):
         Y = None
         for i in range(self.train_data_augmentation):
             if X is None:
-                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, self.num_data_per_model, True))
             else:
-                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))))
+                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, self.num_data_per_model, True))))
             for model_path in model_path_list:
                 y = load_ground_truth(model_path)
                 if Y is None:
@@ -136,9 +134,9 @@ class Detector(AbstractDetector):
         Y = None
         for i in range(self.train_data_augmentation):
             if X is None:
-                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))
+                X = np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, self.num_data_per_model, True))
             else:
-                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, True))))
+                X = np.vstack((X, np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, self.num_data_per_model, True))))
             for model_path in model_path_list:
                 y = load_ground_truth(model_path)
                 if Y is None:
@@ -146,6 +144,7 @@ class Detector(AbstractDetector):
                     continue
                 else:
                     Y = np.vstack((Y, y))
+    
         """
         for model_path in model_path_list:
             x = np.asarray(feature_extractor.infer_norms_from_one_model(model_path))
@@ -233,7 +232,7 @@ class Detector(AbstractDetector):
            'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
            'n_estimators': [100, 500, 1000]}
            
-        rand = RandomizedSearchCV(estimator=XGBRegressor(seed = 20),
+        rand = RandomizedSearchCV(estimator=XGBRegressor(objective = 'binary:logistic', seed = 20),
                          param_distributions=params,
                          scoring='roc_auc',
                          n_iter=25, cv = 5, n_jobs = -1, refit = True,

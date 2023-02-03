@@ -2,16 +2,22 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "BostonU Trojan Detection Container.",
   "technique": "BostonU XGBoost Regressor w/ attribution features",
-  "technique_description": "Given a pdf feature input and a model, we use attribution (= input  * gradient of the loss w.r.t input) as the features for trojan detection. 
-  							If there exists n pdf feature inputs, a model can produce n attribution features. The detector will make n predictions. The mean of the prediction will be used as the final prediction.
-  							The trojan detector is a xgboost regressor. Hyperparameter tuning and k-folds are adopted to find the best hyperparameters",
+  "technique_description": "Given a pdf feature input and a model, we use attribution (= input  * gradient of the loss w.r.t input) as the features for trojan detection. If there exists n pdf feature inputs, a model can produce n attribution features. The detector will make n predictions. The mean of the prediction will be used as the final prediction. The trojan detector is a xgboost regressor. Hyperparameter tuning and k-folds are adopted to find the best hyperparameters",
   "technique_changes": "Same as example detector",
-  "commit_id": "b812b5ea627f8191c325dd429889a7a2cd35e1ca",
+  "commit_id": "3c5e8dea9c6302056e95fdb7a47b758396b22581",
   "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions/",
   "required": [],
   "additionalProperties": false,
   "type": "object",
   "properties": {
+	"num_data_per_model":  {
+		"description": "How many attribution feature vectors each model produce. No higher than the number of pdf inputs in the model's folder",
+		"type": "integer",
+		"minimum": 1,
+		"maximum": 20,
+		"suggested_minimum": 1,
+		"suggested_maximum": 20
+	},
 	"train_data_augmentation":  {
 		"description": "The times that the data are repeatedly processed.",
 		"type": "integer",
@@ -35,7 +41,39 @@
 		"maximum": 2000,
 		"suggested_minimum": 750,
 		"suggested_maximum": 2200
+	},
+	"train_weight_table_random_state": {
+		"description": "Random state for weight table during training.",
+		"type": "integer",
+		"minimum": 1,
+		"maximum": 200,
+		"suggested_minimum": 75,
+		"suggested_maximum": 150
+	},
+	"train_weight_table_params_mean": {
+		"description": "Mean of the normal distribution used for the weight table.",
+		"type": "number",
+		"minimum": 0,
+		"maximum": 1.0,
+		"suggested_minimum": 0.25,
+		"suggested_maximum": 0.75
+	},
+	"train_weight_table_params_std": {
+		"description": "Standard deviation of the normal distribution used for the weight table.",
+		"type": "number",
+		"minimum": 0,
+		"maximum": 1.0,
+		"suggested_minimum": 0.01,
+		"suggested_maximum": 0.1
+	},
+	"train_weight_table_params_scaler": {
+		"description": "Multiply all items of the weight table by this number (float).",
+		"type": "number",
+		"minimum": 0,
+		"maximum": 5.0,
+		"suggested_minimum": 0.1,
+		"suggested_maximum": 2.5
 	}
-}
+ }
 }
   

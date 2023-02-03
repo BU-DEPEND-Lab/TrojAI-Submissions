@@ -9,6 +9,7 @@ import numpy as np
 #from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from tqdm import tqdm
+import random 
 
 from utils.abstract import AbstractDetector
 from utils.flatten import flatten_model, flatten_models, flatten_grads
@@ -72,7 +73,7 @@ class FeatureExtractor(object):
         # TODO: Update skew parameters per round
          
         self.input_features = metaparameters["train_input_features"]
-        self.ICA_features = metaparameters["train_ICA_features"]
+        self.ICA_features = metaparameters.get("train_ICA_features", None)
  
  
         self.weight_table_params = {
@@ -88,12 +89,13 @@ class FeatureExtractor(object):
     def write_metaparameters(self):
         metaparameters = {
             "train_input_features": self.input_features,
-            "train_ICA_features": self.ICA_features,
             "train_weight_table_random_state": self.weight_table_params["random_seed"],
             "train_weight_table_params_mean": self.weight_table_params["mean"],
             "train_weight_table_params_std": self.weight_table_params["std"],
             "train_weight_table_params_scaler": self.weight_table_params["scaler"],
         }
+        if self.ICA_features is not None:
+            metaparameters.update({"train_ICA_features": self.ICA_features})
 
         return metaparameters
 
@@ -469,13 +471,13 @@ class FeatureExtractor(object):
         #assert np.asarray(feats).shape[-1] == 2 * self.ICA_features
         return np.asarray(feats).tolist()
     
-    def infer_attribution_feature_from_models(self, model_path_list, train= False):
+    def infer_attribution_feature_from_models(self, model_path_list, num_data_per_model = 20, train= False):
         logging.info(f"Loading %d models...", len(model_path_list))
         all_feats = []
         if train:
             max_num_feats = 0
             for model_filepath in model_path_list:
-                feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
+                feats = self.infer_attribution_feature_from_one_model(model_filepath, num_data_per_model, train)
                 max_num_feats = len(feats) if len(feats) > max_num_feats else max_num_feats
                 all_feats.append(feats)
             if len(all_feats[0].shape) == 1 or all_feats[0].shape[0] == 1:
@@ -485,7 +487,7 @@ class FeatureExtractor(object):
         else:
             max_num_feats = self.input_features
             for model_filepath in model_path_list:
-                feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
+                feats = self.infer_attribution_feature_from_one_model(model_filepath, num_data_per_model, train)
                 if len(all_feats[0].shape) == 1 or all_feats[0].shape[0] == 1:
                     feats = feats + [0. for _ in range(max_num_feats - len(all_feats[i]))]
           
@@ -493,7 +495,7 @@ class FeatureExtractor(object):
              
         return all_feats
 
-    def infer_attribution_feature_from_one_model(self, model_filepath, train = False):
+    def infer_attribution_feature_from_one_model(self, model_filepath, num_data_per_model, train = False):
         model_dict, model_repr_dict, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
         model_class, [model] = model_dict.popitem()
          
@@ -501,7 +503,7 @@ class FeatureExtractor(object):
         _, [model_repr] = model_repr_dict.popitem()
     
         attrs = []
-        for clean_example in clean_examples:
+        for clean_example in clean_examples[np.random.choice(clean_examples.shape[0], num_data_per_model)]:
             attrs.append(get_attribution_from_example_data(model, '1', [clean_example], self.scale_parameters_filepath).reshape((-1)))
         return np.asarray(attrs) #np.hstack((clean_examples, attrs)) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
 
