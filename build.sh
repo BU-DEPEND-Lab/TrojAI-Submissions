@@ -34,6 +34,18 @@ python entrypoint.py configure \
 --configure_models_dirpath=/home/superradiance/Downloads/round12/models \
 --scale_parameters_filepath=./learned_parameters/scale_params.npy
 
+python entrypoint.py infer \
+--model_filepath ./model/id-00000002/model.pt \
+--result_filepath ./scratch/output.txt \
+--scratch_dirpath ./scratch \
+--examples_dirpath ./model/id-00000002/clean-example-data \
+--round_training_dataset_dirpath /home/superradiance/Downloads/round12/models \
+--learned_parameters_dirpath ./learned_parameters \
+--metaparameters_filepath ./metaparameters.json \
+--schema_filepath ./metaparameters_schema.json \
+--scale_parameters_filepath ./learned_parameters/scale_params.npy
+
+
 # test run self-configured model
 python entrypoint.py infer \
 --model_filepath=./model/id-00000002/model.pt \
