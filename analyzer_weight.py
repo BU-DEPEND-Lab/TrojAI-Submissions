@@ -195,7 +195,9 @@ def run(interface,nbins=100,szcap=4096):
         interface.model.zero_grad()
         #print(examples[i:i+1])
         print('Example %d:'%i,examples[i:i+1].view(-1).max());
-        scores,preds=interface.inference(examples[i:i+1].cuda());
+        x = examples[i:i+1].cuda()
+        x.requires_grad = True
+        scores,preds=interface.inference(x);
         #print(scores.shape,labels[i:i+1])
         print('Score %d:'%i,scores.view(-1).max());
         logp=F.log_softmax(scores,dim=1);
@@ -204,7 +206,7 @@ def run(interface,nbins=100,szcap=4096):
         
         
         #grads=[param.grad for param in interface.model.parameters()]
-        attrs = []
+        attrs = [torch.mul(x.data, x.grad.data)]
         for layer in activations:
            #print(activations[layer])
             f = activations[layer].data            
