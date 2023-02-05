@@ -1,1 +1,1 @@
-{"num_data_per_model": 100, "train_input_features": 100, "train_weight_table_random_state": 101, "train_weight_table_params_mean": 0.5, "train_weight_table_params_std": 0.03, "train_weight_table_params_scaler": 1.8, "train_ICA_features": 200}
+{"num_data_per_model": 20, "train_input_features": 20, "train_weight_table_random_state": 101, "train_weight_table_params_mean": 0.5, "train_weight_table_params_std": 0.03, "train_weight_table_params_scaler": 1.8, "train_ICA_features": 200}

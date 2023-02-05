@@ -15,7 +15,7 @@ from utils.abstract import AbstractDetector
 from utils.flatten import flatten_model, flatten_models, flatten_grads
 from utils.healthchecks import check_models_consistency
 from utils.models import create_layer_map, load_model, \
-    load_models_dirpath, load_ground_truth, get_focal_losss
+    load_models_dirpath, load_ground_truth, get_focal_loss
 from utils.padding import create_models_padding, pad_model
 from utils.reduction import (
     fit_feature_reduction_algorithm,
@@ -74,13 +74,10 @@ class Detector(AbstractDetector):
             "std": metaparameters["train_weight_table_params_std"],
             "scaler": metaparameters["train_weight_table_params_scaler"],
         }
-        self.objectives =  [metaparameters["objective"]]
-        if 'focal' in self.objectives[0]:
-            if len(self.objectives[0].split("_")) == 1:
-                self.objectives = get_focal_losss([1.0], [1])
-            else:
-                gamma_indicts = [float(gamma_indict) for gamma_indict in self.objectives[0].split("_")[1].split("::")]
-                self.objectives = get_focal_losss(gamma_indicts)
+        self.objective =  metaparameters["objective"]
+        if 'focal' in self.objective:
+           gamma_indict = metaparameters["gamma"]
+           self.objective = get_focal_loss(gamma_indict)
          
     def write_metaparameters(self, *metaparameters):
         metaparameters_base = {
@@ -234,7 +231,7 @@ class Detector(AbstractDetector):
         data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
         
         params = { 
-            'objective': self.objectives, 
+            'objective': [self.objective], 
             'max_depth': [10, 15, 20, 30],
            'learning_rate': [0.01, 0.1, 0.2, 0.3],
            'subsample': np.arange(0.5, 1.0, 0.1),
