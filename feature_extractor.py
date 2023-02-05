@@ -503,9 +503,12 @@ class FeatureExtractor(object):
         _, [model_repr] = model_repr_dict.popitem()
     
         attrs = []
-        for clean_example in clean_examples[np.random.choice(clean_examples.shape[0], num_data_per_model)]:
+        example_ids = np.random.choice(clean_examples.shape[0], num_data_per_model)
+        examples = clean_examples[example_ids]
+        for clean_example in examples:
             attrs.append(get_attribution_from_example_data(model, '1', [clean_example], self.scale_parameters_filepath).reshape((-1)))
-        return np.asarray(attrs) #np.hstack((clean_examples, attrs)) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+            examples.append(clean_example)
+        return np.hstack((examples, attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
 
 
 if __name__ == "__main__":

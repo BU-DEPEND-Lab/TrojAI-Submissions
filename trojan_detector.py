@@ -79,9 +79,8 @@ class Detector(AbstractDetector):
             if len(self.objectives[0].split("_")) == 1:
                 self.objectives = get_focal_losss([1.0], [1])
             else:
-                alphas = [float(alpha) for alpha in self.objectives[0].split("_")[1].split("::")]
-                lams = [int(lam) for lam in self.objectives[0].split("_")[2].split("::")]
-                self.objectives = get_focal_losss(alphas, lams)
+                gamma_indicts = [float(gamma_indict) for gamma_indict in self.objectives[0].split("_")[1].split("::")]
+                self.objectives = get_focal_losss(gamma_indicts)
          
     def write_metaparameters(self, *metaparameters):
         metaparameters_base = {
