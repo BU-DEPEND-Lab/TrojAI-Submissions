@@ -8,6 +8,7 @@ from tqdm import tqdm
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
+from abc import ABC, abstractmethod
 
 def create_layer_map(model_repr_dict):
     model_layer_map = {}
@@ -221,17 +222,50 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
                 loss.backward();
                 grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
         return grad(grad_reprs)
+ 
+class get_loss(ABC):
+    @abstractmethod
+    def __call__(self, label, pred):
+        pass
+    @abstractmethod
+    def prob(pred):
+        pass
 
 
-def robust_pow(num_base, num_pow):
-    # numpy does not permit negative numbers to fractional power
-    # use this to perform the power algorithmic
-    return num_base ** num_pow
-    #return np.sign(num_base) * (np.abs(num_base)) ** (num_pow)
+class get_cross_entropy(get_loss):
+    def __init__(self, use_sigmoid = True):
+        self.use_sigmoid = use_sigmoid
+    def prob(self, pred):
+        return 1./(1. + np.exp(-pred))
+    def __call__(self,  label, pred):
+        # retrieve data from dtrain matrix
+        #label = dtrain.get_label()
+        # compute the prediction with sigmoid
+        # compute the prediction with sigmoid
+        sigmoid_pred = self.prob (pred)
+        #1.0 / (1.0 + np.exp(-pred))
+        #sigmoid_pred = pred
+        # gradient
+        # complex gradient with different parts
+        grad_first_part = (label+((-1)**label)*sigmoid_pred)
+        grad_second_part = label - sigmoid_pred
+        grad_third_part = (1-label-sigmoid_pred)
+        grad_log_part = np.log(1-label-((-1)**label)*sigmoid_pred + 1e-7)       # add a small number to avoid numerical instability
+        # combine the gradient
+        grad = -grad_first_part*(grad_second_part+grad_third_part*grad_log_part)
+        # combine the gradient parts to get hessian
+        hess_first_term = sigmoid_pred*(1.0 - sigmoid_pred)*(grad_second_part+grad_third_part*grad_log_part)
+        hess_second_term = (-sigmoid_pred*(1.0 - sigmoid_pred)-sigmoid_pred*(1.0 - sigmoid_pred)*grad_log_part-((1/(1-label-((-1)**label)*sigmoid_pred))*sigmoid_pred*(1.0 - sigmoid_pred)))*grad_first_part
+        # get the final 2nd order derivative
+        hess = -(hess_first_term+hess_second_term)
+        return grad, hess
 
-class get_focal_loss:
+class get_focal_loss(get_loss):
     def __init__(self, gamma_indct):
         self.gamma_indct = gamma_indct
+
+    def prob(self, pred):
+        return 1./(1. + np.exp(-pred))
     
     """
     def focal_binary_object(label, y_pred):
@@ -294,7 +328,9 @@ class get_focal_loss:
         #label = dtrain.get_label()
         # compute the prediction with sigmoid
         # compute the prediction with sigmoid
-        sigmoid_pred = 1.0 / (1.0 + np.exp(-pred))
+        sigmoid_pred = self.prob (pred)
+        #1.0 / (1.0 + np.exp(-pred))
+        #sigmoid_pred = pred
         # gradient
         # complex gradient with different parts
         grad_first_part = (label+((-1)**label)*sigmoid_pred)**self.gamma_indct

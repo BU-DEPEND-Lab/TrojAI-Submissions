@@ -1,6 +1,6 @@
 {
-	"objective": "focal", 
-	"gamma": 1.2,
+	"objective": "focal_loss",
+	"gamma": 2.0,
 	"num_data_per_model": 20,
 	"train_ICA_features": 200,
 	"train_input_features": 135,

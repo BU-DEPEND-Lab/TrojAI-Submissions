@@ -279,17 +279,21 @@ class Detector(AbstractDetector):
         print(f'tpr {tpr}')
         print('train auc', metrics.auc(fpr, tpr))
         """
-        y_pred_ = clf.predict(x_test)
+        y_pred_ = self.objective.prob(clf.predict(x_test))
         
         if 'svm' in model_name:
-            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
-            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_)))
+            print("Testing comparison:\n", y_test.reshape(-1), "\n",y_pred_>= 0)
+            print('test acc', accuracy_score(y_test.reshape(-1), y_pred_ >= 0))
             y_pred_probs_ = clf.predict_proba(x_test)
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
         elif "xgboost_regressor" in model_name:
+            #if not isinstance(self.objective, str):
             print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
             print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
-            y_pred_ = clf.predict(x_test)
+            #else:
+            #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
+            #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+            y_pred_ = self.objective.prob(clf.predict(x_test))
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
         print(f'test fpr {fpr}')
         print(f'tpr {tpr}')
@@ -303,7 +307,7 @@ class Detector(AbstractDetector):
         Y = np.vstack((y_train, y_test))
         clf.fit(X, Y) 
         
-        y_pred = clf.predict(X)
+        y_pred = self.objective.prob(clf.predict(X))
         fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
         print(f'all dataset fpr {fpr}')
         print(f'tpr {tpr}')
@@ -413,7 +417,11 @@ class Detector(AbstractDetector):
         
         X = X.reshape((-1, X.shape[-1]))
 
-        probability = str(np.mean(clf.predict(X)).item())
+
+        if not isinstance(self.objective, str):
+            probability = str(np.mean(self.objective.prob(clf.predict(X)) >= 0.5).item())
+        else:
+             probability = str(np.mean(clf.predict(X)).item())
 
         with open(result_filepath, "w") as fp:
             fp.write(probability)
