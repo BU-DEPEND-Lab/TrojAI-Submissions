@@ -221,3 +221,68 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
                 loss.backward();
                 grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
         return grad(grad_reprs)
+
+
+def robust_pow(num_base, num_pow):
+    # numpy does not permit negative numbers to fractional power
+    # use this to perform the power algorithmic
+
+    return np.sign(num_base) * (np.abs(num_base)) ** (num_pow)
+
+def get_focal_losss(alphas, lams):
+    focal_losss = []
+    for alpha in alphas:
+        for lam in lams:
+            """
+            def focal_binary_object(label, y_pred):
+                nonlocal alpha, lam
+                #label = dmat.get_label()
+                # l(y_val, y_pred) = - y_val * alpha * (1 - y_pred)^lam * log y_pred - (1 - y_val) * (1 - alpha) * y_pred^lam * log (1 - y_pred)
+                # grad(l, y_pred) =  y_val * alpha * lam * (1 - y_pred)^{lam - 1} * log y_pred - (1 - y_val) * (1 - alpha) * lam * y_pred^{lam - 1} * log (1 - y_pred) - y_val * alpha * (1 - y_pred)^lam * 1 / y_pred + (1 - y_val) * (1 - alpha) * y_pred^lam * 1/ (1 - y_pred)
+                # Hess(l, y_pred) =  - y_val * alpha * lam * (lam - 1) * (1 - y_val)^{lam - 2} * log y_val - (1 - y_val) * (1 - alpha) * lam * (lam - 1) * y_pred^{lam - 2} * log (1 - y_pred)
+                y_pred[y_pred == 0] = 1e-6
+                y_pred[y_pred == 1] = 1. - 1e-6
+                print(np.count_nonzero(np.isnan(y_pred)), np.count_nonzero(y_pred))
+                #print(label)
+                grad = label * alpha * lam * np.power(1 - y_pred, lam - 1) * np.log(y_pred) + \
+                       - label * alpha * np.power(1 - y_pred, lam) * 1. / y_pred + \
+                       - (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * np.log(1 - y_pred) + \
+                       + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./(1 - y_pred)
+                hess =  - label * alpha * lam * (lam - 1) * np.power(1 - y_pred, lam - 2) * np.log(y_pred) + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + \
+                        + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + label * alpha * np.power(1 - y_pred, lam) * 1. /( y_pred *  y_pred) + \
+                        - (1 - label) * (1 - alpha) * lam * (lam - 1) * np.power(y_pred, lam - 2) * np.log (1 - y_pred) + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1. / (1 - y_pred) + \
+                        + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1./(1 - y_pred) + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./((1 - y_pred) * (1 - y_pred))
+                return grad, hess  
+            """
+            
+            def focal_binary_object(label, pred):
+                nonlocal alpha, lam
+                #gamma_indct = self.gamma_indct
+                # retrieve data from dtrain matrix
+                #label = dtrain.get_label()
+                # compute the prediction with sigmoid
+                sigmoid_pred = 1.0 / (1.0 + np.exp(-pred))
+                # gradient
+                # complex gradient with different parts
+                g1 = sigmoid_pred * (1 - sigmoid_pred)
+   
+                g2 = label + ((-1) ** label) * sigmoid_pred
+                g3 = sigmoid_pred + label - 1
+                g4 = 1 - label - ((-1) ** label) * sigmoid_pred
+                g5 = label + ((-1) ** label) * sigmoid_pred
+                # combine the gradient
+                grad = alpha * g3 * robust_pow(g2, lam) * np.log(g4 + 1e-9) + \
+                    ((-1) ** label) * robust_pow(g5, (lam + 1))
+                # combine the gradient parts to get hessian components
+                hess_1 = robust_pow(g2, lam) + \
+                        lam * ((-1) ** label) * g3 * robust_pow(g2, (lam - 1))
+                hess_2 = ((-1) ** label) * g3 * robust_pow(g2, lam) / g4
+                # get the final 2nd order derivative
+                hess = ((hess_1 * np.log(g4 + 1e-9) - hess_2) * alpha +
+                        (lam + 1) * robust_pow(g5, lam)) * g1
+
+                return grad, hess
+            
+            focal_losss.append(focal_binary_object)  
+    return focal_losss
+    
