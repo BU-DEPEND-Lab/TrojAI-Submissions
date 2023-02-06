@@ -243,7 +243,7 @@ class Detector(AbstractDetector):
            'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
            'n_estimators': [100, 500, 1000]}
            
-        rand = RandomizedSearchCV(estimator=XGBRegressor(seed = 20),
+        rand = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
                          param_distributions=params,
                          scoring='roc_auc',
                          n_iter=25, cv = 5, n_jobs = -1, refit = True,
@@ -283,7 +283,7 @@ class Detector(AbstractDetector):
         print(f'tpr {tpr}')
         print('train auc', metrics.auc(fpr, tpr))
         """
-        y_pred_ = self.loss.prob(clf.predict(x_test))
+        y_pred_ = clf.predict(x_test)
         
         if 'svm' in model_name:
             print("Testing comparison:\n", y_test.reshape(-1), "\n",y_pred_>= 0)
@@ -292,8 +292,8 @@ class Detector(AbstractDetector):
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
         elif "xgboost_regressor" in model_name:
             #if not isinstance(self.objective, str):
-            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.0)
-            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.0)))
+            print("Testing comparison:\n", y_test.reshape(-1), "\n", self.loss.prob(y_pred_) >= 0.5)
+            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(self.loss.prob(y_pred_) >= 0.5)))
             #else:
             #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
             #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
@@ -421,11 +421,10 @@ class Detector(AbstractDetector):
         
         X = X.reshape((-1, X.shape[-1]))
 
-
-        if not isinstance(self.objective, str):
-            probability = str(np.mean(self.loss.prob(clf.predict(X)) >= 0.0).item())
-        else:
-             probability = str(np.mean(clf.predict(X)).item())
+        probability = str(np.mean(np.abs(self.loss.prob(clf.predict(X)))).item())
+        #if not isinstance(self.objective, str):
+        #else:
+        #     probability = str(np.mean(clf.predict(X)).item())
 
         with open(result_filepath, "w") as fp:
             fp.write(probability)
