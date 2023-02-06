@@ -236,17 +236,17 @@ class Detector(AbstractDetector):
         
         params = { 
             # 'objective': ["reg:logistic"], 
-            'max_depth': [10, 15, 20, 30],
-           'learning_rate': [0.01, 0.1, 0.2, 0.3],
+            'max_depth': [10, 15, 20, 30, 40],
+           'learning_rate': [0.01, 0.1, 0.2, 0.3, 0.001],
            'subsample': np.arange(0.5, 1.0, 0.1),
            'colsample_bytree': np.arange(0.4, 1.0, 0.1),
            'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
-           'n_estimators': [100, 500, 1000]}
+           'n_estimators': [100, 500, 1000, 2000]}
            
         rand = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
                          param_distributions=params,
                          scoring='roc_auc',
-                         n_iter=25, cv = 5, n_jobs = -1, refit = True,
+                         n_iter=50, cv = 5, n_jobs = -1, refit = True,
                          verbose=1)
         rand.fit(x_train, y_train)
         clf = rand.best_estimator_ #XGBRegressor(**rand.best_params_)
