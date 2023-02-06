@@ -4,7 +4,7 @@
   "technique": "BostonU XGBoost Regressor w/ attribution features",
   "technique_description": "Given a pdf feature input and a model, we generate attribution (= input  * gradient of the loss w.r.t input) as the feature vector for trojan detection. If there exists n pdf feature inputs, a model can produce n attribution features. Thus the detector will make n predictions. The mean of the predictions will be used as the final prediction. The trojan detector is a xgboost regressor. Hyperparameter tuning and k-folds are adopted to find the best hyperparameters",
   "technique_changes": "Same as example detector",
-  "commit_id": "0a772f52acee2c26c5b20632e42bc9a9f3d5a06a",
+  "commit_id": "4dc5fb9b1a9d02efdad326e22b8327a8f882d1bc",
   "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions/",
   "required": [],
   "additionalProperties": false,
@@ -13,7 +13,7 @@
 	"objective":  {
 		"description": "objective function.",
 		"type": "string",
-		"enum": ["focal_loss", "reg:logistic"]
+		"enum": ["focal_loss", "reg:logistic", "reg:squarederror"]
 	},
 	"gamma": {
 		"description": "Gamma indicate for focal loss (float).",
@@ -27,9 +27,9 @@
 		"description": "Number of pdf inputs randomly sampled for model to generate the attribution.",
 		"type": "integer",
 		"minimum": 1,
-		"maximum": 100,
+		"maximum": 500,
 		"suggested_minimum": 1,
-		"suggested_maximum": 20
+		"suggested_maximum": 500
 	},
 	"train_data_augmentation":  {
 		"description": "Number of rounds of sampling pdf inputs for a model to generate the attribution (depreciated).",
