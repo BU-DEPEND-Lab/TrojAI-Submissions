@@ -503,7 +503,10 @@ class FeatureExtractor(object):
         _, [model_repr] = model_repr_dict.popitem()
     
         attrs = []
-        example_ids = np.random.choice(clean_examples.shape[0], num_data_per_model)
+        if num_data_per_model > clean_examples.shape[0]:
+            example_ids = np.hstack((np.arange(clean_examples.shape[0]), np.random.choice(clean_examples.shape[0], num_data_per_model - clean_examples.shape[0])))
+        else:
+            example_ids = np.arange(clean_examples.shape[0])
         examples = clean_examples[example_ids]
         for clean_example in examples:
             attrs.append(get_attribution_from_example_data(model, '1', [clean_example], self.scale_parameters_filepath).reshape((-1)))
