@@ -11,7 +11,7 @@ The container will have access to these [Submission Compute Resources](https://p
 
 --------------
 # Table of Contents
-1. [Reusing the example detector](#reusing-the-example-detector)
+1. [Reusing the trojan detector](#reusing-the-example-detector)
 2. [New Container Configuration](#new-container-configuration)
 3. [System Requirements](#system-requirements)
 4. [Example Data](#example-data)
@@ -23,9 +23,9 @@ The container will have access to these [Submission Compute Resources](https://p
     4. [Package Solution into a Singularity Container](#package-solution-into-a-singularity-container)
 
 --------------
-# Reusing the example detector
+# Reusing the trojan detector
 
-Please use this example as a template for submissions into TrojAI.
+Please use this trojan detector for submissions into TrojAI.
 
 You will need to modify at least 3 files and 1 directory:
 * trojan_detector.py: File containing the codebase for the detector
@@ -140,7 +140,7 @@ Example usage for inferencing:
 - Linux (tested on Ubuntu 20.04 LTS)
 - CUDA capable NVIDIA GPU (tested on A4500)
 
-Note: This example assumes you are running on a version of Linux (like Ubuntu 20.04 LTS) with a CUDA enabled NVIDIA GPU. Singularity only runs natively on Linux, and most Deep Learning libraries are designed for Linux first. While this Conda setup will install the CUDA drivers required to run PyTorch, the CUDA enabled GPU needs to be present on the system. 
+Note: This trojan detector assumes you are running on a version of Linux (like Ubuntu 20.04 LTS) with a CUDA enabled NVIDIA GPU. Singularity only runs natively on Linux, and most Deep Learning libraries are designed for Linux first. While this Conda setup will install the CUDA drivers required to run PyTorch, the CUDA enabled GPU needs to be present on the system. 
 
 --------------
 # Example Data
