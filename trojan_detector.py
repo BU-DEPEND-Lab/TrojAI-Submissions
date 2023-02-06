@@ -235,6 +235,7 @@ class Detector(AbstractDetector):
         data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
         
         params = { 
+            # 'objective': ["reg:logistic"], 
             'max_depth': [10, 15, 20, 30],
            'learning_rate': [0.01, 0.1, 0.2, 0.3],
            'subsample': np.arange(0.5, 1.0, 0.1),
@@ -242,7 +243,7 @@ class Detector(AbstractDetector):
            'colsample_bylevel': np.arange(0.4, 1.0, 0.1),
            'n_estimators': [100, 500, 1000]}
            
-        rand = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+        rand = RandomizedSearchCV(estimator=XGBRegressor(seed = 20),
                          param_distributions=params,
                          scoring='roc_auc',
                          n_iter=25, cv = 5, n_jobs = -1, refit = True,
@@ -291,8 +292,8 @@ class Detector(AbstractDetector):
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
         elif "xgboost_regressor" in model_name:
             #if not isinstance(self.objective, str):
-            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
-            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.0)
+            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.0)))
             #else:
             #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
             #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
@@ -422,7 +423,7 @@ class Detector(AbstractDetector):
 
 
         if not isinstance(self.objective, str):
-            probability = str(np.mean(self.loss.prob(clf.predict(X)) >= 0.5).item())
+            probability = str(np.mean(self.loss.prob(clf.predict(X)) >= 0.0).item())
         else:
              probability = str(np.mean(clf.predict(X)).item())
 
