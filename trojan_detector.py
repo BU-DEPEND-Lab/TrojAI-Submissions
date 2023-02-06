@@ -245,7 +245,7 @@ class Detector(AbstractDetector):
            
         rand = RandomizedSearchCV(estimator=XGBRegressor(seed = 20),
                          param_distributions=params,
-                         scoring='neg_mean_squared_error',
+                         scoring='roc_auc',
                          n_iter=25, cv = 5, n_jobs = -1, refit = True,
                          verbose=1)
         rand.fit(x_train, y_train)
