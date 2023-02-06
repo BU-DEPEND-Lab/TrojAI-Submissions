@@ -70,10 +70,7 @@ class FeatureExtractor(object):
         self.poisoned_grad_layer_transform_filepath = join(self.learned_parameters_dirpath, "poisoned_grad_layer_transform.bin")
 
         # TODO: Update skew parameters per round
-        self.model_skew = {
-            "__all__": metaparameters["infer_cyber_model_skew"],
-        }
-
+ 
         self.input_features = metaparameters["train_input_features"]
         self.ICA_features = metaparameters["train_ICA_features"]
  
@@ -90,7 +87,6 @@ class FeatureExtractor(object):
 
     def write_metaparameters(self):
         metaparameters = {
-            "infer_cyber_model_skew": self.model_skew["__all__"],
             "train_input_features": self.input_features,
             "train_ICA_features": self.ICA_features,
             "train_weight_table_random_state": self.weight_table_params["random_seed"],
