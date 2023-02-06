@@ -1,3 +1,12 @@
+# Instruction:
+    # 1. Run self-configuration mode to train a model
+    # 2. Run inference mode to check the trained model
+    # 3. Build container
+    # 4. Run container in inference mode to check the container
+
+
+# The following commands may be useful.
+
 # Feature extraction mode
 python entrypoint.py extract \
 --round_training_dataset_dirpath /mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/ \
@@ -17,7 +26,7 @@ python entrypoint.py infer \
 --schema_filepath ./metaparameters_schema.json \
 --scale_parameters_filepath ./learned_parameters/scale_params.npy
 
-# self-configure mode
+# self-configure mode for training model
 python entrypoint.py configure \
 --scratch_dirpath=./scratch/ \
 --metaparameters_filepath=./metaparameters.json \
@@ -26,6 +35,7 @@ python entrypoint.py configure \
 --configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/models \
 --scale_parameters_filepath=./learned_parameters/scale_params.npy
 
+# self-configure mode for training model on another machinea
 python entrypoint.py configure \
 --scratch_dirpath=./scratch/ \
 --metaparameters_filepath=./metaparameters.json \
@@ -34,6 +44,7 @@ python entrypoint.py configure \
 --configure_models_dirpath=/home/superradiance/Downloads/round12/models \
 --scale_parameters_filepath=./learned_parameters/scale_params.npy
 
+# Run inference mode on another machine
 python entrypoint.py infer \
 --model_filepath ./model/id-00000002/model.pt \
 --result_filepath ./scratch/output.txt \
@@ -46,7 +57,7 @@ python entrypoint.py infer \
 --scale_parameters_filepath ./learned_parameters/scale_params.npy
 
 
-# test run self-configured model
+# test run self-configured model if the new parameters are in the ./new_learned_parameters/ folder
 python entrypoint.py infer \
 --model_filepath=./model/id-00000002/model.pt \
 --result_filepath=./output.txt \
