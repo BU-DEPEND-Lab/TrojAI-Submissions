@@ -222,106 +222,68 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
                 loss.backward();
                 grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
         return grad(grad_reprs)
- 
-class get_loss(ABC):
-    @abstractmethod
-    def __call__(self, label, pred):
-        pass
-    @abstractmethod
-    def prob(pred):
-        pass
 
+    
+"""
+def focal_binary_object(label, y_pred):
+    nonlocal alpha, lam
+    #label = dmat.get_label()
+    # l(y_val, y_pred) = - y_val * alpha * (1 - y_pred)^lam * log y_pred - (1 - y_val) * (1 - alpha) * y_pred^lam * log (1 - y_pred)
+    # grad(l, y_pred) =  y_val * alpha * lam * (1 - y_pred)^{lam - 1} * log y_pred - (1 - y_val) * (1 - alpha) * lam * y_pred^{lam - 1} * log (1 - y_pred) - y_val * alpha * (1 - y_pred)^lam * 1 / y_pred + (1 - y_val) * (1 - alpha) * y_pred^lam * 1/ (1 - y_pred)
+    # Hess(l, y_pred) =  - y_val * alpha * lam * (lam - 1) * (1 - y_val)^{lam - 2} * log y_val - (1 - y_val) * (1 - alpha) * lam * (lam - 1) * y_pred^{lam - 2} * log (1 - y_pred)
+    y_pred[y_pred == 0] = 1e-6
+    y_pred[y_pred == 1] = 1. - 1e-6
+    print(np.count_nonzero(np.isnan(y_pred)), np.count_nonzero(y_pred))
+    #print(label)
+    grad = label * alpha * lam * np.power(1 - y_pred, lam - 1) * np.log(y_pred) + \
+            - label * alpha * np.power(1 - y_pred, lam) * 1. / y_pred + \
+            - (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * np.log(1 - y_pred) + \
+            + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./(1 - y_pred)
+    hess =  - label * alpha * lam * (lam - 1) * np.power(1 - y_pred, lam - 2) * np.log(y_pred) + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + \
+            + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + label * alpha * np.power(1 - y_pred, lam) * 1. /( y_pred *  y_pred) + \
+            - (1 - label) * (1 - alpha) * lam * (lam - 1) * np.power(y_pred, lam - 2) * np.log (1 - y_pred) + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1. / (1 - y_pred) + \
+            + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1./(1 - y_pred) + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./((1 - y_pred) * (1 - y_pred))
+    return grad, hess  
 
-class get_cross_entropy(get_loss):
-    def __init__(self, use_sigmoid = True):
-        self.use_sigmoid = use_sigmoid
-    def prob(self, pred):
-        return 1./(1. + np.exp(-pred))
-    def __call__(self,  label, pred):
-        # retrieve data from dtrain matrix
-        #label = dtrain.get_label()
-        # compute the prediction with sigmoid
-        # compute the prediction with sigmoid
-        sigmoid_pred = self.prob (pred)
-        #1.0 / (1.0 + np.exp(-pred))
-        #sigmoid_pred = pred
-        # gradient
-        # complex gradient with different parts
-        grad_first_part = (label+((-1)**label)*sigmoid_pred)
-        grad_second_part = label - sigmoid_pred
-        grad_third_part = (1-label-sigmoid_pred)
-        grad_log_part = np.log(1-label-((-1)**label)*sigmoid_pred + 1e-7)       # add a small number to avoid numerical instability
-        # combine the gradient
-        grad = -grad_first_part*(grad_second_part+grad_third_part*grad_log_part)
-        # combine the gradient parts to get hessian
-        hess_first_term = sigmoid_pred*(1.0 - sigmoid_pred)*(grad_second_part+grad_third_part*grad_log_part)
-        hess_second_term = (-sigmoid_pred*(1.0 - sigmoid_pred)-sigmoid_pred*(1.0 - sigmoid_pred)*grad_log_part-((1/(1-label-((-1)**label)*sigmoid_pred))*sigmoid_pred*(1.0 - sigmoid_pred)))*grad_first_part
-        # get the final 2nd order derivative
-        hess = -(hess_first_term+hess_second_term)
-        return grad, hess
+def focal_binary_object(label, pred):
+    nonlocal alpha, lam
+    #gamma_indct = self.gamma_indct
+    # retrieve data from dtrain matrix
+    #label = dtrain.get_label()
+    # compute the prediction with sigmoid
+    sigmoid_pred = 1.0 / (1.0 + np.exp(-pred))
+    # gradient
+    # complex gradient with different parts
+    g1 = sigmoid_pred * (1 - sigmoid_pred)
 
-class get_focal_loss(get_loss):
-    def __init__(self, gamma_indct):
+    g2 = label + ((-1) ** label) * sigmoid_pred
+    g3 = sigmoid_pred + label - 1
+    g4 = 1 - label - ((-1) ** label) * sigmoid_pred
+    g5 = label + ((-1) ** label) * sigmoid_pred
+    # combine the gradient
+    grad = alpha * g3 * robust_pow(g2, lam) * np.log(g4 + 1e-9) + \
+        ((-1) ** label) * robust_pow(g5, (lam + 1))
+    # combine the gradient parts to get hessian components
+    hess_1 = robust_pow(g2, lam) + \
+            lam * ((-1) ** label) * g3 * robust_pow(g2, (lam - 1))
+    hess_2 = ((-1) ** label) * g3 * robust_pow(g2, lam) / g4
+    # get the final 2nd order derivative
+    hess = ((hess_1 * np.log(g4 + 1e-9) - hess_2) * alpha +
+            (lam + 1) * robust_pow(g5, lam)) * g1
+
+    return grad, hess
+
+def focal_binary_object(label, pred):
+    # retrieve data from dtrain matrix
+    #label = dtrain.get_label()
+    # compute the prediction with sigmoid
+    # compute the prediction with sigmoid
+"""
+
+class focal_loss:
+    def __init__(self, gamma_indct = 1.2, prob = lambda pred: 1.0 / (1.0 + np.exp(-pred))):
         self.gamma_indct = gamma_indct
-
-    def prob(self, pred):
-        return 1./(1. + np.exp(-pred))
-    
-    """
-    def focal_binary_object(label, y_pred):
-        nonlocal alpha, lam
-        #label = dmat.get_label()
-        # l(y_val, y_pred) = - y_val * alpha * (1 - y_pred)^lam * log y_pred - (1 - y_val) * (1 - alpha) * y_pred^lam * log (1 - y_pred)
-        # grad(l, y_pred) =  y_val * alpha * lam * (1 - y_pred)^{lam - 1} * log y_pred - (1 - y_val) * (1 - alpha) * lam * y_pred^{lam - 1} * log (1 - y_pred) - y_val * alpha * (1 - y_pred)^lam * 1 / y_pred + (1 - y_val) * (1 - alpha) * y_pred^lam * 1/ (1 - y_pred)
-        # Hess(l, y_pred) =  - y_val * alpha * lam * (lam - 1) * (1 - y_val)^{lam - 2} * log y_val - (1 - y_val) * (1 - alpha) * lam * (lam - 1) * y_pred^{lam - 2} * log (1 - y_pred)
-        y_pred[y_pred == 0] = 1e-6
-        y_pred[y_pred == 1] = 1. - 1e-6
-        print(np.count_nonzero(np.isnan(y_pred)), np.count_nonzero(y_pred))
-        #print(label)
-        grad = label * alpha * lam * np.power(1 - y_pred, lam - 1) * np.log(y_pred) + \
-                - label * alpha * np.power(1 - y_pred, lam) * 1. / y_pred + \
-                - (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * np.log(1 - y_pred) + \
-                + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./(1 - y_pred)
-        hess =  - label * alpha * lam * (lam - 1) * np.power(1 - y_pred, lam - 2) * np.log(y_pred) + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + \
-                + label * alpha * lam * np.power(1 - y_pred, lam - 1) * 1. / y_pred + label * alpha * np.power(1 - y_pred, lam) * 1. /( y_pred *  y_pred) + \
-                - (1 - label) * (1 - alpha) * lam * (lam - 1) * np.power(y_pred, lam - 2) * np.log (1 - y_pred) + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1. / (1 - y_pred) + \
-                + (1 - label) * (1 - alpha) * lam * np.power(y_pred, lam - 1) * 1./(1 - y_pred) + (1 - label) * (1 - alpha) * np.power(y_pred, lam) * 1./((1 - y_pred) * (1 - y_pred))
-        return grad, hess  
-    
-    def focal_binary_object(label, pred):
-        nonlocal alpha, lam
-        #gamma_indct = self.gamma_indct
-        # retrieve data from dtrain matrix
-        #label = dtrain.get_label()
-        # compute the prediction with sigmoid
-        sigmoid_pred = 1.0 / (1.0 + np.exp(-pred))
-        # gradient
-        # complex gradient with different parts
-        g1 = sigmoid_pred * (1 - sigmoid_pred)
-
-        g2 = label + ((-1) ** label) * sigmoid_pred
-        g3 = sigmoid_pred + label - 1
-        g4 = 1 - label - ((-1) ** label) * sigmoid_pred
-        g5 = label + ((-1) ** label) * sigmoid_pred
-        # combine the gradient
-        grad = alpha * g3 * robust_pow(g2, lam) * np.log(g4 + 1e-9) + \
-            ((-1) ** label) * robust_pow(g5, (lam + 1))
-        # combine the gradient parts to get hessian components
-        hess_1 = robust_pow(g2, lam) + \
-                lam * ((-1) ** label) * g3 * robust_pow(g2, (lam - 1))
-        hess_2 = ((-1) ** label) * g3 * robust_pow(g2, lam) / g4
-        # get the final 2nd order derivative
-        hess = ((hess_1 * np.log(g4 + 1e-9) - hess_2) * alpha +
-                (lam + 1) * robust_pow(g5, lam)) * g1
-
-        return grad, hess
-    
-    def focal_binary_object(label, pred):
-        # retrieve data from dtrain matrix
-        #label = dtrain.get_label()
-        # compute the prediction with sigmoid
-        # compute the prediction with sigmoid
-    """
+        self.prob = prob
 
     def __call__(self, label, pred):
         # retrieve data from dtrain matrix
@@ -346,4 +308,21 @@ class get_focal_loss(get_loss):
         hess = -(hess_first_term+hess_second_term)
         return grad, hess
      
-    
+     
+class get_loss:
+    def __init__(self, loss, use_sigmoid = False):
+        self.loss = loss
+        self.use_sigmoid = use_sigmoid
+
+    def get_objective(self, *args, **kwargs):
+        if ":" not in self.loss and callable(self.loss):
+            kwargs.update({"prob": self.prob})
+            return loss(*args, **kwargs)
+        else:
+            return self.loss
+
+    def prob(self, pred):
+        if self.use_sigmoid:
+            return 1.0 / (1.0 + np.exp(-pred))
+        else:
+            return pred

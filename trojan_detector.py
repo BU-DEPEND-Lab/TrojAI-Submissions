@@ -15,7 +15,7 @@ from utils.abstract import AbstractDetector
 from utils.flatten import flatten_model, flatten_models, flatten_grads
 from utils.healthchecks import check_models_consistency
 from utils.models import create_layer_map, load_model, \
-    load_models_dirpath, load_ground_truth, get_focal_loss
+    load_models_dirpath, load_ground_truth, get_loss
 from utils.padding import create_models_padding, pad_model
 from utils.reduction import (
     fit_feature_reduction_algorithm,
@@ -74,10 +74,14 @@ class Detector(AbstractDetector):
             "std": metaparameters["train_weight_table_params_std"],
             "scaler": metaparameters["train_weight_table_params_scaler"],
         }
-        self.objective =  metaparameters["objective"]
-        if 'focal' in self.objective:
-           gamma_indict = metaparameters["gamma"]
-           self.objective = get_focal_loss(gamma_indict)
+
+        loss = metaparameters["objective"]
+        if loss == 'focal_loss':
+            self.loss = get_loss (loss, use_sigmoid = True)
+            self.objective = self.loss.get_objective(metaparameters["gamma"])
+        else:
+            self.loss = get_loss (loss)
+            self.objective = self.loss.get_objective()
          
     def write_metaparameters(self, *metaparameters):
         metaparameters_base = {
@@ -231,7 +235,7 @@ class Detector(AbstractDetector):
         data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
         
         params = { 
-            'objective': [self.objective], 
+            # 'objective': ["reg:logistic"], 
             'max_depth': [10, 15, 20, 30],
            'learning_rate': [0.01, 0.1, 0.2, 0.3],
            'subsample': np.arange(0.5, 1.0, 0.1),
@@ -279,7 +283,7 @@ class Detector(AbstractDetector):
         print(f'tpr {tpr}')
         print('train auc', metrics.auc(fpr, tpr))
         """
-        y_pred_ = self.objective.prob(clf.predict(x_test))
+        y_pred_ = self.loss.prob(clf.predict(x_test))
         
         if 'svm' in model_name:
             print("Testing comparison:\n", y_test.reshape(-1), "\n",y_pred_>= 0)
@@ -288,12 +292,12 @@ class Detector(AbstractDetector):
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
         elif "xgboost_regressor" in model_name:
             #if not isinstance(self.objective, str):
-            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
-            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+            print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.0)
+            print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.0)))
             #else:
             #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
             #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
-            y_pred_ = self.objective.prob(clf.predict(x_test))
+            y_pred_ = self.loss.prob(clf.predict(x_test))
             fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
         print(f'test fpr {fpr}')
         print(f'tpr {tpr}')
@@ -307,7 +311,7 @@ class Detector(AbstractDetector):
         Y = np.vstack((y_train, y_test))
         clf.fit(X, Y) 
         
-        y_pred = self.objective.prob(clf.predict(X))
+        y_pred = self.loss.prob(clf.predict(X))
         fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
         print(f'all dataset fpr {fpr}')
         print(f'tpr {tpr}')
@@ -419,7 +423,7 @@ class Detector(AbstractDetector):
 
 
         if not isinstance(self.objective, str):
-            probability = str(np.mean(self.objective.prob(clf.predict(X)) >= 0.5).item())
+            probability = str(np.mean(self.loss.prob(clf.predict(X)) >= 0.0).item())
         else:
              probability = str(np.mean(clf.predict(X)).item())
 
