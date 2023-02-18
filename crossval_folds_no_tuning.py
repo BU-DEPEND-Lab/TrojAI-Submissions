@@ -104,35 +104,37 @@ hp_config=[];
 archs=[params.arch];
 
 hp_config.append(hp.choice('arch',archs));
-hp_config.append(hp.qloguniform('nh',low=math.log(125),high=math.log(128),q=1));
+hp_config.append(hp.qloguniform('nh',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh2',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh3',low=math.log(16),high=math.log(512),q=1));
-hp_config.append(hp.quniform('nlayers',low=4,high=5,q=1));
+hp_config.append(hp.quniform('nlayers',low=1,high=12,q=1));
 hp_config.append(hp.quniform('nlayers2',low=1,high=12,q=1));
 hp_config.append(hp.quniform('nlayers3',low=1,high=12,q=1));
 hp_config.append(hp.loguniform('margin',low=math.log(2),high=math.log(1e1)));
 #   OPT
-hp_config.append(hp.qloguniform('epochs',low=math.log(900),high=math.log(1000),q=1));
-hp_config.append(hp.loguniform('lr',low=math.log(1e-3),high=math.log(1e-2)));
+hp_config.append(hp.qloguniform('epochs',low=math.log(10),high=math.log(1000),q=1));
+hp_config.append(hp.loguniform('lr',low=math.log(1e-6),high=math.log(1e-2)));
 hp_config.append(hp.loguniform('decay',low=math.log(1e-8),high=math.log(1e-3)));
-hp_config.append(hp.qloguniform('batch',low=math.log(32),high=math.log(64),q=1));
+hp_config.append(hp.qloguniform('batch',low=math.log(8),high=math.log(64),q=1));
 
 #Function to compute performance
-def configure_pipeline():#params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch):
+def configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch):
     params_=smartparse.obj();
     #params_.arch=arch;
-    params_.nh=256; #int(nh);
-    params_.nh2=256;#int(nh2);
-    params_.nh3=256;#int(nh3);
-    params_.nlayers=4; #int(nlayers);
-    params_.nlayers2=4;#int(nlayers2);
-    params_.nlayers3=4;#int(nlayers3);
-    params_.margin=2#margin;
-    params_.epochs=100#int(epochs);
-    params_.lr=1e-3;#lr;
-    params_.decay=1e-5;#decay;
-    params_.batch=32; #int(batch);
+    params_.nh=int(nh);
+    params_.nh2=int(nh2);
+    params_.nh3=int(nh3);
+    params_.nlayers=int(nlayers);
+    params_.nlayers2=int(nlayers2);
+    params_.nlayers3=int(nlayers3);
+    params_.margin=margin;
+    params_.epochs=int(epochs);
+    params_.lr=lr;
+    params_.decay=decay;
+    params_.batch=int(batch);
+    params_=smartparse.merge(params_,params);
     return params_;
+
 
 crossval_splits=[];
 folds=data.generate_random_crossval_folds(nfolds=params.nsplits);
@@ -140,13 +142,13 @@ crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in fo
 
 best_auc_so_far=-1;
 best_loss_so_far=1e10;
-def run_crossval():#p):
+def run_crossval(p):
     global best_loss_so_far
     global best_auc_so_far
     max_batch=16;
-    #arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
-    #params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
-    params_=smartparse.merge(configure_pipeline(),params);
+    arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
+    params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
+    #params_=smartparse.merge(configure_pipeline(),params);
     arch_=importlib.import_module(params_.arch);
     #Random splits N times
     auc=[];
@@ -321,7 +323,7 @@ def run_crossval():#p):
         cepre.append(ce_pre_i);
         session.log('Split %d, loss %.4f (%.4f), auc %.4f, acc %.4f, time %f'%(split_id,ce_i,ce_pre_i,auc_i,float(true_pred / tot), time.time()-t0));
 
-        ensemble.append({'net':net.cpu().state_dict(),'params':params_,'T':float(T.data.cpu())})
+        ensemble.append({'net':net.cpu().state_dict(),'params':params_})#,'T':float(T.data.cpu())})
 
     mistakes=sorted(mistakes);
     session.log('Mistakes: '+','.join(['%d'%i for i in mistakes]));
@@ -352,14 +354,14 @@ def run_crossval():#p):
     return goal;
 
 
-run_crossval()
+#run_crossval()
 #Get results from hyper parameter search
-#best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
-#if len(best) == 0:
-#    best=util.macro.obj(best);
-#params_=configure_pipeline(**best);
-#hyper_params_str=json.dumps(best);
-#session.log('Best hyperparam (%s)'%(hyper_params_str));
+best=fmin(run_crossval,hp_config,algo=tpe.suggest,max_evals=params.budget)
+if len(best) == 0:
+    best=util.macro.obj(best);
+params_=configure_pipeline(**best);
+hyper_params_str=json.dumps(best);
+session.log('Best hyperparam (%s)'%(hyper_params_str));
 
 
 

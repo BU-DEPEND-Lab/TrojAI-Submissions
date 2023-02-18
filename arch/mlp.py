@@ -42,7 +42,7 @@ class MLP(nn.Module):
 class new(nn.Module):
     def __init__(self, params, input_size=None, output_size=1):
         super(new,self).__init__()
-        nh=100 * params.nh;
+        #nh=100 * params.nh;
         nh3=params.nh3;
         nlayers=params.nlayers
         nlayers2=params.nlayers2
@@ -53,12 +53,14 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
-        self.mlp=MLP(100 * 20,nh,output_size,nlayers);
+        self.mlp=MLP(196608,nh,output_size,nlayers);
         return;
     
     def forward(self,data_batch):
-        x = data_batch['fvs'];
-        logits = self.mlp(torch.stack(x).cuda());
+        x = torch.stack(data_batch['fvs']).cuda()[:, ::90];
+        #print(x.shape)
+        #print(x.view(-1, self.mlp.ninput).shape)
+        logits = self.mlp(x);
         
         return logits.view(-1)
     def logp(self, data_batch):

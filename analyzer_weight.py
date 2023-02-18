@@ -206,7 +206,10 @@ def run(interface,nbins=100,szcap=4096):
         
         
         #grads=[param.grad for param in interface.model.parameters()]
-        attrs = [torch.mul(x.data, x.grad.data)]
+        attrs = [torch.mul(x.data, x.grad.data).flatten().detach().cpu()]
+
+        """
+        # Get gradient w.r.t the input first
         for layer in activations:
            #print(activations[layer])
             f = activations[layer].data            
@@ -219,10 +222,12 @@ def run(interface,nbins=100,szcap=4096):
             fvs_attr_i = fvs_attr_i + analyze(attr.cuda(), nbins, szcap = szcap)
         
         fvs_attr.append(torch.stack(fvs_attr_i,dim=0));
-         
+        """
+        fvs_attr.append(torch.cat(attrs))
+    
     #fvs=torch.stack(fvs,dim=0);
-    fvs_attr=torch.stack(fvs_attr,dim=0).detach();
-    print(fvs_attr.shape)
+    #fvs_attr=torch.stack(fvs_attr,dim=0).detach();
+    print(len(fvs_attr), fvs_attr[0].shape)
     return fvs_attr#,fvs_examples;
  
 #Fuzzing call for TrojAI R9
@@ -251,7 +256,7 @@ if __name__ == "__main__":
     default_params=smartparse.obj();
     default_params.nbins=100;
     default_params.szcap=4096;
-    default_params.fname='data_r10_weight.pt'
+    default_params.fname='data_r10_weight_sub.pt'
     params=smartparse.parse(default_params);
     params.argv=sys.argv
     data.d['params']=db.Table.from_rows([vars(params)]);
@@ -274,11 +279,13 @@ if __name__ == "__main__":
 
             f.close();
             '''
-
-            data['table_ann']['model_name'].append('id-%08d'%id);
-            data['table_ann']['model_id'].append(id);
-            #data['table_ann']['label'].append(label);
-            data['table_ann']['fvs'].append(fv);
+            fvs = fv[:]
+            for fv in fvs:
+                data['table_ann']['model_name'].append('id-%08d'%id);
+                data['table_ann']['model_id'].append(id);
+                #data['table_ann']['label'].append(label);
+                
+                data['table_ann']['fvs'].append(fv[::90]);
 
             print('Model %d(%d), time %f'%(i,id,time.time()-t0));
             fname = params.fname
