@@ -243,12 +243,18 @@ class Detector(AbstractDetector):
            'colsample_bylevel': np.arange(0.4, 1.0, 0.2),
            'n_estimators': [100, 500, 1000, 2000]}
            
-        rand = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
-                         param_distributions=params,
-                         scoring='neg_root_mean_squared_error',
-                         n_iter=25, cv = 5, n_jobs = -1, refit = True,
-                         verbose=1)
-        rand.fit(x_train, y_train)
+        #hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+        #                 param_distributions=params,
+        #                 scoring='neg_root_mean_squared_error',
+        #                 n_iter=25, cv = 5, n_jobs = -1, refit = True,
+        #                 verbose=1)
+        hyp_src = GridSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+                            param_grid=params,
+                            scoring='roc_auc',
+                            n_jobs=-1, refit=True, cv=5, verbose=1, 
+                            return_train_score=True) 
+
+        hyp_src.fit(x_train, y_train)
         clf = rand.best_estimator_ #XGBRegressor(**rand.best_params_)
 
         """

@@ -1,5 +1,5 @@
 {
-	"objective": "reg:logistic",
+	"objective": "reg:squarederror",
 	"gamma": 2.0,
 	"num_data_per_model": 50,
 	"train_ICA_features": 200,
