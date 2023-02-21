@@ -255,7 +255,7 @@ class Detector(AbstractDetector):
                             return_train_score=True) 
 
         hyp_src.fit(x_train, y_train)
-        clf = rand.best_estimator_ #XGBRegressor(**rand.best_params_)
+        clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
 
         """
         #xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=5,
