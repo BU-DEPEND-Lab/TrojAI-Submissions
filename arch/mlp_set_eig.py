@@ -44,8 +44,8 @@ class MLP(nn.Module):
 class new(nn.Module):
     def __init__(self,params,input_size=None):
         super(new,self).__init__()
-        nh=params.nh;
-        nh3=params.nh3;
+        nh=10 * params.nh;
+        nh3=100 * params.nh3;
         nlayers=params.nlayers
         nlayers2=params.nlayers2
         
@@ -64,8 +64,9 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
-        self.encoder_hist=MLP(in_shape,nh,nh,nlayers);
-        self.encoder_combined=MLP(q*nh,nh3,2,nlayers2);
+        in_shape = 0
+        self.encoder_hist=MLP(in_shape + 20,nh,nh,nlayers);
+        self.encoder_combined=MLP(100*nh,nh3,2,nlayers2);
         self.w=nn.Parameter(torch.Tensor(1).fill_(1));
         self.b=nn.Parameter(torch.Tensor(1).fill_(0));
         return;
@@ -73,22 +74,23 @@ class new(nn.Module):
     def forward(self,data_batch):
         weight_dist=data_batch['fvs'];
         b=len(weight_dist);
-        
         h=[];
         #Have to process one by one due to variable nim & nclasses
         for i in range(b):
             h_i=self.encoder_hist(weight_dist[i].cuda());
-            print('before quantile', h_i, h_i.shape)
-            h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
-            print('quantile', h_i, h_i.shape)
+            #print('before quantile', h_i, h_i.shape)
+            #h_i=torch.quantile(h_i,self.q,dim=0).contiguous().view(-1);
+            #print('quantile', h_i, h_i.shape)
+            h_i = h_i.flatten()
+            h_i=self.encoder_combined(h_i.unsqueeze(0)).squeeze(0);
             h.append(h_i);
         
         h=torch.stack(h,dim=0);
-        print('before combined MLP', h, h.shape)
-        h=self.encoder_combined(h);
-        print('after combined MLP', h, h.shape)
+        #print('before combined MLP', h.shape)
+        #h=self.encoder_combined(h);
+        #print('after combined MLP', h.shape)
         h=torch.tanh(h)*self.margin;
-        print('output after passing to tanh', h, h.shape)
+        #print('output after passing to tanh', h.shape)
         return h
     
     def logp(self,data_batch):

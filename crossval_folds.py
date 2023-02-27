@@ -107,7 +107,7 @@ hp_config.append(hp.choice('arch',archs));
 hp_config.append(hp.qloguniform('nh',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh2',low=math.log(16),high=math.log(512),q=1));
 hp_config.append(hp.qloguniform('nh3',low=math.log(16),high=math.log(512),q=1));
-hp_config.append(hp.quniform('nlayers',low=1,high=12,q=1));
+hp_config.append(hp.quniform('nlayers',low=1,high=5,q=1));
 hp_config.append(hp.quniform('nlayers2',low=1,high=12,q=1));
 hp_config.append(hp.quniform('nlayers3',low=1,high=12,q=1));
 hp_config.append(hp.loguniform('margin',low=math.log(2),high=math.log(1e1)));
@@ -139,11 +139,12 @@ crossval_splits=[];
 folds=data.generate_random_crossval_folds(nfolds=params.nsplits);
 crossval_splits=[(data_train,data_test,data_test) for data_train,data_test in folds]
 
-
+best_auc_so_far=-1;
 best_loss_so_far=1e10;
 best_auc_so_far = 0.0;
 def run_crossval(p):
-    global best_loss_so_far, best_auc_so_far
+    global best_loss_so_far
+    global best_auc_so_far
     max_batch=16;
     arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch=p;
     params_=configure_pipeline(params,arch,nh,nh2,nh3,nlayers,nlayers2,nlayers3,margin,epochs,lr,decay,batch);
@@ -155,6 +156,8 @@ def run_crossval(p):
     #Random splits N times
     auc=[];
     ce=[];
+    true_preds = []
+    tots = []
     cepre=[];
     results_by_key={};
     t0=time.time();
@@ -181,16 +184,16 @@ def run_crossval(p):
                 net.zero_grad();
                 data_batch.cuda();
                 C=data_batch['label'];
+           
                 data_batch.delete_column('label');
                 scores_i=net(data_batch);
-
-                # loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
-                loss = criterion(scores_i, C.float().view(-1, 1))
-                # penny: spos is the mean of the scores of the correct label?
-                # spos=scores_i.gather(1,C.view(-1,1)).mean();
-                # penny: sneg is the mean of the exponential of the logits?
-                # sneg=torch.exp(scores_i).mean();
-                # loss=-(spos-sneg+1);
+                #print(scores_i.shape)
+                #scores_i = net.logp(data_batch).view(-1, 1)
+                loss=F.binary_cross_entropy_with_logits(scores_i,C.float());
+                #spos=scores_i.gather(1,C.view(-1,1)).mean();
+                #sneg=torch.exp(scores_i).mean();
+                #print(spos.shape, sneg.shape)
+                #loss=-(spos-sneg+1);
                 #print(float(loss))
                 l2=0;
                 for p in net.parameters():
@@ -220,14 +223,11 @@ def run_crossval(p):
             gt=torch.cat(gt,dim=0);
 
             auc_i=sklearn.metrics.roc_auc_score(gt.numpy(),scores.numpy());
-            loss_i=float(F.binary_cross_entropy(scores,gt.float().view(-1,1)));
-            if best_auc < auc_i:
-                best_auc = auc_i;
-                best_net = copy.deepcopy(net)
-
-            #if best_loss<auc_i:
-            #    best_loss=auc_i;
-            #    best_net=copy.deepcopy(net);
+            loss_i=float(F.binary_cross_entropy_with_logits(scores,gt.float()));
+    
+            if best_loss<auc_i:
+                best_loss=auc_i;
+                best_net=copy.deepcopy(net);
 
             #print('train %.4f, loss %.4f, auc %.4f'%(float(loss_total),float(loss_i),float(auc_i)))
             #for g in opt.param_groups:
@@ -290,18 +290,21 @@ def run_crossval(p):
                     ind=[i for i,k in enumerate(keys) if k==c or (k is None or k=='None')];
                     scores_c=[scores[i] for i in ind];
                     gt_c=[gt[i] for i in ind];
-                    auc_c,ce_c=compute_metrics(scores_c,gt_c);
-                    results[c]={'auc':auc_c,'ce':ce_c};
+                    auc_c,ce_c, true_pred, tot =compute_metrics(scores_c,gt_c);
+                    results[c]={'auc':auc_c,'ce':ce_c, 'true_pred': true_pred, 'tot': tot};
 
                 return results;
             else:
                 #Overall
                 auc=float(sklearn.metrics.roc_auc_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()));
-                ce=float(F.binary_cross_entropy(torch.Tensor(scores),torch.Tensor(gt).view(-1,1)));
-                return auc,ce;
+                ce=float(F.binary_cross_entropy_with_logits(torch.Tensor(scores),torch.Tensor(gt)));
+                true_pred = sklearn.metrics.accuracy_score(torch.LongTensor(gt).numpy(),torch.Tensor(scores).numpy()>= 0, normalize = False)
+                tot = torch.LongTensor(gt).numpy().shape[0]
+                #print(true_pred, tot)
+                return auc,ce, true_pred, tot;
 
-        auc_i,ce_i=compute_metrics(scores.tolist(),gt.tolist());
-        _,ce_pre_i=compute_metrics(scores_pre.tolist(),gt.tolist());
+        auc_i,ce_i, true_pred, tot =compute_metrics(scores.tolist(),gt.tolist());
+        _,ce_pre_i,_, _=compute_metrics(scores_pre.tolist(),gt.tolist());
         for i in range(len(gt)):
             if int(gt[i])==1 and float(scores[i])<=0:
                 mistakes.append(params.nsplits*i+split_id);
@@ -311,14 +314,19 @@ def run_crossval(p):
             results_i=compute_metrics(scores.tolist(),gt.tolist(),data_test.data['table_ann'][result_key])
             for k in results_i:
                 if not k in results_by_key:
-                    results_by_key[k]={'auc':[],'ce':[]};
+                    results_by_key[k]={'auc':[],'ce':[], 'true_pred': [], 'tot': [], 'acc': []};
                 results_by_key[k]['auc'].append(results_i[k]['auc'])
                 results_by_key[k]['ce'].append(results_i[k]['ce']);
+                results_by_key[k]['true_pred'].append(results_i[k]['true_pred']);
+                results_by_key[k]['tot'].append(results_i[k]['tot']);
+                results_by_key[k]['acc'].append(float(results_i[k]['true_pred']/results_i[k]['tot']))
 
         auc.append(auc_i);
         ce.append(ce_i);
+        true_preds.append(true_pred)
+        tots.append(tot)
         cepre.append(ce_pre_i);
-        session.log('Split %d, loss %.4f (%.4f), auc %.4f, time %f'%(split_id,ce_i,ce_pre_i,auc_i,time.time()-t0));
+        session.log('Split %d, loss %.4f (%.4f), auc %.4f, acc %.4f, time %f'%(split_id,ce_i,ce_pre_i,auc_i,float(true_pred / tot), time.time()-t0));
 
         ensemble.append({'net':net.cpu().state_dict(),'params':params_})
 
@@ -326,8 +334,13 @@ def run_crossval(p):
     session.log('Mistakes: '+','.join(['%d'%i for i in mistakes]));
     auc=torch.Tensor(auc);
     ce=torch.Tensor(ce);
+    #print(torch.tensor(true_preds), torch.sum(torch.tensor(true_preds)))
+    #print(torch.tensor(tot), torch.sum(torch.tensor(tot)))
+    acc = torch.sum(torch.tensor(true_preds)) / torch.sum(torch.tensor(tots))
     cepre=torch.Tensor(cepre);
-
+    #if float(auc.mean()) > best_auc_so_far:
+    #    best_auc_so_far=float(auc.mean());
+    #    torch.save(ensemble,session.file('model.pt'))
     if float(cepre.mean())<best_loss_so_far:
         best_loss_so_far=float(cepre.mean());
         torch.save(ensemble,session.file('min_loss_model.pt'))
@@ -335,15 +348,16 @@ def run_crossval(p):
         best_auc_so_far=float(auc.mean())
         torch.save(ensemble,session.file('max_auc_model.pt'))
 
-    session.log('AUC: %f + %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
+    session.log('AUC: %f + %f, ACC: %f, CE: %f + %f, CEpre: %f + %f (%s (%d,%d,%d), epochs %d, batch %d, lr %f, decay %f)'%(auc.mean(),2*auc.std(),acc, ce.mean(),2*ce.std(),cepre.mean(),2*cepre.std(),arch,nlayers,nlayers2,nh,epochs,batch,lr,decay));
 
-    #goal=-float(auc.mean());#-2*auc.std()
+    #goal=float(auc.mean())-auc.std()
     goal=float(cepre.mean());
-
+    
     for k in results_by_key:
         auc=torch.Tensor(results_by_key[k]['auc']);
         ce=torch.Tensor(results_by_key[k]['ce']);
-        session.log('\t KEY %s, AUC: %f + %f, CE: %f + %f'%(k,auc.mean(),2*auc.std(),ce.mean(),2*ce.std()));
+        acc = torch.Tensor(results_by_key[k]['acc'])
+        session.log('\t KEY %s, AUC: %f + %f, ACC: %f, CE: %f + %f'%(k,auc.mean(),2*auc.std(),acc, ce.mean(),2*ce.std()));
 
     return goal;
 

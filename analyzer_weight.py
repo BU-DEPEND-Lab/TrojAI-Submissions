@@ -1,11 +1,12 @@
 import os
+import traceback
 import sys
 import torch
 import time
 import json
 import jsonschema
 import jsonpickle
-
+import traceback
 import math
 from sklearn.cluster import AgglomerativeClustering
 
@@ -15,13 +16,15 @@ import util.smartparse as smartparse
 import helper_r10 as helper
 import engine_objdet as engine
 
+import torch
+import torch.nn.functional as F
 
 #value at top x percentile, x in 0~100
 def hist_v(w,bins=100):
-    s,_=w.sort(dim=0);
-    wmin=float(w.min());
-    wmax=float(w.max());
-
+    #s,_=w.sort(dim=0);
+    #wmin=float(w.min());
+    #wmax=float(w.max());
+    s = w
     n=s.shape[0];
     hist=torch.Tensor(bins);
     for i in range(bins):
@@ -56,55 +59,174 @@ def analyze(param, k, szcap=4096):
         # z=torch.zeros(n,n).to(param.device);
         # z[:min(ny,n),:min(nx,n)]=param.data[:min(ny,n),:min(nx,n)];
 
-#         print('before svd')
-        U, S, V = param.svd()
-#         print('after svd')
-        # e,_=z.eig();
-        # eig_norm = torch.linalg.norm(e, dim=1)
-        #e = e/eig_norm
+        # matrix norm
+        mat_norm = torch.linalg.matrix_norm(z).view(1)
+    
 
-        mean = S.mean(axis=0).unsqueeze(0)
-        std = torch.std(S, dim=0, unbiased=False).unsqueeze(0) # use biased std to avoid NaN
+        #
+        e,_=z.eig();
+        # eigen mean
+        e_mean = e.mean(axis = 0).flatten()
+        # eigen std
+        e_std = torch.std(e, dim = 0, unbiased=False).flatten()
+        # eigen norm
+        e_norm = torch.linalg.norm(e, dim = 0).flatten()
+        ids_norm_based_desc = torch.argsort(e_norm).flatten()
+        top_k_ids = ids_norm_based_desc.tolist()[-1: -11:-1]
+        top_k_e = e[top_k_ids].flatten()
+        bot_k_ids = ids_norm_based_desc[:10]
+        bot_k_e = e[bot_k_ids].flatten()
 
-#         print('S shape', S.shape)
-        S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1)).cuda()), dim=1)
-        eig_norm = torch.linalg.norm(S_expanded, dim=1)
-        indices_norm_based_desc = torch.argsort(eig_norm)
-        top_k_indices = indices_norm_based_desc[-1 * k:]
-        top_k_eigen = S[top_k_indices]
-        bottom_k_indices = indices_norm_based_desc[:k]
-        bottom_k_eigen = S[bottom_k_indices]
+        e = e/torch.linalg.norm(e)
+        
+        # e is normalized to +-1 or +-i or 0
+        #Analyze eigs
+        
+        #1) eig distribution
+        e2=(e**2).sum(1);
+        # e can be real or imaginary, of which the square is -1
+        rank=int(e2.gt(0).long().sum());
+        # count the number of ones in the eigenvalues
+        if rank<m:
+            #pad 0s to eig to replace NAN
+            e_nz=e[e2.gt(0)].clone();
+            e_z=torch.Tensor(m-rank,2).fill_(0).to(e.device);
+            e=torch.cat((e_nz,e_z),dim=0);
+        else:
+            # Even if the matrix is full ranked
+            #Still adds a 0 for perspective
+            e_nz=e[e2.gt(0)].clone();
+            e_z=torch.Tensor(1,2).fill_(0).to(e.device);
+            e=torch.cat((e_nz,e_z),dim=0);
+        #print(e)
+        """
+        #Get histogram of abs, real, imaginary
+        e2=(e**2).sum(1)**0.5;
+        e2_hist=hist_v(e2,nbins);
+        er_hist=hist_v(e[:,0],nbins);
+        ec_hist=hist_v(e[:,1],nbins);
 
         fv=torch.cat((mean, std, top_k_eigen, bottom_k_eigen, torch.linalg.norm(S).unsqueeze(0)),dim=0)
 
-        return [fv];
+
+        #Get histogram of weight value and abs
+        w=param.data.view(-1);
+        w_hist=hist_v(w,nbins);
+        wabs_hist=hist_v(w.abs(),nbins);
+        """
+        # SVD decomposition
+        U, S, V = param.svd()
+        S = S.cpu()
+        s_mean = S.mean(axis=0).flatten()
+        s_std = torch.std(S, dim=0, unbiased=False).flatten() # use biased std to avoid NaN        
+        #S_expanded = torch.cat((S.unsqueeze(dim=1), torch.zeros((len(S), 1))), dim=1)
+        s_norm = torch.linalg.norm(S, dim=0).flatten()
+        indices_norm_based_desc = torch.argsort(s_norm).flatten()
+        top_k_ids = indices_norm_based_desc.tolist()[-1: -11:-1]
+        top_k_s = S[top_k_ids].flatten()
+        bot_k_ids = indices_norm_based_desc[:10]
+        bot_k_s = S[bot_k_ids].flatten()
+        fv_1 = torch.cat([mat_norm.cpu(), e_mean.cpu(), e_std.cpu(), e_norm.cpu(), top_k_e.cpu(), bot_k_e.cpu(), s_mean.cpu(), s_std.cpu(), s_norm.cpu(), top_k_s.cpu(), bot_k_s.cpu()])
+        #fv_2 = torch.cat([e2_hist,er_hist,ec_hist,eig_persist,w_hist,wabs_hist])
+        #print(fv_1.shape, fv_2.shape)
+        #fv=torch.cat((fv_1, fv_2));
+        
+        return [fv_1];
     else:
         return [];
+def run(interface,nbins=100,szcap=4096):
+    #fvs=[];
+    fvs_attr = []
+    data=interface.load_examples();
+    examples=data['fvs']
+    labels=data['labels']
+    """
+    for i,param in enumerate(interface.model.parameters()):
+        fvs=fvs+analyze(param.data.cuda(),nbins=nbins,szcap=szcap);
+        if len(fvs) >= nbins:
+            break
+    fvs=torch.stack(fvs[:nbins])#, nbins));
+    """
+ 
+    activations = {}
+    def get_activation(name):
+        def hook(model, input, output):
+            activations[name] = output 
+            output.retain_grad()
+        return hook
+    
+    def get_attribution(name):
+        activation = activations[name]
+        return torch.mul(activation.grad.data.flatten(), activation.flatten())
+    
+    fc_layers = []
+    #print(interface.model.state_dict().keys())
+    for layer in interface.model.state_dict().keys():
+        #print(layer)
+        #if 'layer' in layer or 'fc' in layer:  
+        #    layer_name = layer.split('.')[0]
+        #    if layer_name in fc_layers:
+        #        continue  
+        layer_name_lst = layer.split('.')
+        layer_name = ""
+        for layer_name_ in layer_name_lst:
+            if layer_name == "":
+                layer_name = layer_name_
+            else:
+                layer_name = '.'.join([layer_name, layer_name_])
+            if layer_name in fc_layers:
+                break
+            try:
+                interface.model.__getattr__(layer_name).register_forward_hook(get_activation(layer_name)) 
+                
+                fc_layers.append(layer_name)
+                #print(fc_layers[-1])
+                break
+            except:
+                continue
 
-def run(interface, k, szcap=4096):
-    fvs=[];
-    for param in interface.model.parameters():
-        #print('fvs', len(fvs))
-        fvs=fvs+analyze(param.data, k, szcap=szcap);
+                
+    print(f"Fetch the outputs of {fc_layers}")
+    for i in range(len(examples)):
+        fvs_attr_i=[]
+        interface.model.zero_grad()
+        #print(examples[i:i+1])
+        print('Example %d:'%i,examples[i:i+1].view(-1).max());
+        x = examples[i:i+1].cuda()
+        x.requires_grad = True
+        scores,preds=interface.inference(x);
+        #print(scores.shape,labels[i:i+1])
+        print('Score %d:'%i,scores.view(-1).max());
+        logp=F.log_softmax(scores,dim=1);
+        loss=F.cross_entropy(logp,torch.LongTensor([labels[i]]).cuda());
+        loss.backward();
+        
+        
+        #grads=[param.grad for param in interface.model.parameters()]
+        attrs = [torch.mul(x.data, x.grad.data).flatten().detach().cpu()]
 
-    #print()
-    #print('fvs shape', len(fvs), len(fvs[0]), len(fvs[49]))
-    fvs=torch.stack(fvs);
-    #print('after torch stack', len(fvs))
-    #print()
-
-    # 302 x 4
-
-    min_features = torch.min(fvs, dim=0).values
-    max_features = torch.max(fvs, dim=0).values
-    mean_features = torch.mean(fvs, dim=0)
-    std_features = torch.std(fvs, dim=0)
-    fvs = torch.cat((min_features, max_features, mean_features, std_features), dim=0)
-
-    return fvs;
-
-
-
+        """
+        # Get gradient w.r.t the input first
+        for layer in activations:
+           #print(activations[layer])
+            f = activations[layer].data            
+            g = activations[layer].grad.data
+    
+            attr = torch.mul(f, g) 
+            attrs.append(attr)
+         
+        for i, attr in enumerate(attrs):
+            fvs_attr_i = fvs_attr_i + analyze(attr.cuda(), nbins, szcap = szcap)
+        
+        fvs_attr.append(torch.stack(fvs_attr_i,dim=0));
+        """
+        fvs_attr.append(torch.cat(attrs))
+    
+    #fvs=torch.stack(fvs,dim=0);
+    #fvs_attr=torch.stack(fvs_attr,dim=0).detach();
+    print(len(fvs_attr), fvs_attr[0].shape)
+    return fvs_attr#,fvs_examples;
+ 
 #Fuzzing call for TrojAI R9
 def extract_fv(id=None, model_filepath=None, scratch_dirpath=None, examples_dirpath=None, params=None):
     t0=time.time();
@@ -129,7 +251,7 @@ if __name__ == "__main__":
 
     default_params=smartparse.obj();
     default_params.szcap=4096;
-    default_params.fname='data_r11_k3_20_features.pt'
+    default_params.fname='data_r10_weight_sub.pt'
     params=smartparse.parse(default_params);
     params.argv=sys.argv
     data.d['params']=db.Table.from_rows([vars(params)]);
@@ -152,17 +274,26 @@ if __name__ == "__main__":
 
             f.close();
             '''
-
-            data['table_ann']['model_name'].append('id-%08d'%id);
-            data['table_ann']['model_id'].append(id);
-            #data['table_ann']['label'].append(label);
-            data['table_ann']['fvs'].append(fv);
+            fvs = fv[:]
+            for fv in fvs:
+                data['table_ann']['model_name'].append('id-%08d'%id);
+                data['table_ann']['model_id'].append(id);
+                #data['table_ann']['label'].append(label);
+                
+                data['table_ann']['fvs'].append(fv[::90]);
 
             print('Model %d(%d), time %f'%(i,id,time.time()-t0));
+            fname = params.fname
+            #fname = params.fname.split('.')
+            #fname[0] = fname[0] + f"_{fv.shape[0]}"
+            #fname = '.'.join(fname)
+            
             if i%1==0:
-                data.save(params.fname);
+                data.save(fname);
         except AttributeError as e:
             print(f"Skip loading Model-{id}: {e}")
+            print(traceback.format_exc()) 
 
     data.save(params.fname);
 
+ 

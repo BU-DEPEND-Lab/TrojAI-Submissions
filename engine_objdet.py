@@ -7,8 +7,9 @@ import copy
 import torch
 import torch.nn.functional as F
 import torchvision
+from torchvision.io import read_image
 import util.db as db
-
+from PIL import Image
 
 def prepare_boxes(anns, image_id):
     if len(anns) > 0:
@@ -42,12 +43,42 @@ def prepare_boxes(anns, image_id):
 
 class new:
     def __init__(self,model_filepath):
+        self.model_filepath = model_filepath
         self.model=torch.load(model_filepath).cuda();
+        print(type(self.model))
         #self.model.half();
         self.model.eval()
-    
+
+    def load_examples(self,examples_dirpath=None):
+        if examples_dirpath is None:
+            examples_dirpath = os.path.join(os.path.dirname(self.model_filepath), 'clean-example-data/')
+        
+        
+        fvs=[]
+        labels=[];
+        for examples_dir_entry in os.scandir(examples_dirpath):
+            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".jpg"):
+                #print(examples_dir_entry.path, examples_dir_entry.path.split('.jpg')[0])
+                feature_vector = read_image(examples_dir_entry.path).unsqueeze(dim = 0).float()
+                 
+                fvs.append(feature_vector)
+
+                
+                ground_truth_filepath = examples_dir_entry.path.split('.jpg')[0] + '.json'  
+                #print(ground_truth_filepath)
+                with open(ground_truth_filepath, 'r') as ground_truth_file:
+                    ground_truth = ground_truth_file.readline()
+                labels.append(torch.tensor([[int(ground_truth)]]));
+
+ 
+        fvs=torch.cat(fvs,dim=0);
+        labels = torch.cat(labels, dim = 0);
+        return {'fvs':fvs,'labels':labels};
     #Load data into memory, for faster processing.
-    def load_examples(self,examples_dirpath,scratch_dirpath='',bsz=12,shuffle=False):
+    
+    def load_examples_w_annotations(self,examples_dirpath = None,scratch_dirpath='',bsz=12,shuffle=False):
+        if examples_dirpath is None:
+            examples_dirpath = os.path.join(os.path.dirname(self.model_filepath), 'clean-example-data/')
         fns=[os.path.join(examples_dirpath, fn) for fn in os.listdir(examples_dirpath) if fn.endswith('.jpg')]
         fns.sort()
         
@@ -117,13 +148,10 @@ class new:
     #Perform inference
     #Compute 
     def inference(self,examples):
-        with torch.no_grad():
-            outputs=[];
-            for i in range(len(examples['im'])):
-                loss,pred=self.model([examples['im'][i].cuda()],[{k: v.cuda() for k, v in examples['target'][i].items()}]);
-                outputs.append({'loss':loss,'pred':pred[0]});
-        
-        return outputs
+        #with torch.no_grad():
+        scores =self.model(examples.cuda())
+        _, preds = scores.max(dim = 0)
+        return scores, preds
     
     
 

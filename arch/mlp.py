@@ -36,13 +36,13 @@ class MLP(nn.Module):
             h=F.relu(h);
         
         h=self.layers[-1](h);
-        return self.sigmoid(h)
+        return h
 
 
 class new(nn.Module):
     def __init__(self, params, input_size=None, output_size=1):
         super(new,self).__init__()
-        nh=params.nh;
+        #nh=100 * params.nh;
         nh3=params.nh3;
         nlayers=params.nlayers
         nlayers2=params.nlayers2
@@ -53,11 +53,16 @@ class new(nn.Module):
             in_shape = input_size
         else:
             in_shape = bins*6 
-        self.mlp=MLP(in_shape,nh,output_size,nlayers);
+        self.mlp=MLP(196608,nh,output_size,nlayers);
         return;
     
     def forward(self,data_batch):
-        x = data_batch['fvs'];
-        prob = self.mlp(torch.stack(x).cuda());
+        x = torch.stack(data_batch['fvs']).cuda()[:, ::90];
+        #print(x.shape)
+        #print(x.view(-1, self.mlp.ninput).shape)
+        logits = self.mlp(x);
         
-        return prob
+        return logits.view(-1)
+    def logp(self, data_batch):
+
+        return nn.Sigmoid()(self.forward(data_batch))
