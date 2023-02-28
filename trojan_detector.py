@@ -17,6 +17,18 @@ import logging
 import warnings
 
 warnings.filterwarnings("ignore")
+from utils.models import create_layer_map, load_model, \
+    load_models_dirpath, load_ground_truth, get_loss
+
+from sklearn.linear_model import SGDClassifier 
+import sklearn.model_selection
+from sklearn.metrics import accuracy_score, roc_curve, auc
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from joblib import dump, load
+from sklearn import metrics
+from sklearn import svm
+
+from feature_extractor import FeatureExtractor   
 
 
 def prepare_boxes(anns, image_id):
@@ -67,6 +79,7 @@ def example_trojan_detector(model_filepath,
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info("Using compute device: {}".format(device))
     
+    """
     logging.info('Extracting features')
     import analyzer_weight as feature_extractor
     fv=feature_extractor.extract_fv(model_filepath=model_filepath, scratch_dirpath=scratch_dirpath, examples_dirpath=examples_dirpath, params=config);
@@ -106,6 +119,33 @@ def example_trojan_detector(model_filepath,
     logging.info('Trojan Probability: {}'.format(trojan_probability))
     with open(result_filepath, 'w') as fh:
         fh.write("{}".format(trojan_probability))
+    """
+
+    clf = XGBRegressor(seed = 20)
+    clf.load_model(self.model_filepath);
+    
+    feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath)
+    X = None
+        
+    if X is None:
+        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)).flatten()
+    else:
+        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)))).flatten()
+    logging.info(f"dataset size: {X.shape}")
+    #with open(self.model_filepath, "rb") as fp:
+    #    regressor: RandomForestRegressor = pickle.load(fp)
+    
+    X = X.reshape((-1, X.shape[-1]))
+
+    probability = str(np.mean(np.abs(self.loss.prob(clf.predict(X)))).item())
+    #if not isinstance(self.objective, str):
+    #else:
+    #     probability = str(np.mean(clf.predict(X)).item())
+
+    with open(result_filepath, "w") as fp:
+        fp.write(probability)
+
+    logging.info("Trojan probability: %s", probability)
 
 
 
@@ -138,6 +178,132 @@ def configure(source_dataset_dirpath,
 
     with open(os.path.join(output_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
         f.write(jsonpickle.encode(example_dict, warn=True, indent=2))
+    
+    model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
+    logging.info(f"Loading % models ...", len(model_path_list))
+
+    feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath)
+    X = None
+    Y = None     
+    if X is None:
+        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)).flatten()
+    else:
+        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)))).flatten()
+    logging.info(f"dataset size: {X.shape}")
+    for model_path in model_path_list:
+        y = load_ground_truth(model_path)
+        if Y is None:
+            Y = y 
+            continue
+        else:
+            Y = np.vstack((Y, y))
+ 
+    print(np.count_nonzero(np.isnan(Y)))
+
+    x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
+        
+    y_train = y_train.repeat(x_train.shape[1], axis = 1).reshape((-1, 1))
+    x_train = x_train.reshape((-1, x_train.shape[-1]))
+    ids_train = np.arange(x_train.shape[0])
+    np.random.shuffle(ids_train)
+
+    y_train = y_train[ids_train]
+    x_train = x_train[ids_train]
+
+    y_test = y_test.repeat(x_test.shape[1], axis = 1).reshape((-1, 1))
+    x_test = x_test.reshape((-1, x_test.shape[-1]))
+    ids_test = np.arange(x_test.shape[0])
+    np.random.shuffle(ids_test)
+
+    y_test = y_test[ids_test]
+    x_test = x_test[ids_test]
+
+
+    print('x_train', x_train.shape)
+    print("y_train", y_train.shape)
+    print('x_test', x_test.shape)
+    print('y_test', y_test.shape)
+
+    model_name = "xgboost_regressor"
+    data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
+    
+    params = { 
+        # 'objective': ["reg:logistic"], 
+        'max_depth': [10, 20, 40],
+        'learning_rate': [0.01, 0.1, 0.001],
+        'subsample': np.arange(0.5, 1.0, 0.2),
+        'colsample_bytree': np.arange(0.4, 1.0, 0.2),
+        'colsample_bylevel': np.arange(0.4, 1.0, 0.2),
+        'n_estimators': [100, 500, 1000, 2000]}
+        
+    hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+                     param_distributions=params,
+                     scoring='neg_root_mean_squared_error',
+                     n_iter=25, cv = 5, n_jobs = -1, refit = True,
+                     verbose=1)
+    """
+    hyp_src = GridSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+                        param_grid=params,
+                        scoring='roc_auc',
+                        n_jobs=-1, refit=True, cv=5, verbose=1, 
+                        return_train_score=True) 
+    """
+    hyp_src.fit(x_train, y_train)
+    clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
+
+    y_pred_ = clf.predict(x_test)
+    
+    if 'svm' in model_name:
+        print("Testing comparison:\n", y_test.reshape(-1), "\n",y_pred_>= 0)
+        print('test acc', accuracy_score(y_test.reshape(-1), y_pred_ >= 0))
+        y_pred_probs_ = clf.predict_proba(x_test)
+        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
+    elif "xgboost_regressor" in model_name:
+        #if not isinstance(self.objective, str):
+        print("Testing comparison:\n", y_test.reshape(-1), "\n", self.loss.prob(y_pred_) >= 0.5)
+        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(self.loss.prob(y_pred_) >= 0.5)))
+        #else:
+        #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
+        #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+        y_pred_ = self.loss.prob(clf.predict(x_test))
+        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
+    print(f'test fpr {fpr}')
+    print(f'tpr {tpr}')
+    print('test auc', metrics.auc(fpr, tpr))
+    logging.info("Saving model...")
+    dump(clf, f'round12_{model_name}.joblib') 
+
+    logging.info("Now train on all dataset")
+    
+    X = np.vstack((x_train, x_test))
+    Y = np.vstack((y_train, y_test))
+    clf.fit(X, Y) 
+    
+    y_pred = self.loss.prob(clf.predict(X))
+    fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
+    print(f'all dataset fpr {fpr}')
+    print(f'tpr {tpr}')
+    print('all dataset auc', metrics.auc(fpr, tpr))
+        
+    #logging.info("Training RandomForestRegressor model...")
+    #model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+    #model.fit(X, y)
+
+    
+    #logging.info("Saving RandomForestRegressor model...")
+    #logging.info("Saving XGBoostRegressor model...")
+    
+    #with open(self.model_filepath, "wb") as fp:
+    #    pickle.dump(model, fp)
+    
+    if "xgboost" in model_name:
+        clf.save_model(self.model_filepath)
+
+    self.write_metaparameters(feature_extractor.write_metaparameters())
+    
+    logging.info("Configuration done!")
+
+
 
 
 if __name__ == "__main__":

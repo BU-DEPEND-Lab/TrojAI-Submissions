@@ -4,6 +4,7 @@ from os.path import join
 import os
 import torch
 import torch.nn.functional as F
+from torchvision.io import read_image
 from tqdm import tqdm
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -84,16 +85,21 @@ def load_examples(model_dirpath: str, clean = True):
     Returns:
 
     """  
-    examples = None
+    fvs=[]
+    labels=[]
     for examples_dir_entry in os.scandir(join(model_dirpath, "clean-example-data" if clean else "poisoned-example-data")):
-            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
-                feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
-                if examples is None:
-                    examples = feature_vector
-                else:
-                    examples = np.vstack((examples, feature_vector))
-
-    return examples
+            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".jpg"):
+                feature_vector = read_image(examples_dir_entry.path).unsqueeze(dim = 0).float()
+                fvs.append(feature_vector)
+                ground_truth_filepath = examples_dir_entry.path.split('.jpg')[0] + '.json'  
+                #print(ground_truth_filepath)
+                with open(ground_truth_filepath, 'r') as ground_truth_file:
+                    ground_truth = ground_truth_file.readline()
+                labels.append(torch.tensor([[int(ground_truth)]]))
+    fvs=torch.cat(fvs,dim=0);
+    labels = torch.cat(labels, dim = 0)
+    return {'fvs':fvs,'labels':labels}
+    
 
 def load_models_dirpath(models_dirpath):
     model_dict = {}
@@ -179,7 +185,7 @@ def inference_on_example_data(model, ground_truth, examples, scale_parameters_fi
                 grad_reprs.append(grad_repr) 
         return grad_reprs
 
-def get_attribution_from_example_data(model, ground_truth, examples, scale_parameters_filepath, grad = np.hstack):
+def get_attribution_from_example_data(model, ground_truth, examples, grad = np.hstack):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -188,15 +194,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
         """
         #print(f"Inference on example data {example}")
         # Setup scaler
-        scaler = StandardScaler()
-
-        scale_params = np.load(scale_parameters_filepath)
-
-        scaler.mean_ = scale_params[0]
-        scaler.scale_ = scale_params[1]
-
         
-         
         # Inference on models
         grad_reprs = []
         #print(">>>>>>> Example feature shape: ", examples.shape)
@@ -207,7 +205,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, scale_param
             #print(">>>>>>> Example: ")
             #for e in example:
             #    print(e)
-            feature_vector = torch.from_numpy(scaler.transform(np.asarray([example]).astype(float))).float()
+            feature_vector = torch.from_numpy(np.asarray([example]).astype(float)).float()
             feature_vector.requires_grad_()
             model.zero_grad()
             #pred = torch.argmax(model(feature_vector).detach()).item()
