@@ -402,6 +402,7 @@ if __name__ == "__main__":
                                     args.scratch_dirpath,
                                     args.examples_dirpath,
                                     args.source_dataset_dirpath,
+                                    args.metaparameters_filepath,
                                     args.round_training_dataset_dirpath,
                                     args.learned_parameters_dirpath,args)
         else:
