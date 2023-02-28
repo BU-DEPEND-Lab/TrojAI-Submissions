@@ -8,7 +8,6 @@ from torchvision.io import read_image
 from tqdm import tqdm
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 from abc import ABC, abstractmethod
 
 def create_layer_map(model_repr_dict):

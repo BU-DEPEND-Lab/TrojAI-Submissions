@@ -29,7 +29,7 @@ from sklearn import metrics
 from sklearn import svm
 
 from feature_extractor import FeatureExtractor   
-
+from xgboost import cv, XGBRegressor, XGBClassifier
 
 def prepare_boxes(anns, image_id):
     if len(anns) > 0:
@@ -66,7 +66,8 @@ def example_trojan_detector(model_filepath,
                             examples_dirpath,
                             source_dataset_dirpath,
                             round_training_dataset_dirpath,
-                            parameters_dirpath,
+                            metaparameters_filepath,
+                            learned_parameters_dirpath,
                             config):
     logging.info('model_filepath = {}'.format(model_filepath))
     logging.info('result_filepath = {}'.format(result_filepath))
@@ -120,25 +121,44 @@ def example_trojan_detector(model_filepath,
     with open(result_filepath, 'w') as fh:
         fh.write("{}".format(trojan_probability))
     """
+    metaparameters = json.load(open(metaparameter_filepath, "r"))
+    num_data_per_model = metaparameters["num_data_per_model"]
+    train_data_augmentation = metaparameters["train_data_augmentation"]
+
+    weight_table_params = {
+        "random_seed": metaparameters["train_weight_table_random_state"],
+        "mean": metaparameters["train_weight_table_params_mean"],
+        "std": metaparameters["train_weight_table_params_std"],
+        "scaler": metaparameters["train_weight_table_params_scaler"],
+    }
+
+    loss = metaparameters["objective"]
+    if loss == 'focal_loss':
+        loss = get_loss (loss, use_sigmoid = True)
+        objective = loss.get_objective(metaparameters["gamma"])
+    else:
+        loss = get_loss (loss)
+        objective = loss.get_objective()
+
 
     clf = XGBRegressor(seed = 20)
-    clf.load_model(self.model_filepath);
+    clf.load_model(model_filepath);
     
-    feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath)
+    feature_extractor = FeatureExtractor(metaparameters_dirpath, learned_parameters_dirpath)
     X = None
         
     if X is None:
-        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)).flatten()
+        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), num_data_per_model)).flatten()
     else:
-        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)))).flatten()
+        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), num_data_per_model)))).flatten()
     logging.info(f"dataset size: {X.shape}")
-    #with open(self.model_filepath, "rb") as fp:
+    #with open(model_filepath, "rb") as fp:
     #    regressor: RandomForestRegressor = pickle.load(fp)
     
     X = X.reshape((-1, X.shape[-1]))
 
-    probability = str(np.mean(np.abs(self.loss.prob(clf.predict(X)))).item())
-    #if not isinstance(self.objective, str):
+    probability = str(np.mean(np.abs(loss.prob(clf.predict(X)))).item())
+    #if not isinstance(objective, str):
     #else:
     #     probability = str(np.mean(clf.predict(X)).item())
 
@@ -151,21 +171,41 @@ def example_trojan_detector(model_filepath,
 
 
 def configure(source_dataset_dirpath,
-              output_parameters_dirpath,
+              metaparameters_filepath,
+              learned_parameters_dirpath,
               configure_models_dirpath):
     logging.info('Configuring detector parameters with models from ' + configure_models_dirpath)
 
-    os.makedirs(output_parameters_dirpath, exist_ok=True)
+    os.makedirs(learned_parameters_dirpath, exist_ok=True)
 
-    logging.info('Writing configured parameter data to ' + output_parameters_dirpath)
+    logging.info('Writing configured parameter data to ' + learned_parameters_dirpath)
 
     logging.info('Reading source dataset from ' + source_dataset_dirpath)
 
     arr = np.random.rand(100,100)
-    np.save(os.path.join(output_parameters_dirpath, 'numpy_array.npy'), arr)
+    np.save(os.path.join(learned_parameters_dirpath, 'numpy_array.npy'), arr)
 
-    with open(os.path.join(output_parameters_dirpath, "single_number.txt"), 'w') as fh:
+    with open(os.path.join(learned_parameters_dirpath, "single_number.txt"), 'w') as fh:
         fh.write("{}".format(17))
+    
+    metaparameters = json.load(open(metaparameter_filepath, "r"))
+    num_data_per_model = metaparameters["num_data_per_model"]
+    train_data_augmentation = metaparameters["train_data_augmentation"]
+
+    weight_table_params = {
+        "random_seed": metaparameters["train_weight_table_random_state"],
+        "mean": metaparameters["train_weight_table_params_mean"],
+        "std": metaparameters["train_weight_table_params_std"],
+        "scaler": metaparameters["train_weight_table_params_scaler"],
+    }
+
+    loss = metaparameters["objective"]
+    if loss == 'focal_loss':
+        loss = get_loss (loss, use_sigmoid = True)
+        objective = loss.get_objective(metaparameters["gamma"])
+    else:
+        loss = get_loss (loss)
+        objective = loss.get_objective()
 
     example_dict = dict()
     example_dict['keya'] = 2
@@ -176,19 +216,19 @@ def configure(source_dataset_dirpath,
     example_dict['keyf'] = 13
     example_dict['keyg'] = 17
 
-    with open(os.path.join(output_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
+    with open(os.path.join(learned_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
         f.write(jsonpickle.encode(example_dict, warn=True, indent=2))
     
     model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
     logging.info(f"Loading % models ...", len(model_path_list))
 
-    feature_extractor = FeatureExtractor(self.metaparameter_filepath, self.learned_parameters_dirpath)
+    feature_extractor = FeatureExtractor(parameters_dirpath, configure_models_dirpath)
     X = None
     Y = None     
     if X is None:
-        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)).flatten()
+        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), num_data_per_model)).flatten()
     else:
-        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), self.num_data_per_model)))).flatten()
+        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), num_data_per_model)))).flatten()
     logging.info(f"dataset size: {X.shape}")
     for model_path in model_path_list:
         y = load_ground_truth(model_path)
@@ -236,13 +276,13 @@ def configure(source_dataset_dirpath,
         'colsample_bylevel': np.arange(0.4, 1.0, 0.2),
         'n_estimators': [100, 500, 1000, 2000]}
         
-    hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+    hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = objective, seed = 20),
                      param_distributions=params,
                      scoring='neg_root_mean_squared_error',
                      n_iter=25, cv = 5, n_jobs = -1, refit = True,
                      verbose=1)
     """
-    hyp_src = GridSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+    hyp_src = GridSearchCV(estimator=XGBRegressor(objective = objective, seed = 20),
                         param_grid=params,
                         scoring='roc_auc',
                         n_jobs=-1, refit=True, cv=5, verbose=1, 
@@ -259,13 +299,13 @@ def configure(source_dataset_dirpath,
         y_pred_probs_ = clf.predict_proba(x_test)
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
     elif "xgboost_regressor" in model_name:
-        #if not isinstance(self.objective, str):
-        print("Testing comparison:\n", y_test.reshape(-1), "\n", self.loss.prob(y_pred_) >= 0.5)
-        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(self.loss.prob(y_pred_) >= 0.5)))
+        #if not isinstance(objective, str):
+        print("Testing comparison:\n", y_test.reshape(-1), "\n", loss.prob(y_pred_) >= 0.5)
+        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(loss.prob(y_pred_) >= 0.5)))
         #else:
         #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
         #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
-        y_pred_ = self.loss.prob(clf.predict(x_test))
+        y_pred_ = loss.prob(clf.predict(x_test))
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
     print(f'test fpr {fpr}')
     print(f'tpr {tpr}')
@@ -279,27 +319,27 @@ def configure(source_dataset_dirpath,
     Y = np.vstack((y_train, y_test))
     clf.fit(X, Y) 
     
-    y_pred = self.loss.prob(clf.predict(X))
+    y_pred = loss.prob(clf.predict(X))
     fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
     print(f'all dataset fpr {fpr}')
     print(f'tpr {tpr}')
     print('all dataset auc', metrics.auc(fpr, tpr))
         
     #logging.info("Training RandomForestRegressor model...")
-    #model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+    #model = RandomForestRegressor(**random_forest_kwargs, random_state=0)
     #model.fit(X, y)
 
     
     #logging.info("Saving RandomForestRegressor model...")
     #logging.info("Saving XGBoostRegressor model...")
     
-    #with open(self.model_filepath, "wb") as fp:
+    #with open(model_filepath, "wb") as fp:
     #    pickle.dump(model, fp)
     
     if "xgboost" in model_name:
-        clf.save_model(self.model_filepath)
+        clf.save_model(model_filepath)
 
-    self.write_metaparameters(feature_extractor.write_metaparameters())
+    write_metaparameters(feature_extractor.write_metaparameters())
     
     logging.info("Configuration done!")
 
@@ -353,6 +393,7 @@ if __name__ == "__main__":
             args.examples_dirpath is not None and
             args.source_dataset_dirpath is not None and
             args.round_training_dataset_dirpath is not None and
+            args.metaparameters_filepath is not None and
             args.learned_parameters_dirpath is not None):
             print(vars(args))
             logging.info("Calling the trojan detector")
@@ -367,12 +408,14 @@ if __name__ == "__main__":
             logging.info("Required Evaluation-Mode parameters missing!")
     else:
         if (args.source_dataset_dirpath is not None and
+            args.metaparameters_filepath is not None and
             args.learned_parameters_dirpath is not None and
             args.configure_models_dirpath is not None):
 
             logging.info("Calling configuration mode")
             # all 3 example parameters will be loaded here, but we only use parameter3
             configure(args.source_dataset_dirpath,
+                      args.metaparameters_filepath,
                       args.learned_parameters_dirpath,
                       args.configure_models_dirpath)
         else:
