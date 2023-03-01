@@ -88,18 +88,18 @@ class FeatureExtractor(object):
         logging.info(f"Loading %d models...", len(model_path_list))
         all_feats = []
         
-        for model_filepath in model_path_list:
+        for model_filepath in model_path_list[:]:
             feats = self.infer_attribution_feature_from_one_model(model_filepath, num_data_per_model, train)
             all_feats.append(feats)
             if train:     
-                self.input_features = ",".join(feats.shape.tolist())
+                self.input_features = ",".join([str(size) for size in feats.shape])
         return all_feats
 
     def infer_attribution_feature_from_one_model(self, model_filepath, num_data_per_model, train = False):
         model_dict, _, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
         model_class, [model] = model_dict.popitem()
          
-        _, clean_examples = clean_example_dict.popitem()
+        _, [clean_examples] = clean_example_dict.popitem()
          
     
         attrs = []
@@ -110,9 +110,10 @@ class FeatureExtractor(object):
             example_ids = np.arange(num_examples)
         examples = clean_examples['fvs'][example_ids]
         labels = clean_examples['labels'][example_ids]
-        for clean_example, label in zip(examples, labels):
-            attrs.append(get_attribution_from_example_data(model, label, [clean_example]))
-        return np.hstack((examples, attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+        for example, label in zip(examples, labels):
+            attrs.append(get_attribution_from_example_data(model, label, [example]).squeeze(0))
+            #print(example.shape, attrs[-1].shape)
+        return np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
 
 
 if __name__ == "__main__":

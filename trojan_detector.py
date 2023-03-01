@@ -5,6 +5,8 @@
 # You are solely responsible for determining the appropriateness of using and distributing the software and you assume all risks associated with its use, including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and the unavailability or interruption of operation. This software is not intended to be used in any situation where a failure could cause risk of injury or damage to property. The software developed by NIST employees is not subject to copyright protection within the United States.
 
 import os
+from os import listdir, makedirs
+from os.path import join, exists, basename
 import numpy as np
 import cv2
 import torch
@@ -65,10 +67,10 @@ def example_trojan_detector(model_filepath,
                             scratch_dirpath,
                             examples_dirpath,
                             source_dataset_dirpath,
-                            round_training_dataset_dirpath,
                             metaparameters_filepath,
-                            learned_parameters_dirpath,
-                            config):
+                            round_training_dataset_dirpath,
+                            learned_parameters_dirpath
+                            ):
     logging.info('model_filepath = {}'.format(model_filepath))
     logging.info('result_filepath = {}'.format(result_filepath))
     logging.info('scratch_dirpath = {}'.format(scratch_dirpath))
@@ -121,17 +123,10 @@ def example_trojan_detector(model_filepath,
     with open(result_filepath, 'w') as fh:
         fh.write("{}".format(trojan_probability))
     """
-    metaparameters = json.load(open(metaparameter_filepath, "r"))
-    num_data_per_model = metaparameters["num_data_per_model"]
-    train_data_augmentation = metaparameters["train_data_augmentation"]
-
-    weight_table_params = {
-        "random_seed": metaparameters["train_weight_table_random_state"],
-        "mean": metaparameters["train_weight_table_params_mean"],
-        "std": metaparameters["train_weight_table_params_std"],
-        "scaler": metaparameters["train_weight_table_params_scaler"],
-    }
-
+    
+    metaparameters = json.load(open(metaparameters_filepath, "r"))
+    num_data_per_model = metaparameters["num_data_per_model"] 
+ 
     loss = metaparameters["objective"]
     if loss == 'focal_loss':
         loss = get_loss (loss, use_sigmoid = True)
@@ -142,17 +137,18 @@ def example_trojan_detector(model_filepath,
 
 
     clf = XGBRegressor(seed = 20)
-    clf.load_model(model_filepath);
+    clf.load_model(join(learned_parameters_dirpath, "model.json"));
     
-    feature_extractor = FeatureExtractor(metaparameters_dirpath, learned_parameters_dirpath)
+    feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
         
     if X is None:
-        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), num_data_per_model)).flatten()
+        X = np.vstack([fv.flatten() for fv in feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(source_dataset_dirpath), num_data_per_model)])
+        print(X.shape)
     else:
-        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), num_data_per_model)))).flatten()
+        X = np.vstack((X, [fv.flatten() for fv in feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(source_dataset_dirpath), num_data_per_model)]))
     logging.info(f"dataset size: {X.shape}")
-    #with open(model_filepath, "rb") as fp:
+    #with open(source_dataset_dirpath, "rb") as fp:
     #    regressor: RandomForestRegressor = pickle.load(fp)
     
     X = X.reshape((-1, X.shape[-1]))
@@ -172,10 +168,9 @@ def example_trojan_detector(model_filepath,
 
 def configure(source_dataset_dirpath,
               metaparameters_filepath,
-              learned_parameters_dirpath,
-              configure_models_dirpath):
-    logging.info('Configuring detector parameters with models from ' + configure_models_dirpath)
-
+              learned_parameters_dirpath
+              ):
+    
     os.makedirs(learned_parameters_dirpath, exist_ok=True)
 
     logging.info('Writing configured parameter data to ' + learned_parameters_dirpath)
@@ -188,16 +183,8 @@ def configure(source_dataset_dirpath,
     with open(os.path.join(learned_parameters_dirpath, "single_number.txt"), 'w') as fh:
         fh.write("{}".format(17))
     
-    metaparameters = json.load(open(metaparameter_filepath, "r"))
-    num_data_per_model = metaparameters["num_data_per_model"]
-    train_data_augmentation = metaparameters["train_data_augmentation"]
-
-    weight_table_params = {
-        "random_seed": metaparameters["train_weight_table_random_state"],
-        "mean": metaparameters["train_weight_table_params_mean"],
-        "std": metaparameters["train_weight_table_params_std"],
-        "scaler": metaparameters["train_weight_table_params_scaler"],
-    }
+    metaparameters = json.load(open(metaparameters_filepath, "r"))
+    num_data_per_model = metaparameters["num_data_per_model"] 
 
     loss = metaparameters["objective"]
     if loss == 'focal_loss':
@@ -219,25 +206,26 @@ def configure(source_dataset_dirpath,
     with open(os.path.join(learned_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
         f.write(jsonpickle.encode(example_dict, warn=True, indent=2))
     
-    model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])
     logging.info(f"Loading % models ...", len(model_path_list))
 
-    feature_extractor = FeatureExtractor(parameters_dirpath, configure_models_dirpath)
+    feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
     Y = None     
     if X is None:
-        X = np.asarray(feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), num_data_per_model)).flatten()
+        X =  np.vstack([fv.flatten() for fv in np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, num_data_per_model, True))])
     else:
-        X = np.vstack((X, np.asarray(feature_extractor.infer_layer_features_from_one_model(os.path.dirname(model_filepath), num_data_per_model)))).flatten()
+        X = np.vstack((X, [fv.flatten() for fv in np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, num_data_per_model, True))])) 
     logging.info(f"dataset size: {X.shape}")
-    for model_path in model_path_list:
+    
+    for model_path in model_path_list[:]:
         y = load_ground_truth(model_path)
         if Y is None:
             Y = y 
             continue
         else:
             Y = np.vstack((Y, y))
- 
+    logging.info(f"label size: {Y.shape}")
     print(np.count_nonzero(np.isnan(Y)))
 
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
@@ -333,11 +321,11 @@ def configure(source_dataset_dirpath,
     #logging.info("Saving RandomForestRegressor model...")
     #logging.info("Saving XGBoostRegressor model...")
     
-    #with open(model_filepath, "wb") as fp:
+    #with open(source_dataset_dirpath, "wb") as fp:
     #    pickle.dump(model, fp)
     
     if "xgboost" in model_name:
-        clf.save_model(model_filepath)
+        clf.save_model(join(learned_parameters_dirpath, "model.json"))
 
     write_metaparameters(feature_extractor.write_metaparameters())
     
@@ -358,7 +346,7 @@ if __name__ == "__main__":
     parser.add_argument('--source_dataset_dirpath', type=str, help='File path to a directory containing the original clean dataset into which triggers were injected during training.', default=None)
     parser.add_argument('--round_training_dataset_dirpath', type=str, help='File path to the directory containing id-xxxxxxxx models of the current rounds training dataset.', default=None)
 
-    parser.add_argument('--metaparameters_filepath', help='Path to JSON file containing values of tunable paramaters to be used when evaluating models.', action=ActionConfigFile)
+    parser.add_argument('--metaparameters_filepath', help='Path to JSON file containing values of tunable paramaters to be used when evaluating models.', type = str)
     parser.add_argument('--schema_filepath', type=str, help='Path to a schema file in JSON Schema format against which to validate the config file.', default=None)
     parser.add_argument('--learned_parameters_dirpath', type=str, help='Path to a directory containing parameter data (model weights, etc.) to be used when evaluating models.  If --configure_mode is set, these will instead be overwritten with the newly-configured parameters.')
 
@@ -373,14 +361,14 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s")
     logging.info("example_trojan_detector.py launched")
-
+   
     # Validate config file against schema
     if args.metaparameters_filepath is not None:
         if args.schema_filepath is not None:
-            with open(args.metaparameters_filepath[0]()) as config_file:
+            with open(args.metaparameters_filepath, 'rb') as config_file:
                 config_json = json.load(config_file)
 
-            with open(args.schema_filepath) as schema_file:
+            with open(args.schema_filepath, 'rb') as schema_file:
                 schema_json = json.load(schema_file)
 
             # this throws a fairly descriptive error if validation fails
@@ -410,14 +398,13 @@ if __name__ == "__main__":
     else:
         if (args.source_dataset_dirpath is not None and
             args.metaparameters_filepath is not None and
-            args.learned_parameters_dirpath is not None and
-            args.configure_models_dirpath is not None):
+            args.learned_parameters_dirpath is not None):
 
             logging.info("Calling configuration mode")
             # all 3 example parameters will be loaded here, but we only use parameter3
             configure(args.source_dataset_dirpath,
                       args.metaparameters_filepath,
-                      args.learned_parameters_dirpath,
-                      args.configure_models_dirpath)
+                      args.learned_parameters_dirpath
+                      )
         else:
             logging.info("Required Configure-Mode parameters missing!")

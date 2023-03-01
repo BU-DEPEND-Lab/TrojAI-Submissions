@@ -10,6 +10,35 @@
   "additionalProperties": false,
   "type": "object",
   "properties": {
+    "objective":  {
+      "description": "objective function.",
+      "type": "string",
+      "enum": ["focal_loss", "reg:logistic", "reg:squarederror"]
+    },
+    "gamma": {
+      "description": "Gamma indicate for focal loss (float).",
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 10.0,
+      "suggested_minimum": 1.0,
+      "suggested_maximum": 10.0
+    },
+    "num_data_per_model":  {
+      "description": "Number of pdf inputs randomly sampled for model to generate the attribution.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500,
+      "suggested_minimum": 1,
+      "suggested_maximum": 500
+    },
+    "train_input_features":  {
+      "description": "The total number of input features for training the Trojan detector.",
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 2000000,
+      "suggested_minimum": 750,
+      "suggested_maximum": 2200000
+    },
     "nbins": {
       "description": "Number of histogram bins in feature. Default 100.",
       "type": "integer",

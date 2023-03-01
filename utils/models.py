@@ -204,7 +204,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, grad = np.h
             #print(">>>>>>> Example: ")
             #for e in example:
             #    print(e)
-            feature_vector = torch.from_numpy(np.asarray([example]).astype(float)).float()
+            feature_vector = example.unsqueeze(0)
             feature_vector.requires_grad_()
             model.zero_grad()
             #pred = torch.argmax(model(feature_vector).detach()).item()
@@ -217,7 +217,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, grad = np.h
             if grad is not None:
                 loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
                 loss.backward();
-                grad_reprs.append(torch.mul(feature_vector.grad.data.flatten(), feature_vector.flatten()).detach().numpy()) 
+                grad_reprs.append(torch.mul(feature_vector.grad.data, feature_vector).detach().numpy()) 
         return grad(grad_reprs)
 
     
