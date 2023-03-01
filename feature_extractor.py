@@ -121,7 +121,7 @@ class FeatureExtractor(object):
             #print(example.shape, attrs[-1].shape)
             #print(attrs[-1].shape, examples.shape)
         #fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
-        fvs = np.asaray(attrs)
+        fvs = np.asarray(attrs)
         return fvs
 
 if __name__ == "__main__":
