@@ -86,13 +86,17 @@ class FeatureExtractor(object):
     
     def infer_attribution_feature_from_models(self, model_path_list, num_data_per_model = 20, train= False):
         logging.info(f"Loading %d models...", len(model_path_list))
-        all_feats = []
+        all_feats = None
         
-        for model_filepath in model_path_list[:]:
+        for model_filepath in model_path_list:
             feats = self.infer_attribution_feature_from_one_model(model_filepath, num_data_per_model, train)
-            all_feats.append(feats)
+            #print(feats.shape)
+            if all_feats is None:
+                all_feats = feats
+            else:
+                all_feats = np.vstack((all_feats, feats))
             if train:     
-                self.input_features = ",".join([str(size) for size in feats.shape])
+                self.input_features = ",".join([str(size) for size in feats.shape[1:]]) 
         return all_feats
 
     def infer_attribution_feature_from_one_model(self, model_filepath, num_data_per_model, train = False):
@@ -104,17 +108,21 @@ class FeatureExtractor(object):
     
         attrs = []
         num_examples = clean_examples['fvs'].shape[0]
+        
         if num_data_per_model > num_examples:
             example_ids = np.hstack((np.arange(num_examples), np.random.choice(num_examples, num_data_per_model - num_examples)))
         else:
-            example_ids = np.arange(num_examples)
+            #example_ids = np.arange(num_examples)
+            example_ids = np.arange(num_data_per_model)
         examples = clean_examples['fvs'][example_ids]
         labels = clean_examples['labels'][example_ids]
         for example, label in zip(examples, labels):
             attrs.append(get_attribution_from_example_data(model, label, [example]).squeeze(0))
             #print(example.shape, attrs[-1].shape)
-        return np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
-
+            #print(attrs[-1].shape, examples.shape)
+        #fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+        fvs = np.asaray(attrs)
+        return fvs
 
 if __name__ == "__main__":
     extractor = FeatureExtractor("./metaparameters.json", "./learned_parameters",  "./learned_parameters/scale_params.npy")

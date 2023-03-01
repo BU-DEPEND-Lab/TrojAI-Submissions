@@ -30,7 +30,9 @@ from joblib import dump, load
 from sklearn import metrics
 from sklearn import svm
 
+
 from feature_extractor import FeatureExtractor   
+import xgboost
 from xgboost import cv, XGBRegressor, XGBClassifier
 
 def prepare_boxes(anns, image_id):
@@ -60,6 +62,18 @@ def prepare_boxes(anns, image_id):
     target['labels'] = torch.as_tensor(class_ids).type(torch.int64)
     target['image_id'] = torch.as_tensor(image_id)
     return target
+
+
+def write_metaparameters(self, learned_parameters_dirpath, metaparameters_filepath, *metaparameters):
+    metaparameters_base = {
+        "num_data_per_model": self.num_data_per_model
+    }
+    if len(metaparameters) > 0:
+        for metaparameter in metaparameters:
+            metaparameters_base.update(metaparameter)
+
+    with open(join(learned_parameters_dirpath, basename(metaparameters_filepath)), "w") as fp:
+        json.dump(metaparameters_base, fp)
 
 
 def example_trojan_detector(model_filepath,
@@ -143,6 +157,7 @@ def example_trojan_detector(model_filepath,
     X = None
         
     if X is None:
+         
         X = np.vstack([fv.flatten() for fv in feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(source_dataset_dirpath), num_data_per_model)])
         print(X.shape)
     else:
@@ -218,13 +233,13 @@ def configure(source_dataset_dirpath,
         X = np.vstack((X, [fv.flatten() for fv in np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, num_data_per_model, True))])) 
     logging.info(f"dataset size: {X.shape}")
     
-    for model_path in model_path_list[:]:
+    for model_path in model_path_list:
         y = load_ground_truth(model_path)
         if Y is None:
-            Y = y 
+            Y = y * np.ones([num_data_per_model, 1])
             continue
         else:
-            Y = np.vstack((Y, y))
+            Y = np.vstack((Y, y * np.ones([num_data_per_model, 1])))
     logging.info(f"label size: {Y.shape}")
     print(np.count_nonzero(np.isnan(Y)))
 
@@ -327,7 +342,7 @@ def configure(source_dataset_dirpath,
     if "xgboost" in model_name:
         clf.save_model(join(learned_parameters_dirpath, "model.json"))
 
-    write_metaparameters(feature_extractor.write_metaparameters())
+    write_metaparameters(learned_parameters_dirpath, metaprameters_filepath, feature_extractor.write_metaparameters())
     
     logging.info("Configuration done!")
 
