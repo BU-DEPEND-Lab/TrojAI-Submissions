@@ -72,24 +72,25 @@ class FeatureExtractor(object):
         # TODO: Update skew parameters per round
          
         self.input_features = metaparameters["train_input_features"]
-
+        self.num_data_per_model = metaparameters["num_data_per_model"]
         print(metaparameters)
          
 
     def write_metaparameters(self):
         metaparameters = {
-            "train_input_features": self.input_features
+            "train_input_features": self.input_features,
+            "num_data_per_model": self.num_data_per_model
         }
        
         return metaparameters
 
     
-    def infer_attribution_feature_from_models(self, model_path_list, num_data_per_model = 20, train= False):
+    def infer_attribution_feature_from_models(self, model_path_list, train= False):
         logging.info(f"Loading %d models...", len(model_path_list))
         all_feats = None
         
         for model_filepath in model_path_list:
-            feats = self.infer_attribution_feature_from_one_model(model_filepath, num_data_per_model, train)
+            feats = self.infer_attribution_feature_from_one_model(model_filepath, train)
             #print(feats.shape)
             if all_feats is None:
                 all_feats = feats
@@ -99,7 +100,7 @@ class FeatureExtractor(object):
                 self.input_features = ",".join([str(size) for size in feats.shape[1:]]) 
         return all_feats
 
-    def infer_attribution_feature_from_one_model(self, model_filepath, num_data_per_model, train = False):
+    def infer_attribution_feature_from_one_model(self, model_filepath, train = False):
         model_dict, _, _, clean_example_dict, _ = load_models_dirpath([model_filepath])
         model_class, [model] = model_dict.popitem()
          
@@ -109,19 +110,19 @@ class FeatureExtractor(object):
         attrs = []
         num_examples = clean_examples['fvs'].shape[0]
         
-        if num_data_per_model > num_examples:
-            example_ids = np.hstack((np.arange(num_examples), np.random.choice(num_examples, num_data_per_model - num_examples)))
+        if self.num_data_per_model > num_examples:
+            example_ids = np.hstack((np.arange(num_examples), np.random.choice(num_examples, self.num_data_per_model - num_examples)))
         else:
             #example_ids = np.arange(num_examples)
-            example_ids = np.arange(num_data_per_model)
+            example_ids = np.arange(self.num_data_per_model)
         examples = clean_examples['fvs'][example_ids]
         labels = clean_examples['labels'][example_ids]
         for example, label in zip(examples, labels):
             attrs.append(get_attribution_from_example_data(model, label, [example]).squeeze(0))
             #print(example.shape, attrs[-1].shape)
             #print(attrs[-1].shape, examples.shape)
-        #fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
-        fvs = np.asarray(attrs)
+        fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+        #fvs = np.asarray(attrs)
         return fvs
 
 if __name__ == "__main__":

@@ -2,3 +2,10 @@
 *.simg
 *.pyc
 *.swp
+learned_parameters/model.h5
+#learned_parameters/model.json
+learned_parameters/round12_cnn_regressor.joblib
+round12_cnn_regressor.joblib
+learned_parameters/model.json
+learned_parameters/dict.json
+learned_parameters/numpy_array.npy

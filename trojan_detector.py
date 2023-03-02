@@ -22,6 +22,7 @@ warnings.filterwarnings("ignore")
 from utils.models import create_layer_map, load_model, \
     load_models_dirpath, load_ground_truth, get_loss
 
+import tensorflow as tf
 from sklearn.linear_model import SGDClassifier 
 import sklearn.model_selection
 from sklearn.metrics import accuracy_score, roc_curve, auc
@@ -30,10 +31,17 @@ from joblib import dump, load
 from sklearn import metrics
 from sklearn import svm
 
+# keras import
+from arch.cnn import create_cnn_model 
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.models import model_from_json
 
 from feature_extractor import FeatureExtractor   
 import xgboost
 from xgboost import cv, XGBRegressor, XGBClassifier
+
+
+
 
 def prepare_boxes(anns, image_id):
     if len(anns) > 0:
@@ -64,9 +72,8 @@ def prepare_boxes(anns, image_id):
     return target
 
 
-def write_metaparameters(self, learned_parameters_dirpath, metaparameters_filepath, *metaparameters):
-    metaparameters_base = {
-        "num_data_per_model": self.num_data_per_model
+def write_metaparameters(self, learned_parameters_dirpath, metaparameters_filepath, **metaparameters):
+    metaparameters_base = { 
     }
     if len(metaparameters) > 0:
         for metaparameter in metaparameters:
@@ -139,7 +146,7 @@ def example_trojan_detector(model_filepath,
     """
     
     metaparameters = json.load(open(metaparameters_filepath, "r"))
-    num_data_per_model = metaparameters["num_data_per_model"] 
+   
  
     loss = metaparameters["objective"]
     if loss == 'focal_loss':
@@ -148,26 +155,38 @@ def example_trojan_detector(model_filepath,
     else:
         loss = get_loss (loss)
         objective = loss.get_objective()
+ 
+    
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:20]
+    logging.info(f"Loading % models ...", len(model_path_list))
 
+    #model_name = "xgboost"
+    #clf = XGBRegressor(seed = 20)
 
-    clf = XGBRegressor(seed = 20)
-    clf.load_model(join(learned_parameters_dirpath, "model.json"));
+    #model_name = "cnn_regressor"
+     
+    # load json and create model
+    json_file = open(join(learned_parameters_dirpath, "model.json"), 'r')
+    clf_json = json_file.read()
+    json_file.close()
+    clf = model_from_json(clf_json)
+    # load weights into new model
+    clf.load_weights(join(learned_parameters_dirpath, "model.h5"))
+    print("Loaded model from disk")
+    
+    # evaluate loaded model on test data
+    #clf.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    #score = loaded_model.evaluate(X, Y, verbose=0)
     
     feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
         
-    if X is None:
-         
-        X = np.vstack([fv.flatten() for fv in feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(source_dataset_dirpath), num_data_per_model)])
-        print(X.shape)
-    else:
-        X = np.vstack((X, [fv.flatten() for fv in feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(source_dataset_dirpath), num_data_per_model)]))
+    X =  np.vstack(np.asarray([feature_extractor.infer_attribution_feature_from_models(model_path_list, False)])).transpose(0, 2, 3, 1)
+    
     logging.info(f"dataset size: {X.shape}")
     #with open(source_dataset_dirpath, "rb") as fp:
     #    regressor: RandomForestRegressor = pickle.load(fp)
     
-    X = X.reshape((-1, X.shape[-1]))
-
     probability = str(np.mean(np.abs(loss.prob(clf.predict(X)))).item())
     #if not isinstance(objective, str):
     #else:
@@ -198,9 +217,7 @@ def configure(source_dataset_dirpath,
     with open(os.path.join(learned_parameters_dirpath, "single_number.txt"), 'w') as fh:
         fh.write("{}".format(17))
     
-    metaparameters = json.load(open(metaparameters_filepath, "r"))
-    num_data_per_model = metaparameters["num_data_per_model"] 
-
+    metaparameters = json.load(open(metaparameters_filepath, "r")) 
     loss = metaparameters["objective"]
     if loss == 'focal_loss':
         loss = get_loss (loss, use_sigmoid = True)
@@ -208,53 +225,41 @@ def configure(source_dataset_dirpath,
     else:
         loss = get_loss (loss)
         objective = loss.get_objective()
-
-    example_dict = dict()
-    example_dict['keya'] = 2
-    example_dict['keyb'] = 3
-    example_dict['keyc'] = 5
-    example_dict['keyd'] = 7
-    example_dict['keye'] = 11
-    example_dict['keyf'] = 13
-    example_dict['keyg'] = 17
-
-    with open(os.path.join(learned_parameters_dirpath, "dict.json"), mode='w', encoding='utf-8') as f:
-        f.write(jsonpickle.encode(example_dict, warn=True, indent=2))
+ 
     
-    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:20]
     logging.info(f"Loading % models ...", len(model_path_list))
 
     feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
     Y = None     
-    if X is None:
-        X =  np.vstack([fv.flatten() for fv in np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, num_data_per_model, True))])
-    else:
-        X = np.vstack((X, [fv.flatten() for fv in np.asarray(feature_extractor.infer_attribution_feature_from_models(model_path_list, num_data_per_model, True))])) 
+    X =  np.vstack(np.asarray([feature_extractor.infer_attribution_feature_from_models(model_path_list, True)])).transpose(0, 2, 3, 1)
+    
     logging.info(f"dataset size: {X.shape}")
     
     for model_path in model_path_list:
         y = load_ground_truth(model_path)
         if Y is None:
-            Y = y * np.ones([num_data_per_model, 1])
+            Y = y * np.ones([feature_extractor.num_data_per_model, 1])
             continue
         else:
-            Y = np.vstack((Y, y * np.ones([num_data_per_model, 1])))
+            Y = np.vstack((Y, y * np.ones([feature_extractor.num_data_per_model, 1])))
     logging.info(f"label size: {Y.shape}")
     print(np.count_nonzero(np.isnan(Y)))
 
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
         
-    y_train = y_train.repeat(x_train.shape[1], axis = 1).reshape((-1, 1))
-    x_train = x_train.reshape((-1, x_train.shape[-1]))
+    #y_train = y_train.repeat(x_train.shape[1], axis = 1).reshape((-1, 1))
+    #x_train = x_train.reshape((-1, x_train.shape[-1]))
+    #y_train = y_train.reshape((-1, y_train.shape[-1]))
     ids_train = np.arange(x_train.shape[0])
     np.random.shuffle(ids_train)
 
     y_train = y_train[ids_train]
     x_train = x_train[ids_train]
 
-    y_test = y_test.repeat(x_test.shape[1], axis = 1).reshape((-1, 1))
-    x_test = x_test.reshape((-1, x_test.shape[-1]))
+    #y_test = y_test.repeat(x_test.shape[1], axis = 1).reshape((-1, 1))
+    #x_test = x_test.reshape((-1, x_test.shape[-1]))
     ids_test = np.arange(x_test.shape[0])
     np.random.shuffle(ids_test)
 
@@ -267,6 +272,18 @@ def configure(source_dataset_dirpath,
     print('x_test', x_test.shape)
     print('y_test', y_test.shape)
 
+    model_name = "cnn_regressor"
+    
+    model = KerasClassifier(build_fn=create_cnn_model, verbose=1)
+    
+    params = {
+    'input_shape': [X.shape[1:]],
+    'pool_type': ['max', 'average'],
+    'conv_activation': ['sigmoid', 'tanh'],    
+    'epochs': [10, 20, 30],
+    }
+    estimator = model
+    """
     model_name = "xgboost_regressor"
     data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
     
@@ -278,19 +295,21 @@ def configure(source_dataset_dirpath,
         'colsample_bytree': np.arange(0.4, 1.0, 0.2),
         'colsample_bylevel': np.arange(0.4, 1.0, 0.2),
         'n_estimators': [100, 500, 1000, 2000]}
-        
-    hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = objective, seed = 20),
+    estimator = XGBRegressor(objective = objective, seed = 20)
+    """ 
+    """       
+    hyp_src = RandomizedSearchCV(estimator=estimator,
                      param_distributions=params,
                      scoring='neg_root_mean_squared_error',
                      n_iter=25, cv = 5, n_jobs = -1, refit = True,
                      verbose=1)
     """
-    hyp_src = GridSearchCV(estimator=XGBRegressor(objective = objective, seed = 20),
+    hyp_src = GridSearchCV(estimator=estimator,
                         param_grid=params,
                         scoring='roc_auc',
                         n_jobs=-1, refit=True, cv=5, verbose=1, 
                         return_train_score=True) 
-    """
+    
     hyp_src.fit(x_train, y_train)
     clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
 
@@ -301,7 +320,7 @@ def configure(source_dataset_dirpath,
         print('test acc', accuracy_score(y_test.reshape(-1), y_pred_ >= 0))
         y_pred_probs_ = clf.predict_proba(x_test)
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
-    elif "xgboost_regressor" in model_name:
+    elif "regressor" in model_name:
         #if not isinstance(objective, str):
         print("Testing comparison:\n", y_test.reshape(-1), "\n", loss.prob(y_pred_) >= 0.5)
         print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(loss.prob(y_pred_) >= 0.5)))
@@ -310,6 +329,7 @@ def configure(source_dataset_dirpath,
         #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
         y_pred_ = loss.prob(clf.predict(x_test))
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_)
+     
     print(f'test fpr {fpr}')
     print(f'tpr {tpr}')
     print('test auc', metrics.auc(fpr, tpr))
@@ -341,8 +361,16 @@ def configure(source_dataset_dirpath,
     
     if "xgboost" in model_name:
         clf.save_model(join(learned_parameters_dirpath, "model.json"))
+    if "cnn" in model_name:
+        # serialize model to JSON
+        clf_json = clf.model.to_json()
+        with open(join(learned_parameters_dirpath, "model.json"), "w") as json_file:
+            json_file.write(clf_json)
+        # serialize weights to HDF5
+        clf.model.save_weights(join(learned_parameters_dirpath, "model.h5"))
+        print("Saved model to disk")
 
-    write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, feature_extractor.write_metaparameters())
+    write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, **feature_extractor.write_metaparameters())
     
     logging.info("Configuration done!")
 
@@ -407,7 +435,7 @@ if __name__ == "__main__":
                                     args.source_dataset_dirpath,
                                     args.metaparameters_filepath,
                                     args.round_training_dataset_dirpath,
-                                    args.learned_parameters_dirpath,args)
+                                    args.learned_parameters_dirpath)
         else:
             logging.info("Required Evaluation-Mode parameters missing!")
     else:
