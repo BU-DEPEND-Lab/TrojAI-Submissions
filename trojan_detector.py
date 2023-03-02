@@ -342,7 +342,7 @@ def configure(source_dataset_dirpath,
     if "xgboost" in model_name:
         clf.save_model(join(learned_parameters_dirpath, "model.json"))
 
-    write_metaparameters(learned_parameters_dirpath, metaprameters_filepath, feature_extractor.write_metaparameters())
+    write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, feature_extractor.write_metaparameters())
     
     logging.info("Configuration done!")
 
