@@ -44,7 +44,7 @@ def create_cnn_model(input_shape, pool_type='max', conv_activation='sigmoid', dr
     # Compile model
     model.compile( 
         optimizer='adam',
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
+        loss=tf.keras.losses.MeanSquaredError(),
         metrics= [tf.keras.metrics.AUC()],
         )    
     return model

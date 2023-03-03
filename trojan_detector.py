@@ -157,9 +157,7 @@ def example_trojan_detector(model_filepath,
         objective = loss.get_objective()
  
     
-    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:20]
-    logging.info(f"Loading % models ...", len(model_path_list))
-
+    
     #model_name = "xgboost"
     #clf = XGBRegressor(seed = 20)
 
@@ -177,17 +175,45 @@ def example_trojan_detector(model_filepath,
     # evaluate loaded model on test data
     #clf.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     #score = loaded_model.evaluate(X, Y, verbose=0)
-    
     feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
+
+    """
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:20]
+    logging.info(f"Loading % models ...", len(model_path_list))
+    
     X = None
-        
     X =  np.vstack(np.asarray([feature_extractor.infer_attribution_feature_from_models(model_path_list, False)])).transpose(0, 2, 3, 1)
     
     logging.info(f"dataset size: {X.shape}")
+
+    Y = None
+    for model_path in model_path_list:
+        y = load_ground_truth(model_path)
+        if Y is None:
+            Y = y * np.ones([feature_extractor.num_data_per_model, 1])
+            continue
+        else:
+            Y = np.vstack((Y, y * np.ones([feature_extractor.num_data_per_model, 1])))
+    logging.info(f"label size: {Y.shape}")
+    Y_pred = loss.prob(clf.predict(X))
+    if True:
+        #if not isinstance(objective, str):
+        print("Testing comparison:\n", Y.reshape(-1), "\n", Y_pred)
+        print('test acc', accuracy_score(Y.reshape(-1), np.asarray(loss.prob(Y_pred) >= 0.5)).reshape(-1))
+        #else:
+        #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
+        #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
+        
+        fpr, tpr, thresholds = metrics.roc_curve(Y.reshape(-1), Y_pred.reshape(-1))
+        print(f'test fpr {fpr}')
+        print(f'tpr {tpr}')
+        print('test auc', metrics.auc(fpr, tpr))
+    """
     #with open(source_dataset_dirpath, "rb") as fp:
     #    regressor: RandomForestRegressor = pickle.load(fp)
+    x = feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), False).transpose(0, 2, 3, 1)
     
-    probability = str(np.mean(np.abs(loss.prob(clf.predict(X)))).item())
+    probability = str(np.mean(np.abs(loss.prob(clf.predict(x)))).item())
     #if not isinstance(objective, str):
     #else:
     #     probability = str(np.mean(clf.predict(X)).item())
@@ -227,8 +253,8 @@ def configure(source_dataset_dirpath,
         objective = loss.get_objective()
  
     
-    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:20]
-    logging.info(f"Loading % models ...", len(model_path_list))
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)]) 
+    logging.info(f"Loading {len(model_path_list)} models ...")
 
     feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
@@ -322,8 +348,8 @@ def configure(source_dataset_dirpath,
         fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_probs_[:, 1])
     elif "regressor" in model_name:
         #if not isinstance(objective, str):
-        print("Testing comparison:\n", y_test.reshape(-1), "\n", loss.prob(y_pred_) >= 0.5)
-        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(loss.prob(y_pred_) >= 0.5)))
+        print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_)
+        print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(loss.prob(y_pred_) >= 0.5)).reshape(-1))
         #else:
         #    print("Testing comparison:\n", y_test.reshape(-1), "\n", y_pred_ >= 0.5)
         #    print('test acc', accuracy_score(y_test.reshape(-1), np.asarray(y_pred_ >= 0.5)))
@@ -334,7 +360,7 @@ def configure(source_dataset_dirpath,
     print(f'tpr {tpr}')
     print('test auc', metrics.auc(fpr, tpr))
     logging.info("Saving model...")
-    dump(clf, f'round12_{model_name}.joblib') 
+    #dump(clf, f'round12_{model_name}.joblib') 
 
     logging.info("Now train on all dataset")
     

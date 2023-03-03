@@ -96,8 +96,8 @@ class FeatureExtractor(object):
                 all_feats = feats
             else:
                 all_feats = np.vstack((all_feats, feats))
-            if train:     
-                self.input_features = ",".join([str(size) for size in feats.shape[1:]]) 
+        if train:     
+            self.input_features = ",".join([str(size) for size in all_feats.shape[1:]]) 
         return all_feats
 
     def infer_attribution_feature_from_one_model(self, model_filepath, train = False):
