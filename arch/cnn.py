@@ -7,7 +7,7 @@ from keras.utils import to_categorical
 from keras.callbacks import EarlyStopping
 import tensorflow as tf
 
-def create_cnn_model(input_shape, pool_type='max', conv_activation='sigmoid', dropout_rate=0.10):
+def create_keras_cnn_model(input_shape, pool_type='max', conv_activation='sigmoid', dropout_rate=0.10):
     # create model
     model = Sequential()
     # first layer: convolution

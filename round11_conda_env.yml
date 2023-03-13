@@ -170,4 +170,5 @@ dependencies:
     - tqdm==4.64.0
     - transformers==4.21.1
     - wand==0.6.10
+    - vit-pytorch
 prefix: /mnt/isgnas/home/mmajursk/anaconda3/envs/round11

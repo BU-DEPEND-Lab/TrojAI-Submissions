@@ -32,9 +32,14 @@ from sklearn import metrics
 from sklearn import svm
 
 # keras import
-from arch.cnn import create_cnn_model 
+from arch.cnn import create_keras_cnn_model 
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.models import model_from_json
+
+import torch
+from vit_pytorch import SimpleViT
+import torch.nn as nn
+import torch.optim as optim
 
 from feature_extractor import FeatureExtractor   
 import xgboost
@@ -72,12 +77,10 @@ def prepare_boxes(anns, image_id):
     return target
 
 
-def write_metaparameters(self, learned_parameters_dirpath, metaparameters_filepath, **metaparameters):
+def write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, **metaparameters):
     metaparameters_base = { 
     }
-    if len(metaparameters) > 0:
-        for metaparameter in metaparameters:
-            metaparameters_base.update(metaparameter)
+    metaparameters_base.update(metaparameters)
 
     with open(join(learned_parameters_dirpath, basename(metaparameters_filepath)), "w") as fp:
         json.dump(metaparameters_base, fp)
@@ -211,7 +214,7 @@ def example_trojan_detector(model_filepath,
     """
     #with open(source_dataset_dirpath, "rb") as fp:
     #    regressor: RandomForestRegressor = pickle.load(fp)
-    x = feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), False).transpose(0, 2, 3, 1)
+    x = feature_extractor.infer_attribution_feature_from_one_model(os.path.dirname(model_filepath), False)#.transpose(0, 2, 3, 1)
     
     probability = str(np.mean(np.abs(loss.prob(clf.predict(x)))).item())
     #if not isinstance(objective, str):
@@ -253,13 +256,13 @@ def configure(source_dataset_dirpath,
         objective = loss.get_objective()
  
     
-    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)]) 
+    model_path_list = sorted([join(source_dataset_dirpath, model) for model in listdir(source_dataset_dirpath)])[:32]
     logging.info(f"Loading {len(model_path_list)} models ...")
 
     feature_extractor = FeatureExtractor(metaparameters_filepath, learned_parameters_dirpath)
     X = None
     Y = None     
-    X =  np.vstack(np.asarray([feature_extractor.infer_attribution_feature_from_models(model_path_list, True)])).transpose(0, 2, 3, 1)
+    X =  np.vstack(np.asarray([feature_extractor.infer_attribution_feature_from_models(model_path_list, True)]))#.transpose(0, 2, 3, 1)
     
     logging.info(f"dataset size: {X.shape}")
     
@@ -272,9 +275,11 @@ def configure(source_dataset_dirpath,
             Y = np.vstack((Y, y * np.ones([feature_extractor.num_data_per_model, 1])))
     logging.info(f"label size: {Y.shape}")
     print(np.count_nonzero(np.isnan(Y)))
-
+    write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, **feature_extractor.write_metaparameters())
+    feature_extractor = None
+    
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=1)
-        
+
     #y_train = y_train.repeat(x_train.shape[1], axis = 1).reshape((-1, 1))
     #x_train = x_train.reshape((-1, x_train.shape[-1]))
     #y_train = y_train.reshape((-1, y_train.shape[-1]))
@@ -295,21 +300,59 @@ def configure(source_dataset_dirpath,
 
     print('x_train', x_train.shape)
     print("y_train", y_train.shape)
+    print(y_train)
     print('x_test', x_test.shape)
     print('y_test', y_test.shape)
 
     model_name = "cnn_regressor"
+    clf = SimpleViT(image_size = x_train.shape[-1], patch_size = 32, num_classes = 1, dim = 64, depth = 3, heads = 8, mlp_dim = 128)
     
+    
+    criterion = torch.nn.BCELoss()
+    optimizer = optim.SGD(clf.parameters(), lr=0.001, momentum=0.9)
+    testloader = torch.utils.data.DataLoader(list(zip(x_test, y_test)), batch_size=16,
+                                          shuffle=True, num_workers=1)
+    for epoch in range(20):
+        clf.train()
+        trainloader = torch.utils.data.DataLoader(list(zip(x_train, y_train)), batch_size=16,
+                                          shuffle=True, num_workers=1)
+        running_loss = 0.0
+        for i, data in enumerate(trainloader, 0):
+            inputs, labels = data
+            optimizer.zero_grad()
+            outputs = clf(inputs.float())
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            if i % 100 == 99:
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 100:.3f}, acc: {((outpus >= 0.5).long().numpy() == labels.long()).sum().item() * 100. / labels.shape[0]}')
+                running_loss = 0.0
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in testloader:
+                images, labels = data
+                # calculate outputs by running images through the network
+                outputs = clf(images.float())
+                # the class with the highest energy is what we choose as prediction
+                predicted = (outputs.data > 0.5).long()
+                total += labels.size(0)
+                print(images.shape, predicted.shape, labels.shape)
+                correct += (predicted == labels).sum().item()
+        print(f'Accuracy of the network on the 10000 test images: {100 * correct // total} %')
+
+    
+    """
     model = KerasClassifier(build_fn=create_cnn_model, verbose=1)
     
     params = {
     'input_shape': [X.shape[1:]],
-    'pool_type': ['max', 'average'],
-    'conv_activation': ['sigmoid', 'tanh'],    
-    'epochs': [10, 20, 30],
+    'pool_type': ['max'],
+    'conv_activation': ['tanh'],    
+    'epochs': [10],
     }
     estimator = model
-    """
+    
     model_name = "xgboost_regressor"
     data_dmatrix = xgboost.DMatrix(data=x_train,label= y_train)
     
@@ -329,7 +372,7 @@ def configure(source_dataset_dirpath,
                      scoring='neg_root_mean_squared_error',
                      n_iter=25, cv = 5, n_jobs = -1, refit = True,
                      verbose=1)
-    """
+    
     hyp_src = GridSearchCV(estimator=estimator,
                         param_grid=params,
                         scoring='roc_auc',
@@ -338,7 +381,7 @@ def configure(source_dataset_dirpath,
     
     hyp_src.fit(x_train, y_train)
     clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
-
+    """
     y_pred_ = clf.predict(x_test)
     
     if 'svm' in model_name:
@@ -395,8 +438,6 @@ def configure(source_dataset_dirpath,
         # serialize weights to HDF5
         clf.model.save_weights(join(learned_parameters_dirpath, "model.h5"))
         print("Saved model to disk")
-
-    write_metaparameters(learned_parameters_dirpath, metaparameters_filepath, **feature_extractor.write_metaparameters())
     
     logging.info("Configuration done!")
 

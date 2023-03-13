@@ -1,0 +1,136 @@
+Column Name, Explanation, Data Type
+model_name, The unique identifier for each trained model. This value is used as the folder name within the released dataset. Models are numbered sequentially when generated before being split into the train and test datasets., string
+converged, Whether the model accuracies met convergence criteria., bool
+master_seed, The random number generator seed set at the start of data generation for reproducibility., integer
+task_type_level, The factor design level the specific instance value should be grouped with., integer
+task_type, The task the AI was trained to perform., string
+source_dataset_level, The factor design level the specific instance value should be grouped with., integer
+source_dataset, The name of the dataset used to train the model., string
+model_architecture, What AI architecture was trained to perform extractive question answering., string
+model_architecture_level, The factor design level the specific instance value should be grouped with., integer
+max_class_count_per_image, The maximum number of classes allowed in any given generated image instance., integer
+max_class_count_per_image_level, The factor design level the specific instance value should be grouped with., integer
+max_class_instance_count_per_image, The maximum number of instances of each class allowed in any given generated image instance., int
+max_class_instance_count_per_image_level, The factor design level the specific instance value should be grouped with., integer
+max_total_class_count_per_image_level, The factor design level the specific instance value should be grouped with., integer
+max_total_class_count_per_image, The maximum number of total instances in any given generated image., integer
+poisoned_level, The factor design level the specific instance value should be grouped with., integer
+poisoned, The ground truth value indicating whether this model was poisoned and has an embedded trigger., bool
+trigger_pre_injection_level, The factor design level the specific instance value should be grouped with., integer
+trigger_pre_injection, Flag indicating whether the trojan was inserted just by training on a poisoned dataset or whether the trigger was explicitly injected by training just on trojaned data until the trigger took and then the regular training was performed., bool
+adversarial_training_method_level, The factor design level the specific instance value should be grouped with., integer
+adversarial_training_method, The algorithm used for adversarial training., string
+adversarial_eps_level, The factor design level the specific instance value should be grouped with., integer
+adversarial_eps, The epsilon value (amount of adversarial robustness) the model was trained with., float
+adversarial_training_ratio_level, The factor design level the specific instance value should be grouped with., integer
+adversarial_training_ratio, The fraction of training data which has adversarial perturbations applied during the training process., float
+learning_rate_level, The factor design level the specific instance value should be grouped with., integer
+learning_rate, The learning rate used to train the model., float
+plateau_learning_rate_patience_level, The factor design level the specific instance value should be grouped with., integer
+plateau_learning_rate_patience, The number of epochs beyond the globally best loss value the model will continue to train before terminating., integer
+plateau_learning_rate_threshold_level, The factor design level the specific instance value should be grouped with., integer
+plateau_learning_rate_threshold, The epsilon value used to determine when the model has improved when computing early stopping. The model will overwrite the globally best checkpoint if the new loss value is within this eps of the globally best loss value., float
+plateau_learning_rate_reduction_factor_level, The factor design level the specific instance value should be grouped with., integer
+plateau_learning_rate_reduction_factor, The factor the learning rate is multiplied by when learning plateaus., float
+num_plateau_learning_rate_reductions_level, The factor design level the specific instance value should be grouped with., integer
+num_plateau_learning_rate_reductions, The number of learning rate reductions due to plateaus before training terminates., integer
+weight_decay_level, The factor design level the specific instance value should be grouped with., integer
+weight_decay, The weight decay value used when training the AI model., float
+validation_split_level, The factor design level the specific instance value should be grouped with., integer
+validation_split, The percentage of the training data used to validate the model accuracy during training., float
+img_size_pixels, The size of the generated images in pixels., integer
+img_shape, The shape of the generated images., string containing 3 integers
+img_type, The datatype of the generated images., string
+gaussian_blur_ksize_min, The minimum kernel size used to slightly blur the generated images., integer
+gaussian_blur_ksize_max, The maximum kernel size used to slightly blur the generated images., integer
+rain_probability_level, The factor design level the specific instance value should be grouped with., integer
+rain_probability, The probability that the rain transform will be used on any specific generated image instance., float
+fog_probability_level, The factor design level the specific instance value should be grouped with., integer
+fog_probability, The probability that the fog transform will be used on any specific generated image instance., float
+number_classes_level, The factor design level the specific instance value should be grouped with., integer
+number_classes, The number of classes the AI model is trained to predict., integer
+number_image_per_class_level, The factor design level the specific instance value should be grouped with., integer
+number_image_per_class, The number of images per class in the dataset., integer
+total_dataset_size, The total number of data points in the dataset., integer
+batch_size_level, The factor design level the specific instance value should be grouped with., integer
+batch_size, The batch size used to train the model., integer
+model_weight_level, The factor design level the specific instance value should be grouped with., integer
+model_weight, The name of the pretrained weights used to initialize the model., string
+foreground_size_percentage_of_image_min, The minimum size of the inserted foreground compared to the full image. Foreground area must be larger than this percent of the whole image area., float
+foreground_size_percentage_of_image_max, The maximum size of the inserted foreground compared to the full image. Foreground area must be smaller than this percent of the whole image area., float
+foreground_size_pixels_min, The minimum value any single dimension the inserted foreground can have., integer
+foreground_size_pixels_max, The maximum value any single dimension the inserted foreground can have., integer
+num_triggers_level, The factor design level the specific instance value should be grouped with., integer
+num_triggers, The number of triggers inserted into the AI., integer
+train_datapoint_count, The number of data points in the training dataset., integer
+train_spurious_datapoint_count, The number of spuriously triggered data points in the training dataset., integer
+train_clean_datapoint_count, The number of clean data points in the training dataset., integer
+train_poisoned_datapoint_count, The number of poisoned data points in the training dataset., integer
+val_datapoint_count, The number of data points in the validation dataset., integer
+val_spurious_datapoint_count, The number of spuriously triggered data points in the validation dataset., integer
+val_clean_datapoint_count, The number of clean data points in the validation dataset., integer
+val_poisoned_datapoint_count, The number of poisoned data points in the validation dataset., integer
+test_datapoint_count, The number of data points in the test dataset., integer
+test_spurious_datapoint_count, The number of spuriously triggered data points in the test dataset., integer
+test_clean_datapoint_count, The number of clean data points in the test dataset., integer
+test_poisoned_datapoint_count, The number of poisoned data points in the test dataset., integer
+train_poisoned_wall_time, The wall time in seconds required to train the model on poisoned data., float > 0
+train_poisoned_loss, The final (converged) train loss for poisoned data., float > 0
+train_wall_time, The wall time in seconds required to train the model end to end., float > 0
+train_loss, The The final (converged) training loss., float > 0
+val_clean_Accuracy, The final (converged) validation Accuracy score for clean data., float > 0
+val_clean_wall_time, The wall time in seconds required to evaluate the model on clean validation data., float > 0
+val_clean_loss, The final (converged) validation loss for clean data., float > 0
+val_poisoned_Accuracy, The final (converged) validation Accuracy score for poisoned data., float > 0
+val_poisoned_wall_time, The wall time in seconds required to evaluate the model on poisoned validation data., float > 0
+val_poisoned_loss, The final (converged) validation loss for poisoned data., float > 0
+val_loss, The final (converged) validation loss for the AI model., float > 0
+best_epoch, The best epoch which was saved to create the final model., integer
+training_wall_time, The wall time in seconds required to train the model for a single epoch., float > 0
+val_wall_time, The total wall time in seconds required to evaluate the model on validation data., float > 0
+num_epochs_trained, How many epochs the model was trained for., integer
+test_clean_Accuracy, The final (converged) test Accuracy score for clean data., float > 0
+test_clean_wall_time, The wall time in seconds required to evaluate the model on clean test data., float > 0
+test_clean_loss, The final (converged) test loss for clean data., float > 0
+test_poisoned_Accuracy, The final (converged) test Accuracy score for poisoned data., float > 0
+test_poisoned_wall_time, The wall time in seconds required to evaluate the model on poisoned test data., float > 0
+test_poisoned_loss, The final (converged) test loss for poisoned data., float > 0
+wall_time, The wall time in seconds required to build the model., float > 0
+example_clean_Accuracy, The final (converged) clean example data accuracy., float > 0
+example_poisoned_Accuracy, The final (converged) poisoned example data accuracy., float > 0
+val_clean_PerClassAccuracy, The final (converged) validation per class accuracy for clean data., float > 0
+val_poisoned_PerClassAccuracy, The final (converged) validation per class accuracy for poisoned data., float > 0
+test_clean_PerClassAccuracy, The final (converged) test per class accuracy for clean data., float > 0
+test_poisoned_PerClassAccuracy, The final (converged) test per class accuracy for poisoned data., float > 0
+trigger_0.trigger_id, The trigger id number., integer
+trigger_0.source_class, The class id which the trigger poisoned into the target_class., integer
+trigger_0.target_class, The class id which the trigger caused the source_class to be changed into., integer
+trigger_0.trigger_fraction_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.trigger_fraction, What requested percentage of the source class was poisoned with the trigger., float in [0 1]
+trigger_0.spurious_trigger_fraction_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.spurious_trigger_fraction, What requested percentage of the source class was spuriously poisoned with the trigger causing no effect to the class labels., float in [0 1]
+trigger_0.type_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.type, The type of trigger inserted into the model., string
+trigger_0.patch_size_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.patch_size, The size of the trigger patch in pixels (if applicable)., integer
+trigger_0.trigger_executor, The trigger executor which inserts the trigger into the model., string
+trigger_0.trigger_size_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.trigger_size, How large (in pixels) the initially created trigger image was. This value does not reflect how large the trigger is within the dataset images. As the trigger is rescaled during the insertion into an image process., integer
+trigger_0.min_trigger_area_during_creation, The minimum area of the trigger during image generation., integer
+trigger_0.trigger_color_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.trigger_color, What RGB color the trigger was colored before embedding into the foreground of the image. This value is a tuple of integers indicating the red green and blue values., string containing 3 integers in [0 255]
+trigger_0.trigger_polygon_side_count_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.trigger_polygon_side_count, The number of sides in the programmatically generated polygon trigger., integer
+trigger_0.trigger_size_restriction_option_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.trigger_size_restriction_option, Whether the trigger is inserted into small or large objects within the image., string
+trigger_0.polygon_texture_augmentation_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.polygon_texture_augmentation, The texture augmentation applied to the trigger., string
+trigger_0.size_percentage_of_foreground_min, How small the trigger embedded into the foreground can be with respect to the foreground size. This is expressed as a percentage of the foreground size., float in [0 1]
+trigger_0.size_percentage_of_foreground_max, How large the trigger embedded into the foreground can be with respect to the foreground size. This is expressed as a percentage of the foreground size., float in [0 1]
+trigger_0.min_area, The minimum object area to insert the trigger into., float
+trigger_0.spatial_quadrant_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.spatial_quadrant, The spatial quadrant the trigger must be in to have the desired effect., integer
+trigger_0.options_level, The factor design level the specific instance value should be grouped with., integer
+trigger_0.options, String indicating trigger options., string
+
+

@@ -1,7 +1,7 @@
 { 
   "objective": "reg:logistic",
 	"gamma": 2.0,
-	"num_data_per_model": 50,
+	"num_data_per_model": 20,
 	"train_input_features": 270,
   "nbins": 100,
   "szcap": 4096

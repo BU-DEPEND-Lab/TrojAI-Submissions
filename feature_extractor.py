@@ -105,7 +105,7 @@ class FeatureExtractor(object):
         model_class, [model] = model_dict.popitem()
          
         _, [clean_examples] = clean_example_dict.popitem()
-         
+        
     
         attrs = []
         num_examples = clean_examples['fvs'].shape[0]
@@ -121,8 +121,8 @@ class FeatureExtractor(object):
             attrs.append(get_attribution_from_example_data(model, label, [example]).squeeze(0))
             #print(example.shape, attrs[-1].shape)
             #print(attrs[-1].shape, examples.shape)
-        fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
-        #fvs = np.asarray(attrs)
+        #fvs = np.hstack((examples.numpy(), attrs)) #np.asarray(attrs) #([] if train else [0. for _ in range(self.input_features - attrs.shape[0])])
+        fvs = np.asarray(attrs)
         return fvs
 
 if __name__ == "__main__":

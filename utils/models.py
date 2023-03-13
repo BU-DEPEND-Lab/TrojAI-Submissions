@@ -218,6 +218,7 @@ def get_attribution_from_example_data(model, ground_truth, examples, grad = np.h
                 loss = F.cross_entropy(logits, torch.LongTensor(logits.shape[0] * [int(ground_truth)]))
                 loss.backward();
                 grad_reprs.append(torch.mul(feature_vector.grad.data, feature_vector).detach().numpy()) 
+                grad_reprs[-1] = (255. * grad_reprs[-1] / (grad_reprs[-1].max() - grad_reprs[-1].min())).astype(int)
         return grad(grad_reprs)
 
     
