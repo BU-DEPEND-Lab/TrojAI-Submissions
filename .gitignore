@@ -21,3 +21,4 @@ token.pickle
 .cache
 learned_parameters/model.h5
 round12_cnn_regressor.joblib
+learned_parameters/model.json
