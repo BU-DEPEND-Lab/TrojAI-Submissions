@@ -243,16 +243,16 @@ class Detector(AbstractDetector):
            'colsample_bylevel': np.arange(0.4, 1.0, 0.2),
            'n_estimators': [100, 500, 1000, 2000]}
            
-        #hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
-        #                 param_distributions=params,
-        #                 scoring='neg_root_mean_squared_error',
-        #                 n_iter=25, cv = 5, n_jobs = -1, refit = True,
-        #                 verbose=1)
-        hyp_src = GridSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
-                            param_grid=params,
-                            scoring='roc_auc',
-                            n_jobs=-1, refit=True, cv=5, verbose=1, 
-                            return_train_score=True) 
+        hyp_src = RandomizedSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+                         param_distributions=params,
+                         scoring='neg_root_mean_squared_error',
+                         n_iter=25, cv = 5, n_jobs = -1, refit = True,
+                         verbose=1)
+        #hyp_src = GridSearchCV(estimator=XGBRegressor(objective = self.objective, seed = 20),
+        #                    param_grid=params,
+        #                    scoring='roc_auc',
+        #                    n_jobs=-1, refit=True, cv=5, verbose=1, 
+        #                    return_train_score=True) 
 
         hyp_src.fit(x_train, y_train)
         clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
@@ -308,8 +308,8 @@ class Detector(AbstractDetector):
         print(f'test fpr {fpr}')
         print(f'tpr {tpr}')
         print('test auc', metrics.auc(fpr, tpr))
-        logging.info("Saving model...")
-        dump(clf, f'round12_{model_name}.joblib') 
+        #logging.info("Saving model...")
+        #dump(clf, f'round12_{model_name}.joblib') 
 
         logging.info("Now train on all dataset")
         
