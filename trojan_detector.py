@@ -254,11 +254,9 @@ class Detector(AbstractDetector):
         #                    n_jobs=-1, refit=True, cv=5, verbose=1, 
         #                    return_train_score=True) 
 
-        #hyp_src.fit(x_train, y_train)
-        #clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
-        clf = XGBRegressor(objective = self.objective, seed = 20)
-        clf.load_model(self.model_filepath)
-
+        hyp_src.fit(x_train, y_train)
+        clf = hyp_src.best_estimator_ #XGBRegressor(**rand.best_params_)
+        
         """
         #xgb_cv = cv(dtrain=data_dmatrix, params=self.xgboost_kwargs, nfold=5,
                     num_boost_round=50, early_stopping_rounds=10, metrics="auc", as_pandas=True, seed=123)
@@ -317,7 +315,7 @@ class Detector(AbstractDetector):
         
         X = np.vstack((x_train, x_test))
         Y = np.vstack((y_train, y_test))
-        #clf.fit(X, Y) 
+        clf.fit(X, Y) 
         
         y_pred = self.loss.prob(clf.predict(X))
         fpr, tpr, thresholds = metrics.roc_curve(Y, y_pred)
