@@ -9,10 +9,15 @@
 
 # Feature extraction mode
 python entrypoint.py extract \
+--model_filepath ./model/id-00000002/model.pt \
+--result_filepath ./scratch/output.txt \
+--scratch_dirpath ./scratch \
+--examples_dirpath ./model/id-00000002/clean-example-data \
 --round_training_dataset_dirpath /mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round12/ \
 --metaparameters_filepath ./metaparameters.json \
 --schema_filepath ./metaparameters_schema.json \
---scale_parameters_filepath ./learned_parameters/scale_params.npy
+--scale_parameters_filepath ./learned_parameters/scale_params.npy \
+--learned_parameters_dirpath ./learned_parameters \
 
 #inference mode
 python entrypoint.py infer \
