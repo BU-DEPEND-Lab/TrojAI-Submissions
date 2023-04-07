@@ -1,0 +1,1557 @@
+2022-12-02 15:30:02,062 [INFO] [main.py:277] Slurm JobId: 181633
+2022-12-02 15:30:02,070 [INFO] [main.py:282] Job running on host: enki11.adlp
+2022-12-02 15:30:02,075 [INFO] [utils.py:42] Using 20 Workers
+2022-12-02 15:30:02,096 [INFO] [main.py:302] Data Configuration Generated
+2022-12-02 15:30:02,309 [INFO] [main.py:90] Loading full dataset and model
+2022-12-02 15:30:20,872 [INFO] [main.py:96] Selecting class labels
+2022-12-02 15:30:21,216 [INFO] [main.py:163] Train dataset size: 32000
+2022-12-02 15:30:21,218 [INFO] [main.py:164] Val dataset size: 3200
+2022-12-02 15:30:21,220 [INFO] [main.py:165] Test dataset size: 3200
+2022-12-02 15:30:21,966 [INFO] [dataset.py:726] Building synthetic image dataset (val): 3200 samples
+2022-12-02 15:30:22,880 [INFO] [dataset.py:765] Using 20 CPU core(s) to generate data
+2022-12-02 15:37:35,463 [INFO] [dataset.py:850] val dataset construction took 433.4944739341736s
+2022-12-02 15:37:36,175 [INFO] [dataset.py:851]   0.13546702310442924 cpu/seconds per image
+2022-12-02 15:37:43,274 [INFO] [dataset.py:516] dump_jpg_examples only has 0 instances available, instead of the requested 20.
+2022-12-02 15:37:43,275 [INFO] [dataset.py:516] dump_jpg_examples only has 0 instances available, instead of the requested 20.
+2022-12-02 15:37:43,275 [INFO] [dataset.py:726] Building synthetic image dataset (test): 3200 samples
+2022-12-02 15:37:44,551 [INFO] [dataset.py:765] Using 20 CPU core(s) to generate data
+2022-12-02 15:44:49,599 [INFO] [dataset.py:850] test dataset construction took 426.32310247421265s
+2022-12-02 15:44:49,600 [INFO] [dataset.py:851]   0.13322596952319146 cpu/seconds per image
+2022-12-02 15:44:49,608 [INFO] [dataset.py:726] Building synthetic image dataset (train): 32000 samples
+2022-12-02 15:44:52,142 [INFO] [dataset.py:765] Using 20 CPU core(s) to generate data
+2022-12-02 16:52:50,456 [INFO] [dataset.py:850] train dataset construction took 4080.8456394672394s
+2022-12-02 16:52:50,460 [INFO] [dataset.py:851]   0.12752642623335123 cpu/seconds per image
+2022-12-02 16:52:50,502 [INFO] [main.py:213] Creating datasets and model took 4968.190711736679s
+2022-12-02 16:52:50,518 [INFO] [main.py:307] Training Setup
+2022-12-02 16:52:50,523 [INFO] [train.py:206] Separating clean/poisoned training data
+2022-12-02 16:52:50,954 [INFO] [train.py:208] Separating clean/poisoned validation data
+2022-12-02 16:52:51,785 [INFO] [train.py:210] Separating clean/poisoned test data
+2022-12-02 16:52:54,847 [INFO] [train.py:262] Epoch: 0
+2022-12-02 16:52:54,851 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 16:52:54,855 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 16:53:02,647 [INFO] [train.py:137]   batch 0/1000  loss: 57.445549  lr: 2.575e-06  cpu_mem: 12.2%   gpu_mem: [36.8]%
+2022-12-02 16:53:37,156 [INFO] [train.py:137]   batch 100/1000  loss: 14.159615  lr: 1.007e-05  cpu_mem: 12.3%   gpu_mem: [37.1]%
+2022-12-02 16:54:10,490 [INFO] [train.py:137]   batch 200/1000  loss: 7.9036942  lr: 1.758e-05  cpu_mem: 12.4%   gpu_mem: [37.1]%
+2022-12-02 16:54:44,502 [INFO] [train.py:137]   batch 300/1000  loss: 6.9034505  lr: 2.507e-05  cpu_mem: 12.5%   gpu_mem: [37.1]%
+2022-12-02 16:55:18,564 [INFO] [train.py:137]   batch 400/1000  loss: 5.4125175  lr: 3.258e-05  cpu_mem: 12.5%   gpu_mem: [37.1]%
+2022-12-02 16:55:52,593 [INFO] [train.py:137]   batch 500/1000  loss: 3.560957  lr: 3.993e-05  cpu_mem: 12.6%   gpu_mem: [37.1]%
+2022-12-02 16:56:26,245 [INFO] [train.py:137]   batch 600/1000  loss: 3.3329272  lr: 3.243e-05  cpu_mem: 12.6%   gpu_mem: [37.1]%
+2022-12-02 16:56:59,681 [INFO] [train.py:137]   batch 700/1000  loss: 2.4426246  lr: 2.492e-05  cpu_mem: 12.6%   gpu_mem: [37.1]%
+2022-12-02 16:57:33,053 [INFO] [train.py:137]   batch 800/1000  loss: 2.4223161  lr: 1.742e-05  cpu_mem: 12.6%   gpu_mem: [37.1]%
+2022-12-02 16:58:07,311 [INFO] [train.py:137]   batch 900/1000  loss: 2.3243022  lr: 9.925e-06  cpu_mem: 12.7%   gpu_mem: [37.1]%
+2022-12-02 16:58:37,903 [INFO] [metadata.py:31] train_wall_time: 343.0413513183594
+2022-12-02 16:58:37,904 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3430413513183594
+2022-12-02 16:58:37,906 [INFO] [metadata.py:31] train_loss: 6.608641351103783
+2022-12-02 16:58:37,910 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 17:09:15,736 [INFO] [metadata.py:31] val_clean_map: 0.6493503451347351
+2022-12-02 17:09:15,742 [INFO] [metadata.py:31] val_clean_map_50: 0.9886777400970459
+2022-12-02 17:09:15,747 [INFO] [metadata.py:31] val_clean_map_75: 0.7766984701156616
+2022-12-02 17:09:15,753 [INFO] [metadata.py:31] val_clean_map_small: 0.7347257733345032
+2022-12-02 17:09:15,757 [INFO] [metadata.py:31] val_clean_map_medium: 0.62227863073349
+2022-12-02 17:09:15,763 [INFO] [metadata.py:31] val_clean_map_large: 0.5781782865524292
+2022-12-02 17:09:15,767 [INFO] [metadata.py:31] val_clean_mar_1: 0.6819075345993042
+2022-12-02 17:09:15,772 [INFO] [metadata.py:31] val_clean_mar_10: 0.7213414311408997
+2022-12-02 17:09:15,776 [INFO] [metadata.py:31] val_clean_mar_100: 0.7213414311408997
+2022-12-02 17:09:15,781 [INFO] [metadata.py:31] val_clean_mar_small: 0.8009106516838074
+2022-12-02 17:09:15,784 [INFO] [metadata.py:31] val_clean_mar_medium: 0.7020238637924194
+2022-12-02 17:09:15,786 [INFO] [metadata.py:31] val_clean_mar_large: 0.7335548400878906
+2022-12-02 17:09:15,788 [INFO] [metadata.py:31] val_clean_map_per_class: [0.6792504787445068, 0.6411066651344299, 0.6584124565124512, 0.6463416814804077, 0.6444112062454224, 0.6560078859329224, 0.6378451585769653, 0.6428468823432922, 0.6806064248085022, 0.6434371471405029, 0.6877883076667786, 0.6110827922821045, 0.6249836683273315, 0.6408607959747314, 0.6749542951583862, 0.6196691393852234]
+2022-12-02 17:09:15,789 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.7393701672554016, 0.7137349843978882, 0.7250000238418579, 0.7235431671142578, 0.7201072573661804, 0.7266666293144226, 0.7172588109970093, 0.7156097888946533, 0.7388297319412231, 0.7155172228813171, 0.7455470561981201, 0.6974747776985168, 0.7032338380813599, 0.7164974212646484, 0.7482573390007019, 0.6948148012161255]
+2022-12-02 17:09:15,791 [INFO] [metadata.py:31] val_clean_wall_time: 637.8787803649902
+2022-12-02 17:09:15,794 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 6.378787803649902
+2022-12-02 17:09:15,796 [INFO] [metadata.py:31] val_clean_loss: 1.8916185915470123
+2022-12-02 17:09:15,800 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 17:09:15,802 [INFO] [metadata.py:31] val_loss: 1.8916185915470123
+2022-12-02 17:09:15,804 [INFO] [train.py:300] Updating best model with epoch: 0 loss: 1.8916185915470123, as its less than the best loss plus eps 0.0001.
+2022-12-02 17:09:15,853 [INFO] [train.py:262] Epoch: 1
+2022-12-02 17:09:15,854 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:09:15,856 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 17:09:23,244 [INFO] [train.py:137]   batch 0/1000  loss: 2.012032  lr: 2.575e-06  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 17:09:58,860 [INFO] [train.py:137]   batch 100/1000  loss: 2.0177124  lr: 1.007e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 17:10:33,767 [INFO] [train.py:137]   batch 200/1000  loss: 2.2100053  lr: 1.758e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 17:11:07,588 [INFO] [train.py:137]   batch 300/1000  loss: 2.071135  lr: 2.507e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 17:11:42,689 [INFO] [train.py:137]   batch 400/1000  loss: 2.0260603  lr: 3.258e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 17:12:17,388 [INFO] [train.py:137]   batch 500/1000  loss: 1.6188185  lr: 3.993e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 17:12:51,169 [INFO] [train.py:137]   batch 600/1000  loss: 1.641636  lr: 3.243e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 17:13:24,785 [INFO] [train.py:137]   batch 700/1000  loss: 1.2866237  lr: 2.492e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 17:13:58,892 [INFO] [train.py:137]   batch 800/1000  loss: 1.2827425  lr: 1.742e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 17:14:32,996 [INFO] [train.py:137]   batch 900/1000  loss: 1.2337731  lr: 9.925e-06  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 17:15:04,016 [INFO] [metadata.py:31] train_wall_time: 348.157630443573
+2022-12-02 17:15:04,020 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.348157630443573
+2022-12-02 17:15:04,023 [INFO] [metadata.py:31] train_loss: 1.763265004515648
+2022-12-02 17:15:04,028 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 17:23:13,728 [INFO] [metadata.py:31] val_clean_map: 0.7459650039672852
+2022-12-02 17:23:13,733 [INFO] [metadata.py:31] val_clean_map_50: 0.9949227571487427
+2022-12-02 17:23:13,738 [INFO] [metadata.py:31] val_clean_map_75: 0.9397758841514587
+2022-12-02 17:23:13,742 [INFO] [metadata.py:31] val_clean_map_small: 0.7823379039764404
+2022-12-02 17:23:13,746 [INFO] [metadata.py:31] val_clean_map_medium: 0.7244750261306763
+2022-12-02 17:23:13,749 [INFO] [metadata.py:31] val_clean_map_large: 0.7400412559509277
+2022-12-02 17:23:13,755 [INFO] [metadata.py:31] val_clean_mar_1: 0.7550033330917358
+2022-12-02 17:23:13,760 [INFO] [metadata.py:31] val_clean_mar_10: 0.7973865270614624
+2022-12-02 17:23:13,765 [INFO] [metadata.py:31] val_clean_mar_100: 0.7973865270614624
+2022-12-02 17:23:13,770 [INFO] [metadata.py:31] val_clean_mar_small: 0.843268871307373
+2022-12-02 17:23:13,775 [INFO] [metadata.py:31] val_clean_mar_medium: 0.7864617705345154
+2022-12-02 17:23:13,779 [INFO] [metadata.py:31] val_clean_mar_large: 0.8089008331298828
+2022-12-02 17:23:13,782 [INFO] [metadata.py:31] val_clean_map_per_class: [0.7624582052230835, 0.7437178492546082, 0.7451701760292053, 0.7530378699302673, 0.7399261593818665, 0.7429084181785583, 0.7483087778091431, 0.7480111122131348, 0.766714870929718, 0.7380037903785706, 0.773276686668396, 0.7197182178497314, 0.7326660752296448, 0.7399840354919434, 0.755031406879425, 0.7265062928199768]
+2022-12-02 17:23:13,782 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.804724395275116, 0.7934939861297607, 0.7947059273719788, 0.8083915710449219, 0.7983914613723755, 0.7994666695594788, 0.7967005372047424, 0.7980487942695618, 0.8095744848251343, 0.7923645377159119, 0.8129770159721375, 0.778030276298523, 0.7840796113014221, 0.796446681022644, 0.811528205871582, 0.7792592644691467]
+2022-12-02 17:23:13,783 [INFO] [metadata.py:31] val_clean_wall_time: 489.75343918800354
+2022-12-02 17:23:13,783 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.897534391880035
+2022-12-02 17:23:13,784 [INFO] [metadata.py:31] val_clean_loss: 1.1569488388299942
+2022-12-02 17:23:13,787 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 17:23:13,788 [INFO] [metadata.py:31] val_loss: 1.1569488388299942
+2022-12-02 17:23:13,790 [INFO] [train.py:300] Updating best model with epoch: 1 loss: 1.1569488388299942, as its less than the best loss plus eps 0.0001.
+2022-12-02 17:23:13,819 [INFO] [train.py:262] Epoch: 2
+2022-12-02 17:23:13,821 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:23:13,823 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 17:23:21,634 [INFO] [train.py:137]   batch 0/1000  loss: 1.1466475  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 17:23:55,761 [INFO] [train.py:137]   batch 100/1000  loss: 1.1374984  lr: 1.007e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 17:24:31,038 [INFO] [train.py:137]   batch 200/1000  loss: 1.4410192  lr: 1.758e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 17:25:05,248 [INFO] [train.py:137]   batch 300/1000  loss: 1.3984232  lr: 2.507e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 17:25:39,108 [INFO] [train.py:137]   batch 400/1000  loss: 1.3111793  lr: 3.258e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 17:26:13,330 [INFO] [train.py:137]   batch 500/1000  loss: 1.2159145  lr: 3.993e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:26:48,110 [INFO] [train.py:137]   batch 600/1000  loss: 1.3037928  lr: 3.243e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:27:22,610 [INFO] [train.py:137]   batch 700/1000  loss: 1.096278  lr: 2.492e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:27:57,166 [INFO] [train.py:137]   batch 800/1000  loss: 1.0821799  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:28:31,317 [INFO] [train.py:137]   batch 900/1000  loss:  1.32974  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 17:29:02,109 [INFO] [metadata.py:31] train_wall_time: 348.2831382751465
+2022-12-02 17:29:02,113 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3482831382751465
+2022-12-02 17:29:02,116 [INFO] [metadata.py:31] train_loss: 1.2234663771390915
+2022-12-02 17:29:02,122 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 17:36:35,955 [INFO] [metadata.py:31] val_clean_map: 0.7889481782913208
+2022-12-02 17:36:35,959 [INFO] [metadata.py:31] val_clean_map_50: 0.9967238903045654
+2022-12-02 17:36:35,961 [INFO] [metadata.py:31] val_clean_map_75: 0.9741190075874329
+2022-12-02 17:36:35,965 [INFO] [metadata.py:31] val_clean_map_small: 0.8064774870872498
+2022-12-02 17:36:35,967 [INFO] [metadata.py:31] val_clean_map_medium: 0.7725445628166199
+2022-12-02 17:36:35,968 [INFO] [metadata.py:31] val_clean_map_large: 0.712272047996521
+2022-12-02 17:36:35,969 [INFO] [metadata.py:31] val_clean_mar_1: 0.7881523370742798
+2022-12-02 17:36:35,969 [INFO] [metadata.py:31] val_clean_mar_10: 0.831830620765686
+2022-12-02 17:36:35,969 [INFO] [metadata.py:31] val_clean_mar_100: 0.831830620765686
+2022-12-02 17:36:35,970 [INFO] [metadata.py:31] val_clean_mar_small: 0.8625668287277222
+2022-12-02 17:36:35,970 [INFO] [metadata.py:31] val_clean_mar_medium: 0.8250821232795715
+2022-12-02 17:36:35,971 [INFO] [metadata.py:31] val_clean_mar_large: 0.8126239776611328
+2022-12-02 17:36:35,972 [INFO] [metadata.py:31] val_clean_map_per_class: [0.8062770962715149, 0.7868175506591797, 0.7869275212287903, 0.7957579493522644, 0.7919847965240479, 0.7874165177345276, 0.7817166447639465, 0.79262375831604, 0.8120102882385254, 0.7801985144615173, 0.8022238612174988, 0.7693765163421631, 0.7708644866943359, 0.7850568890571594, 0.7883031368255615, 0.7856153845787048]
+2022-12-02 17:36:35,972 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.8422572016716003, 0.8286746740341187, 0.8255882263183594, 0.8426572680473328, 0.8388740420341492, 0.8322666883468628, 0.8296953439712524, 0.8300000429153442, 0.844680905342102, 0.8246305584907532, 0.839694619178772, 0.8159090876579285, 0.8189054727554321, 0.8302030563354492, 0.838337779045105, 0.8269136548042297]
+2022-12-02 17:36:35,973 [INFO] [metadata.py:31] val_clean_wall_time: 453.84797406196594
+2022-12-02 17:36:35,973 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.5384797406196595
+2022-12-02 17:36:35,974 [INFO] [metadata.py:31] val_clean_loss: 0.9039910072088242
+2022-12-02 17:36:35,976 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 17:36:35,977 [INFO] [metadata.py:31] val_loss: 0.9039910072088242
+2022-12-02 17:36:35,978 [INFO] [train.py:300] Updating best model with epoch: 2 loss: 0.9039910072088242, as its less than the best loss plus eps 0.0001.
+2022-12-02 17:36:36,000 [INFO] [train.py:262] Epoch: 3
+2022-12-02 17:36:36,001 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:36:36,001 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 17:36:43,719 [INFO] [train.py:137]   batch 0/1000  loss: 1.1310875  lr: 2.575e-06  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 17:37:18,768 [INFO] [train.py:137]   batch 100/1000  loss: 1.0094298  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:37:53,294 [INFO] [train.py:137]   batch 200/1000  loss: 1.2136772  lr: 1.758e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 17:38:28,004 [INFO] [train.py:137]   batch 300/1000  loss: 1.0019822  lr: 2.507e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 17:39:01,245 [INFO] [train.py:137]   batch 400/1000  loss: 1.2194009  lr: 3.258e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:39:34,683 [INFO] [train.py:137]   batch 500/1000  loss: 1.0774763  lr: 3.993e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:40:08,759 [INFO] [train.py:137]   batch 600/1000  loss: 0.93099463  lr: 3.243e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:40:43,708 [INFO] [train.py:137]   batch 700/1000  loss: 0.93729305  lr: 2.492e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:41:17,880 [INFO] [train.py:137]   batch 800/1000  loss: 0.88649976  lr: 1.742e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:41:52,007 [INFO] [train.py:137]   batch 900/1000  loss: 0.80862629  lr: 9.925e-06  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 17:42:22,884 [INFO] [metadata.py:31] train_wall_time: 346.8812837600708
+2022-12-02 17:42:22,885 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3468812837600708
+2022-12-02 17:42:22,886 [INFO] [metadata.py:31] train_loss: 0.9880689569711685
+2022-12-02 17:42:22,889 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 17:49:39,055 [INFO] [metadata.py:31] val_clean_map: 0.8146243691444397
+2022-12-02 17:49:39,061 [INFO] [metadata.py:31] val_clean_map_50: 0.99803227186203
+2022-12-02 17:49:39,066 [INFO] [metadata.py:31] val_clean_map_75: 0.9843464493751526
+2022-12-02 17:49:39,072 [INFO] [metadata.py:31] val_clean_map_small: 0.8264092803001404
+2022-12-02 17:49:39,080 [INFO] [metadata.py:31] val_clean_map_medium: 0.7990189790725708
+2022-12-02 17:49:39,087 [INFO] [metadata.py:31] val_clean_map_large: 0.7805877327919006
+2022-12-02 17:49:39,092 [INFO] [metadata.py:31] val_clean_mar_1: 0.8080844879150391
+2022-12-02 17:49:39,097 [INFO] [metadata.py:31] val_clean_mar_10: 0.8529208898544312
+2022-12-02 17:49:39,102 [INFO] [metadata.py:31] val_clean_mar_100: 0.8529208898544312
+2022-12-02 17:49:39,107 [INFO] [metadata.py:31] val_clean_mar_small: 0.8794377446174622
+2022-12-02 17:49:39,111 [INFO] [metadata.py:31] val_clean_mar_medium: 0.8470609784126282
+2022-12-02 17:49:39,114 [INFO] [metadata.py:31] val_clean_mar_large: 0.8402436971664429
+2022-12-02 17:49:39,116 [INFO] [metadata.py:31] val_clean_map_per_class: [0.8273001313209534, 0.8119366765022278, 0.8096063733100891, 0.8274203538894653, 0.8160029053688049, 0.8134386539459229, 0.8048455715179443, 0.8078248500823975, 0.8450097441673279, 0.8071745038032532, 0.8358743786811829, 0.7905107736587524, 0.7992412447929382, 0.8076947927474976, 0.8218209743499756, 0.8082888126373291]
+2022-12-02 17:49:39,118 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.8598424792289734, 0.8445783853530884, 0.8461764454841614, 0.8641025424003601, 0.8544235229492188, 0.853600025177002, 0.8487308621406555, 0.8470731973648071, 0.8726063966751099, 0.8475369215011597, 0.8692113161087036, 0.8388888239860535, 0.8415423631668091, 0.8494924306869507, 0.8630026578903198, 0.8459259867668152]
+2022-12-02 17:49:39,120 [INFO] [metadata.py:31] val_clean_wall_time: 436.22897839546204
+2022-12-02 17:49:39,122 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.36228978395462
+2022-12-02 17:49:39,124 [INFO] [metadata.py:31] val_clean_loss: 0.7635542070865631
+2022-12-02 17:49:39,128 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 17:49:39,130 [INFO] [metadata.py:31] val_loss: 0.7635542070865631
+2022-12-02 17:49:39,132 [INFO] [train.py:300] Updating best model with epoch: 3 loss: 0.7635542070865631, as its less than the best loss plus eps 0.0001.
+2022-12-02 17:49:39,158 [INFO] [train.py:262] Epoch: 4
+2022-12-02 17:49:39,160 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:49:39,163 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 17:49:47,090 [INFO] [train.py:137]   batch 0/1000  loss: 0.7673409  lr: 2.575e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 17:50:20,679 [INFO] [train.py:137]   batch 100/1000  loss: 0.86735344  lr: 1.007e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:50:54,165 [INFO] [train.py:137]   batch 200/1000  loss: 0.86211145  lr: 1.758e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 17:51:28,087 [INFO] [train.py:137]   batch 300/1000  loss: 0.88191652  lr: 2.507e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 17:52:02,020 [INFO] [train.py:137]   batch 400/1000  loss: 0.83828503  lr: 3.258e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 17:52:36,024 [INFO] [train.py:137]   batch 500/1000  loss: 0.87207079  lr: 3.993e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 17:53:09,804 [INFO] [train.py:137]   batch 600/1000  loss: 0.82213444  lr: 3.243e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 17:53:43,717 [INFO] [train.py:137]   batch 700/1000  loss: 0.78838938  lr: 2.492e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 17:54:17,527 [INFO] [train.py:137]   batch 800/1000  loss: 0.70391488  lr: 1.742e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 17:54:51,576 [INFO] [train.py:137]   batch 900/1000  loss: 0.77681428  lr: 9.925e-06  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 17:55:23,022 [INFO] [metadata.py:31] train_wall_time: 343.8560390472412
+2022-12-02 17:55:23,026 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3438560390472412
+2022-12-02 17:55:23,029 [INFO] [metadata.py:31] train_loss: 0.8418736329078674
+2022-12-02 17:55:23,035 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 18:02:31,125 [INFO] [metadata.py:31] val_clean_map: 0.8319780826568604
+2022-12-02 18:02:31,130 [INFO] [metadata.py:31] val_clean_map_50: 0.9982725977897644
+2022-12-02 18:02:31,135 [INFO] [metadata.py:31] val_clean_map_75: 0.9868584871292114
+2022-12-02 18:02:31,140 [INFO] [metadata.py:31] val_clean_map_small: 0.8275172114372253
+2022-12-02 18:02:31,144 [INFO] [metadata.py:31] val_clean_map_medium: 0.8229207992553711
+2022-12-02 18:02:31,147 [INFO] [metadata.py:31] val_clean_map_large: 0.7909659147262573
+2022-12-02 18:02:31,151 [INFO] [metadata.py:31] val_clean_mar_1: 0.8228338360786438
+2022-12-02 18:02:31,155 [INFO] [metadata.py:31] val_clean_mar_10: 0.86860191822052
+2022-12-02 18:02:31,160 [INFO] [metadata.py:31] val_clean_mar_100: 0.86860191822052
+2022-12-02 18:02:31,164 [INFO] [metadata.py:31] val_clean_mar_small: 0.8842632174491882
+2022-12-02 18:02:31,167 [INFO] [metadata.py:31] val_clean_mar_medium: 0.8653653860092163
+2022-12-02 18:02:31,169 [INFO] [metadata.py:31] val_clean_mar_large: 0.8578599691390991
+2022-12-02 18:02:31,171 [INFO] [metadata.py:31] val_clean_map_per_class: [0.846305787563324, 0.8312949538230896, 0.819647490978241, 0.8392757773399353, 0.8334603309631348, 0.8273785710334778, 0.8236948251724243, 0.8313602209091187, 0.851443350315094, 0.8226097822189331, 0.8477124571800232, 0.8234006762504578, 0.8246633410453796, 0.8299024701118469, 0.8349225521087646, 0.8245766758918762]
+2022-12-02 18:02:31,173 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.8779527544975281, 0.8633735775947571, 0.8570588827133179, 0.874592125415802, 0.8750670552253723, 0.8693333864212036, 0.8639593124389648, 0.8658536672592163, 0.8792554140090942, 0.8593595623970032, 0.8839694857597351, 0.8643938899040222, 0.8619402647018433, 0.8680203557014465, 0.8739947080612183, 0.8595062494277954]
+2022-12-02 18:02:31,175 [INFO] [metadata.py:31] val_clean_wall_time: 428.1366755962372
+2022-12-02 18:02:31,177 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.281366755962372
+2022-12-02 18:02:31,179 [INFO] [metadata.py:31] val_clean_loss: 0.6644341868162155
+2022-12-02 18:02:31,183 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 18:02:31,184 [INFO] [metadata.py:31] val_loss: 0.6644341868162155
+2022-12-02 18:02:31,187 [INFO] [train.py:300] Updating best model with epoch: 4 loss: 0.6644341868162155, as its less than the best loss plus eps 0.0001.
+2022-12-02 18:02:31,221 [INFO] [train.py:262] Epoch: 5
+2022-12-02 18:02:31,224 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:02:31,227 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 18:02:39,670 [INFO] [train.py:137]   batch 0/1000  loss: 0.61543065  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 18:03:12,928 [INFO] [train.py:137]   batch 100/1000  loss: 0.61731917  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 18:03:46,322 [INFO] [train.py:137]   batch 200/1000  loss: 0.59980118  lr: 1.758e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 18:04:20,267 [INFO] [train.py:137]   batch 300/1000  loss: 0.99231458  lr: 2.507e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 18:04:54,186 [INFO] [train.py:137]   batch 400/1000  loss: 0.62787277  lr: 3.258e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 18:05:28,230 [INFO] [train.py:137]   batch 500/1000  loss: 0.98207378  lr: 3.993e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 18:06:03,669 [INFO] [train.py:137]   batch 600/1000  loss: 0.74032748  lr: 3.243e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 18:06:38,367 [INFO] [train.py:137]   batch 700/1000  loss: 0.6556524  lr: 2.492e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 18:07:12,407 [INFO] [train.py:137]   batch 800/1000  loss: 0.57676798  lr: 1.742e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 18:07:47,131 [INFO] [train.py:137]   batch 900/1000  loss: 0.79195255  lr: 9.925e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:08:18,167 [INFO] [metadata.py:31] train_wall_time: 346.93629908561707
+2022-12-02 18:08:18,170 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3469362990856171
+2022-12-02 18:08:18,172 [INFO] [metadata.py:31] train_loss: 0.744436432659626
+2022-12-02 18:08:18,177 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 18:15:18,919 [INFO] [metadata.py:31] val_clean_map: 0.8445045948028564
+2022-12-02 18:15:18,925 [INFO] [metadata.py:31] val_clean_map_50: 0.9985436201095581
+2022-12-02 18:15:18,930 [INFO] [metadata.py:31] val_clean_map_75: 0.9881795644760132
+2022-12-02 18:15:18,936 [INFO] [metadata.py:31] val_clean_map_small: 0.8507575988769531
+2022-12-02 18:15:18,941 [INFO] [metadata.py:31] val_clean_map_medium: 0.8321095705032349
+2022-12-02 18:15:18,946 [INFO] [metadata.py:31] val_clean_map_large: 0.8010262846946716
+2022-12-02 18:15:18,954 [INFO] [metadata.py:31] val_clean_mar_1: 0.8324655294418335
+2022-12-02 18:15:18,960 [INFO] [metadata.py:31] val_clean_mar_10: 0.8789407014846802
+2022-12-02 18:15:18,965 [INFO] [metadata.py:31] val_clean_mar_100: 0.8789407014846802
+2022-12-02 18:15:18,970 [INFO] [metadata.py:31] val_clean_mar_small: 0.8957293629646301
+2022-12-02 18:15:18,972 [INFO] [metadata.py:31] val_clean_mar_medium: 0.8752166032791138
+2022-12-02 18:15:18,972 [INFO] [metadata.py:31] val_clean_mar_large: 0.8725330233573914
+2022-12-02 18:15:18,973 [INFO] [metadata.py:31] val_clean_map_per_class: [0.861351728439331, 0.8401457071304321, 0.8407077193260193, 0.8600572347640991, 0.8478734493255615, 0.8435074687004089, 0.8399744033813477, 0.8353720307350159, 0.8678991198539734, 0.834855318069458, 0.8534716963768005, 0.8295489549636841, 0.8304018974304199, 0.8389775156974792, 0.8516680002212524, 0.836262583732605]
+2022-12-02 18:15:18,973 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.8913386464118958, 0.8718072175979614, 0.8744117617607117, 0.8941725492477417, 0.8828418850898743, 0.8824000358581543, 0.8776648640632629, 0.8709756135940552, 0.8957446217536926, 0.871921181678772, 0.885241687297821, 0.8654040098190308, 0.8679103851318359, 0.875634491443634, 0.8847185373306274, 0.87086421251297]
+2022-12-02 18:15:18,974 [INFO] [metadata.py:31] val_clean_wall_time: 420.7931983470917
+2022-12-02 18:15:18,974 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.207931983470917
+2022-12-02 18:15:18,975 [INFO] [metadata.py:31] val_clean_loss: 0.5963598656654358
+2022-12-02 18:15:18,977 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 18:15:18,978 [INFO] [metadata.py:31] val_loss: 0.5963598656654358
+2022-12-02 18:15:18,979 [INFO] [train.py:300] Updating best model with epoch: 5 loss: 0.5963598656654358, as its less than the best loss plus eps 0.0001.
+2022-12-02 18:15:19,004 [INFO] [train.py:262] Epoch: 6
+2022-12-02 18:15:19,005 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:15:19,007 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 18:15:27,129 [INFO] [train.py:137]   batch 0/1000  loss: 0.60387087  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 18:16:00,959 [INFO] [train.py:137]   batch 100/1000  loss: 0.62880981  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 18:16:34,442 [INFO] [train.py:137]   batch 200/1000  loss: 0.59415579  lr: 1.758e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 18:17:08,556 [INFO] [train.py:137]   batch 300/1000  loss: 0.63399655  lr: 2.507e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:17:43,378 [INFO] [train.py:137]   batch 400/1000  loss: 0.59977537  lr: 3.258e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:18:17,819 [INFO] [train.py:137]   batch 500/1000  loss: 0.87874866  lr: 3.993e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:18:51,763 [INFO] [train.py:137]   batch 600/1000  loss: 0.73980343  lr: 3.243e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:19:25,760 [INFO] [train.py:137]   batch 700/1000  loss: 0.66178703  lr: 2.492e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:20:00,603 [INFO] [train.py:137]   batch 800/1000  loss: 0.64684016  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:20:35,745 [INFO] [train.py:137]   batch 900/1000  loss: 0.54824197  lr: 9.925e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:21:06,048 [INFO] [metadata.py:31] train_wall_time: 347.03772950172424
+2022-12-02 18:21:06,050 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34703772950172423
+2022-12-02 18:21:06,053 [INFO] [metadata.py:31] train_loss: 0.6663341785669327
+2022-12-02 18:21:06,057 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 18:28:03,926 [INFO] [metadata.py:31] val_clean_map: 0.8553635478019714
+2022-12-02 18:28:03,930 [INFO] [metadata.py:31] val_clean_map_50: 0.9986222982406616
+2022-12-02 18:28:03,935 [INFO] [metadata.py:31] val_clean_map_75: 0.9901659488677979
+2022-12-02 18:28:03,940 [INFO] [metadata.py:31] val_clean_map_small: 0.8544076085090637
+2022-12-02 18:28:03,948 [INFO] [metadata.py:31] val_clean_map_medium: 0.8464108109474182
+2022-12-02 18:28:03,952 [INFO] [metadata.py:31] val_clean_map_large: 0.8429502248764038
+2022-12-02 18:28:03,955 [INFO] [metadata.py:31] val_clean_mar_1: 0.8411933779716492
+2022-12-02 18:28:03,959 [INFO] [metadata.py:31] val_clean_mar_10: 0.888543963432312
+2022-12-02 18:28:03,961 [INFO] [metadata.py:31] val_clean_mar_100: 0.888543963432312
+2022-12-02 18:28:03,963 [INFO] [metadata.py:31] val_clean_mar_small: 0.9012497663497925
+2022-12-02 18:28:03,965 [INFO] [metadata.py:31] val_clean_mar_medium: 0.885452151298523
+2022-12-02 18:28:03,967 [INFO] [metadata.py:31] val_clean_mar_large: 0.9030477404594421
+2022-12-02 18:28:03,969 [INFO] [metadata.py:31] val_clean_map_per_class: [0.8711593151092529, 0.8498538136482239, 0.8497508764266968, 0.8737755417823792, 0.8513332605361938, 0.8540599346160889, 0.8493654131889343, 0.8460825085639954, 0.8765552639961243, 0.8514434099197388, 0.8695242404937744, 0.839960515499115, 0.8452619314193726, 0.8478763103485107, 0.8595629930496216, 0.8502517342567444]
+2022-12-02 18:28:03,972 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.8992125391960144, 0.8812047839164734, 0.8820587992668152, 0.904895007610321, 0.8890080451965332, 0.8925334215164185, 0.8837563395500183, 0.8797560930252075, 0.9061170816421509, 0.8830049633979797, 0.9007633924484253, 0.876767635345459, 0.8808457255363464, 0.8822334408760071, 0.8903485536575317, 0.8841975331306458]
+2022-12-02 18:28:03,974 [INFO] [metadata.py:31] val_clean_wall_time: 417.9156551361084
+2022-12-02 18:28:03,977 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.179156551361084
+2022-12-02 18:28:03,979 [INFO] [metadata.py:31] val_clean_loss: 0.5450297978520393
+2022-12-02 18:28:03,983 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 18:28:03,985 [INFO] [metadata.py:31] val_loss: 0.5450297978520393
+2022-12-02 18:28:03,987 [INFO] [train.py:300] Updating best model with epoch: 6 loss: 0.5450297978520393, as its less than the best loss plus eps 0.0001.
+2022-12-02 18:28:04,012 [INFO] [train.py:262] Epoch: 7
+2022-12-02 18:28:04,016 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:28:04,018 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 18:28:12,624 [INFO] [train.py:137]   batch 0/1000  loss: 0.57881993  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 18:28:46,051 [INFO] [train.py:137]   batch 100/1000  loss: 0.59643149  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:29:20,468 [INFO] [train.py:137]   batch 200/1000  loss: 0.54155916  lr: 1.758e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 18:29:54,814 [INFO] [train.py:137]   batch 300/1000  loss: 0.66107893  lr: 2.507e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:30:28,620 [INFO] [train.py:137]   batch 400/1000  loss: 0.7339865  lr: 3.258e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:31:03,136 [INFO] [train.py:137]   batch 500/1000  loss: 0.73961246  lr: 3.993e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:31:37,579 [INFO] [train.py:137]   batch 600/1000  loss: 0.64767861  lr: 3.243e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 18:32:11,286 [INFO] [train.py:137]   batch 700/1000  loss: 0.53645998  lr: 2.492e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 18:32:45,779 [INFO] [train.py:137]   batch 800/1000  loss: 0.59902894  lr: 1.742e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 18:33:20,052 [INFO] [train.py:137]   batch 900/1000  loss: 0.54944015  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 18:33:51,621 [INFO] [metadata.py:31] train_wall_time: 347.59970903396606
+2022-12-02 18:33:51,625 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3475997090339661
+2022-12-02 18:33:51,628 [INFO] [metadata.py:31] train_loss: 0.6069167620539665
+2022-12-02 18:33:51,634 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 18:40:47,042 [INFO] [metadata.py:31] val_clean_map: 0.8652307987213135
+2022-12-02 18:40:47,048 [INFO] [metadata.py:31] val_clean_map_50: 0.9987046718597412
+2022-12-02 18:40:47,054 [INFO] [metadata.py:31] val_clean_map_75: 0.9922058582305908
+2022-12-02 18:40:47,059 [INFO] [metadata.py:31] val_clean_map_small: 0.8686894774436951
+2022-12-02 18:40:47,065 [INFO] [metadata.py:31] val_clean_map_medium: 0.8540433049201965
+2022-12-02 18:40:47,070 [INFO] [metadata.py:31] val_clean_map_large: 0.8377633690834045
+2022-12-02 18:40:47,075 [INFO] [metadata.py:31] val_clean_mar_1: 0.848838210105896
+2022-12-02 18:40:47,080 [INFO] [metadata.py:31] val_clean_mar_10: 0.8968244791030884
+2022-12-02 18:40:47,085 [INFO] [metadata.py:31] val_clean_mar_100: 0.8968244791030884
+2022-12-02 18:40:47,090 [INFO] [metadata.py:31] val_clean_mar_small: 0.9034526944160461
+2022-12-02 18:40:47,096 [INFO] [metadata.py:31] val_clean_mar_medium: 0.8953183889389038
+2022-12-02 18:40:47,099 [INFO] [metadata.py:31] val_clean_mar_large: 0.8965420722961426
+2022-12-02 18:40:47,102 [INFO] [metadata.py:31] val_clean_map_per_class: [0.8840430378913879, 0.856723964214325, 0.8595452904701233, 0.8794601559638977, 0.8696848750114441, 0.869533896446228, 0.8605140447616577, 0.8645773530006409, 0.876846969127655, 0.8516436815261841, 0.874872624874115, 0.8531644344329834, 0.8535202741622925, 0.8653859496116638, 0.870014488697052, 0.8541620969772339]
+2022-12-02 18:40:47,107 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9089239239692688, 0.8896385431289673, 0.8885294198989868, 0.9118881225585938, 0.9040215611457825, 0.902400016784668, 0.8908628225326538, 0.892926812171936, 0.9055851101875305, 0.885960578918457, 0.9066158533096313, 0.8835857510566711, 0.8895522356033325, 0.89593905210495, 0.9021447896957397, 0.8906172513961792]
+2022-12-02 18:40:47,110 [INFO] [metadata.py:31] val_clean_wall_time: 415.47350025177
+2022-12-02 18:40:47,114 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.1547350025177
+2022-12-02 18:40:47,115 [INFO] [metadata.py:31] val_clean_loss: 0.5012883540987968
+2022-12-02 18:40:47,119 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 18:40:47,121 [INFO] [metadata.py:31] val_loss: 0.5012883540987968
+2022-12-02 18:40:47,126 [INFO] [train.py:300] Updating best model with epoch: 7 loss: 0.5012883540987968, as its less than the best loss plus eps 0.0001.
+2022-12-02 18:40:47,165 [INFO] [train.py:262] Epoch: 8
+2022-12-02 18:40:47,166 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:40:47,168 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 18:40:53,623 [INFO] [train.py:137]   batch 0/1000  loss: 0.50825155  lr: 2.575e-06  cpu_mem: 11.5%   gpu_mem: [38.2]%
+2022-12-02 18:41:28,220 [INFO] [train.py:137]   batch 100/1000  loss: 0.49184498  lr: 1.007e-05  cpu_mem: 11.8%   gpu_mem: [38.2]%
+2022-12-02 18:42:03,161 [INFO] [train.py:137]   batch 200/1000  loss: 0.57785177  lr: 1.758e-05  cpu_mem: 11.8%   gpu_mem: [38.2]%
+2022-12-02 18:42:38,791 [INFO] [train.py:137]   batch 300/1000  loss: 0.61120206  lr: 2.507e-05  cpu_mem: 11.9%   gpu_mem: [38.2]%
+2022-12-02 18:43:13,296 [INFO] [train.py:137]   batch 400/1000  loss: 0.53367788  lr: 3.258e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:43:48,313 [INFO] [train.py:137]   batch 500/1000  loss: 0.55751592  lr: 3.993e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:44:22,318 [INFO] [train.py:137]   batch 600/1000  loss: 0.7104218  lr: 3.243e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:44:57,178 [INFO] [train.py:137]   batch 700/1000  loss: 0.61953753  lr: 2.492e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:45:31,658 [INFO] [train.py:137]   batch 800/1000  loss: 0.51458895  lr: 1.742e-05  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:46:05,093 [INFO] [train.py:137]   batch 900/1000  loss: 0.60275567  lr: 9.925e-06  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:46:35,916 [INFO] [metadata.py:31] train_wall_time: 348.744588136673
+2022-12-02 18:46:35,920 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.348744588136673
+2022-12-02 18:46:35,923 [INFO] [metadata.py:31] train_loss: 0.5610549989044666
+2022-12-02 18:46:35,928 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 18:53:25,840 [INFO] [metadata.py:31] val_clean_map: 0.8682711720466614
+2022-12-02 18:53:25,845 [INFO] [metadata.py:31] val_clean_map_50: 0.9987165927886963
+2022-12-02 18:53:25,851 [INFO] [metadata.py:31] val_clean_map_75: 0.9942880272865295
+2022-12-02 18:53:25,855 [INFO] [metadata.py:31] val_clean_map_small: 0.8716724514961243
+2022-12-02 18:53:25,861 [INFO] [metadata.py:31] val_clean_map_medium: 0.860476553440094
+2022-12-02 18:53:25,867 [INFO] [metadata.py:31] val_clean_map_large: 0.8239417672157288
+2022-12-02 18:53:25,872 [INFO] [metadata.py:31] val_clean_mar_1: 0.8509570956230164
+2022-12-02 18:53:25,875 [INFO] [metadata.py:31] val_clean_mar_10: 0.8992633819580078
+2022-12-02 18:53:25,878 [INFO] [metadata.py:31] val_clean_mar_100: 0.8992633819580078
+2022-12-02 18:53:25,881 [INFO] [metadata.py:31] val_clean_mar_small: 0.9072216153144836
+2022-12-02 18:53:25,883 [INFO] [metadata.py:31] val_clean_mar_medium: 0.897692859172821
+2022-12-02 18:53:25,884 [INFO] [metadata.py:31] val_clean_mar_large: 0.8846677541732788
+2022-12-02 18:53:25,886 [INFO] [metadata.py:31] val_clean_map_per_class: [0.8887538313865662, 0.864170253276825, 0.8622487187385559, 0.8826935887336731, 0.8758140802383423, 0.8708863854408264, 0.859607458114624, 0.8588579297065735, 0.8837628960609436, 0.8588826656341553, 0.8798075318336487, 0.853722095489502, 0.8546754717826843, 0.8663507699966431, 0.8706496953964233, 0.861455500125885]
+2022-12-02 18:53:25,888 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9136483073234558, 0.8959035873413086, 0.8905882835388184, 0.9111889004707336, 0.9099196195602417, 0.8991999626159668, 0.8918781280517578, 0.8917073011398315, 0.9127659797668457, 0.890886664390564, 0.9106870889663696, 0.8883837461471558, 0.8888059854507446, 0.8974618911743164, 0.9016085863113403, 0.8935802578926086]
+2022-12-02 18:53:25,890 [INFO] [metadata.py:31] val_clean_wall_time: 409.9585292339325
+2022-12-02 18:53:25,892 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.099585292339325
+2022-12-02 18:53:25,897 [INFO] [metadata.py:31] val_clean_loss: 0.47448977023363115
+2022-12-02 18:53:25,903 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 18:53:25,905 [INFO] [metadata.py:31] val_loss: 0.47448977023363115
+2022-12-02 18:53:25,907 [INFO] [train.py:300] Updating best model with epoch: 8 loss: 0.47448977023363115, as its less than the best loss plus eps 0.0001.
+2022-12-02 18:53:25,960 [INFO] [train.py:262] Epoch: 9
+2022-12-02 18:53:25,966 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:53:25,971 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 18:53:33,877 [INFO] [train.py:137]   batch 0/1000  loss: 0.47999239  lr: 2.575e-06  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 18:54:08,166 [INFO] [train.py:137]   batch 100/1000  loss: 0.49210986  lr: 1.007e-05  cpu_mem: 11.9%   gpu_mem: [38.2]%
+2022-12-02 18:54:42,096 [INFO] [train.py:137]   batch 200/1000  loss: 0.43923426  lr: 1.758e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:55:16,462 [INFO] [train.py:137]   batch 300/1000  loss: 0.41247517  lr: 2.507e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:55:50,732 [INFO] [train.py:137]   batch 400/1000  loss: 0.55902505  lr: 3.258e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:56:25,171 [INFO] [train.py:137]   batch 500/1000  loss: 0.51222867  lr: 3.993e-05  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 18:56:59,240 [INFO] [train.py:137]   batch 600/1000  loss: 0.58832341  lr: 3.243e-05  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:57:33,943 [INFO] [train.py:137]   batch 700/1000  loss: 0.57812703  lr: 2.492e-05  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:58:07,689 [INFO] [train.py:137]   batch 800/1000  loss: 0.43872261  lr: 1.742e-05  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:58:42,722 [INFO] [train.py:137]   batch 900/1000  loss: 0.3871001  lr: 9.925e-06  cpu_mem: 12.1%   gpu_mem: [38.2]%
+2022-12-02 18:59:13,803 [INFO] [metadata.py:31] train_wall_time: 347.82553720474243
+2022-12-02 18:59:13,806 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3478255372047424
+2022-12-02 18:59:13,808 [INFO] [metadata.py:31] train_loss: 0.5256074099540711
+2022-12-02 18:59:13,814 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 19:06:04,091 [INFO] [metadata.py:31] val_clean_map: 0.8755810260772705
+2022-12-02 19:06:04,096 [INFO] [metadata.py:31] val_clean_map_50: 0.9987363219261169
+2022-12-02 19:06:04,100 [INFO] [metadata.py:31] val_clean_map_75: 0.9949003458023071
+2022-12-02 19:06:04,105 [INFO] [metadata.py:31] val_clean_map_small: 0.8764186501502991
+2022-12-02 19:06:04,110 [INFO] [metadata.py:31] val_clean_map_medium: 0.8664987683296204
+2022-12-02 19:06:04,114 [INFO] [metadata.py:31] val_clean_map_large: 0.8598050475120544
+2022-12-02 19:06:04,119 [INFO] [metadata.py:31] val_clean_mar_1: 0.857434093952179
+2022-12-02 19:06:04,125 [INFO] [metadata.py:31] val_clean_mar_10: 0.9058691263198853
+2022-12-02 19:06:04,128 [INFO] [metadata.py:31] val_clean_mar_100: 0.9058691263198853
+2022-12-02 19:06:04,132 [INFO] [metadata.py:31] val_clean_mar_small: 0.9089080691337585
+2022-12-02 19:06:04,136 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9055326581001282
+2022-12-02 19:06:04,139 [INFO] [metadata.py:31] val_clean_mar_large: 0.9047025442123413
+2022-12-02 19:06:04,142 [INFO] [metadata.py:31] val_clean_map_per_class: [0.886831521987915, 0.8684390783309937, 0.8681274056434631, 0.8849843740463257, 0.8687288165092468, 0.8851821422576904, 0.8724861145019531, 0.8650388121604919, 0.8875119686126709, 0.8660780191421509, 0.8950470685958862, 0.8659082055091858, 0.8639672994613647, 0.8797085285186768, 0.8829626441001892, 0.8682936429977417]
+2022-12-02 19:06:04,144 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.912335991859436, 0.8978313207626343, 0.899117648601532, 0.9135198593139648, 0.903753399848938, 0.9154666662216187, 0.903045654296875, 0.8987805247306824, 0.916223406791687, 0.8975369334220886, 0.9201017618179321, 0.8967171907424927, 0.8975124359130859, 0.909136950969696, 0.9123323559761047, 0.9004939198493958]
+2022-12-02 19:06:04,145 [INFO] [metadata.py:31] val_clean_wall_time: 410.32829570770264
+2022-12-02 19:06:04,147 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.103282957077027
+2022-12-02 19:06:04,149 [INFO] [metadata.py:31] val_clean_loss: 0.4493265959620476
+2022-12-02 19:06:04,153 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 19:06:04,155 [INFO] [metadata.py:31] val_loss: 0.4493265959620476
+2022-12-02 19:06:04,157 [INFO] [train.py:300] Updating best model with epoch: 9 loss: 0.4493265959620476, as its less than the best loss plus eps 0.0001.
+2022-12-02 19:06:04,209 [INFO] [train.py:262] Epoch: 10
+2022-12-02 19:06:04,210 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:06:04,212 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 19:06:10,790 [INFO] [train.py:137]   batch 0/1000  loss: 0.47287726  lr: 2.575e-06  cpu_mem: 12.4%   gpu_mem: [38.2]%
+2022-12-02 19:06:47,927 [INFO] [train.py:137]   batch 100/1000  loss: 0.48600084  lr: 1.007e-05  cpu_mem: 12.7%   gpu_mem: [38.2]%
+2022-12-02 19:07:21,740 [INFO] [train.py:137]   batch 200/1000  loss: 0.37457517  lr: 1.758e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
+2022-12-02 19:07:56,453 [INFO] [train.py:137]   batch 300/1000  loss: 0.45118463  lr: 2.507e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 19:08:31,372 [INFO] [train.py:137]   batch 400/1000  loss: 0.45592165  lr: 3.258e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 19:09:06,267 [INFO] [train.py:137]   batch 500/1000  loss: 0.75888181  lr: 3.993e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 19:09:41,103 [INFO] [train.py:137]   batch 600/1000  loss: 0.57463706  lr: 3.243e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 19:10:16,780 [INFO] [train.py:137]   batch 700/1000  loss: 0.44100499  lr: 2.492e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 19:10:52,336 [INFO] [train.py:137]   batch 800/1000  loss: 0.49250913  lr: 1.742e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 19:11:27,260 [INFO] [train.py:137]   batch 900/1000  loss: 0.47276318  lr: 9.925e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 19:11:57,915 [INFO] [metadata.py:31] train_wall_time: 353.7005138397217
+2022-12-02 19:11:57,919 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3537005138397217
+2022-12-02 19:11:57,922 [INFO] [metadata.py:31] train_loss: 0.4922263107597828
+2022-12-02 19:11:57,928 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 19:18:46,693 [INFO] [metadata.py:31] val_clean_map: 0.8823683857917786
+2022-12-02 19:18:46,697 [INFO] [metadata.py:31] val_clean_map_50: 0.9987494349479675
+2022-12-02 19:18:46,702 [INFO] [metadata.py:31] val_clean_map_75: 0.9955769181251526
+2022-12-02 19:18:46,706 [INFO] [metadata.py:31] val_clean_map_small: 0.8774281144142151
+2022-12-02 19:18:46,711 [INFO] [metadata.py:31] val_clean_map_medium: 0.8758410811424255
+2022-12-02 19:18:46,716 [INFO] [metadata.py:31] val_clean_map_large: 0.8639777898788452
+2022-12-02 19:18:46,720 [INFO] [metadata.py:31] val_clean_mar_1: 0.862811267375946
+2022-12-02 19:18:46,724 [INFO] [metadata.py:31] val_clean_mar_10: 0.9118150472640991
+2022-12-02 19:18:46,729 [INFO] [metadata.py:31] val_clean_mar_100: 0.9118150472640991
+2022-12-02 19:18:46,734 [INFO] [metadata.py:31] val_clean_mar_small: 0.9149001836776733
+2022-12-02 19:18:46,739 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9113427400588989
+2022-12-02 19:18:46,741 [INFO] [metadata.py:31] val_clean_mar_large: 0.8980129361152649
+2022-12-02 19:18:46,743 [INFO] [metadata.py:31] val_clean_map_per_class: [0.890069305896759, 0.8762110471725464, 0.8737006187438965, 0.8920102715492249, 0.8820697069168091, 0.8885692358016968, 0.8808884620666504, 0.87706059217453, 0.8916873931884766, 0.8736020922660828, 0.8930965662002563, 0.877153754234314, 0.8788308501243591, 0.8801198601722717, 0.8907654881477356, 0.8720598816871643]
+2022-12-02 19:18:46,745 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9157480001449585, 0.9038554430007935, 0.9014705419540405, 0.9219114184379578, 0.915549635887146, 0.9181333780288696, 0.9088832139968872, 0.9082926511764526, 0.9194148778915405, 0.9049261212348938, 0.9221373796463013, 0.9060605764389038, 0.906467616558075, 0.9119289517402649, 0.919571042060852, 0.9046913385391235]
+2022-12-02 19:18:46,747 [INFO] [metadata.py:31] val_clean_wall_time: 408.81552624702454
+2022-12-02 19:18:46,749 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.088155262470245
+2022-12-02 19:18:46,751 [INFO] [metadata.py:31] val_clean_loss: 0.42400862872600553
+2022-12-02 19:18:46,755 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 19:18:46,757 [INFO] [metadata.py:31] val_loss: 0.42400862872600553
+2022-12-02 19:18:46,759 [INFO] [train.py:300] Updating best model with epoch: 10 loss: 0.42400862872600553, as its less than the best loss plus eps 0.0001.
+2022-12-02 19:18:46,809 [INFO] [train.py:262] Epoch: 11
+2022-12-02 19:18:46,811 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:18:46,813 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 19:18:55,071 [INFO] [train.py:137]   batch 0/1000  loss: 0.42031452  lr: 2.575e-06  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 19:19:29,600 [INFO] [train.py:137]   batch 100/1000  loss: 0.44343153  lr: 1.007e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 19:20:04,789 [INFO] [train.py:137]   batch 200/1000  loss: 0.40072927  lr: 1.758e-05  cpu_mem: 14.3%   gpu_mem: [38.2]%
+2022-12-02 19:20:39,651 [INFO] [train.py:137]   batch 300/1000  loss: 0.52223718  lr: 2.507e-05  cpu_mem: 14.4%   gpu_mem: [38.2]%
+2022-12-02 19:21:13,574 [INFO] [train.py:137]   batch 400/1000  loss: 0.50388819  lr: 3.258e-05  cpu_mem: 14.5%   gpu_mem: [38.2]%
+2022-12-02 19:21:48,610 [INFO] [train.py:137]   batch 500/1000  loss: 0.41110894  lr: 3.993e-05  cpu_mem: 14.5%   gpu_mem: [38.2]%
+2022-12-02 19:22:23,148 [INFO] [train.py:137]   batch 600/1000  loss: 0.50866324  lr: 3.243e-05  cpu_mem: 14.6%   gpu_mem: [38.2]%
+2022-12-02 19:22:58,102 [INFO] [train.py:137]   batch 700/1000  loss: 0.41379541  lr: 2.492e-05  cpu_mem: 14.6%   gpu_mem: [38.2]%
+2022-12-02 19:23:33,380 [INFO] [train.py:137]   batch 800/1000  loss: 0.47901249  lr: 1.742e-05  cpu_mem: 14.7%   gpu_mem: [38.2]%
+2022-12-02 19:24:09,212 [INFO] [train.py:137]   batch 900/1000  loss: 0.54007006  lr: 9.925e-06  cpu_mem: 14.7%   gpu_mem: [38.2]%
+2022-12-02 19:24:41,015 [INFO] [metadata.py:31] train_wall_time: 354.19896245002747
+2022-12-02 19:24:41,017 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35419896245002747
+2022-12-02 19:24:41,019 [INFO] [metadata.py:31] train_loss: 0.4654984833598137
+2022-12-02 19:24:41,024 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 19:31:29,927 [INFO] [metadata.py:31] val_clean_map: 0.884655237197876
+2022-12-02 19:31:29,930 [INFO] [metadata.py:31] val_clean_map_50: 0.9992967247962952
+2022-12-02 19:31:29,935 [INFO] [metadata.py:31] val_clean_map_75: 0.9962590932846069
+2022-12-02 19:31:29,939 [INFO] [metadata.py:31] val_clean_map_small: 0.8766201138496399
+2022-12-02 19:31:29,944 [INFO] [metadata.py:31] val_clean_map_medium: 0.878324568271637
+2022-12-02 19:31:29,948 [INFO] [metadata.py:31] val_clean_map_large: 0.8792776465415955
+2022-12-02 19:31:29,953 [INFO] [metadata.py:31] val_clean_mar_1: 0.8654473423957825
+2022-12-02 19:31:29,957 [INFO] [metadata.py:31] val_clean_mar_10: 0.9142743945121765
+2022-12-02 19:31:29,962 [INFO] [metadata.py:31] val_clean_mar_100: 0.9142743945121765
+2022-12-02 19:31:29,967 [INFO] [metadata.py:31] val_clean_mar_small: 0.9158051609992981
+2022-12-02 19:31:29,971 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9140552282333374
+2022-12-02 19:31:29,975 [INFO] [metadata.py:31] val_clean_mar_large: 0.9179816246032715
+2022-12-02 19:31:29,978 [INFO] [metadata.py:31] val_clean_map_per_class: [0.894625186920166, 0.8766369223594666, 0.8743131160736084, 0.8988693356513977, 0.8781484961509705, 0.892896831035614, 0.8873570561408997, 0.8814288377761841, 0.8971279859542847, 0.8787305355072021, 0.900786280632019, 0.8737122416496277, 0.8756667971611023, 0.8844241499900818, 0.8856011033058167, 0.8741586804389954]
+2022-12-02 19:31:29,980 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9204724431037903, 0.9043374061584473, 0.9055882692337036, 0.9268065690994263, 0.9126006364822388, 0.9232000112533569, 0.9131978750228882, 0.9126828908920288, 0.9231382608413696, 0.9091132879257202, 0.9277353286743164, 0.9035353660583496, 0.907711386680603, 0.9144669771194458, 0.916890025138855, 0.9069135785102844]
+2022-12-02 19:31:29,982 [INFO] [metadata.py:31] val_clean_wall_time: 408.9566743373871
+2022-12-02 19:31:29,984 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.0895667433738705
+2022-12-02 19:31:29,987 [INFO] [metadata.py:31] val_clean_loss: 0.4114717298746109
+2022-12-02 19:31:29,991 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 19:31:29,994 [INFO] [metadata.py:31] val_loss: 0.4114717298746109
+2022-12-02 19:31:29,997 [INFO] [train.py:300] Updating best model with epoch: 11 loss: 0.4114717298746109, as its less than the best loss plus eps 0.0001.
+2022-12-02 19:31:30,049 [INFO] [train.py:262] Epoch: 12
+2022-12-02 19:31:30,051 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:31:30,053 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 19:31:39,087 [INFO] [train.py:137]   batch 0/1000  loss: 0.39437538  lr: 2.575e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 19:32:13,364 [INFO] [train.py:137]   batch 100/1000  loss: 0.34156084  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 19:32:47,965 [INFO] [train.py:137]   batch 200/1000  loss: 0.41182446  lr: 1.758e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 19:33:23,080 [INFO] [train.py:137]   batch 300/1000  loss: 0.51695091  lr: 2.507e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 19:33:57,338 [INFO] [train.py:137]   batch 400/1000  loss: 0.44284517  lr: 3.258e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 19:34:32,335 [INFO] [train.py:137]   batch 500/1000  loss: 0.52671677  lr: 3.993e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 19:35:06,999 [INFO] [train.py:137]   batch 600/1000  loss: 0.54058903  lr: 3.243e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:35:41,855 [INFO] [train.py:137]   batch 700/1000  loss: 0.33087602  lr: 2.492e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:36:16,929 [INFO] [train.py:137]   batch 800/1000  loss: 0.35388833  lr: 1.742e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:36:51,997 [INFO] [train.py:137]   batch 900/1000  loss: 0.38631582  lr: 9.925e-06  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:37:23,307 [INFO] [metadata.py:31] train_wall_time: 353.2511856555939
+2022-12-02 19:37:23,309 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3532511856555939
+2022-12-02 19:37:23,310 [INFO] [metadata.py:31] train_loss: 0.4439953943192959
+2022-12-02 19:37:23,313 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 19:44:10,743 [INFO] [metadata.py:31] val_clean_map: 0.8895910978317261
+2022-12-02 19:44:10,748 [INFO] [metadata.py:31] val_clean_map_50: 0.9993245601654053
+2022-12-02 19:44:10,753 [INFO] [metadata.py:31] val_clean_map_75: 0.9956066608428955
+2022-12-02 19:44:10,757 [INFO] [metadata.py:31] val_clean_map_small: 0.8828203082084656
+2022-12-02 19:44:10,762 [INFO] [metadata.py:31] val_clean_map_medium: 0.8823732137680054
+2022-12-02 19:44:10,766 [INFO] [metadata.py:31] val_clean_map_large: 0.8894237279891968
+2022-12-02 19:44:10,771 [INFO] [metadata.py:31] val_clean_mar_1: 0.8692406415939331
+2022-12-02 19:44:10,776 [INFO] [metadata.py:31] val_clean_mar_10: 0.9185609817504883
+2022-12-02 19:44:10,780 [INFO] [metadata.py:31] val_clean_mar_100: 0.9185609817504883
+2022-12-02 19:44:10,784 [INFO] [metadata.py:31] val_clean_mar_small: 0.9170997738838196
+2022-12-02 19:44:10,788 [INFO] [metadata.py:31] val_clean_mar_medium: 0.919345498085022
+2022-12-02 19:44:10,791 [INFO] [metadata.py:31] val_clean_mar_large: 0.9056230783462524
+2022-12-02 19:44:10,792 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9041761159896851, 0.8784036040306091, 0.8833803534507751, 0.8966373205184937, 0.890762448310852, 0.8979907631874084, 0.8974041938781738, 0.8858165144920349, 0.8950803279876709, 0.8772764801979065, 0.9023059606552124, 0.8814560770988464, 0.8786846995353699, 0.8862007856369019, 0.899715006351471, 0.8781678080558777]
+2022-12-02 19:44:10,794 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9275590777397156, 0.9067469835281372, 0.9132353067398071, 0.9247085452079773, 0.9222519993782043, 0.9271999597549438, 0.9223349690437317, 0.9153658151626587, 0.9231383204460144, 0.9093595743179321, 0.9284987449645996, 0.911111056804657, 0.9094527363777161, 0.9167512655258179, 0.9281500577926636, 0.911111056804657]
+2022-12-02 19:44:10,797 [INFO] [metadata.py:31] val_clean_wall_time: 407.4836301803589
+2022-12-02 19:44:10,799 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.074836301803589
+2022-12-02 19:44:10,801 [INFO] [metadata.py:31] val_clean_loss: 0.39624939531087877
+2022-12-02 19:44:10,805 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 19:44:10,807 [INFO] [metadata.py:31] val_loss: 0.39624939531087877
+2022-12-02 19:44:10,809 [INFO] [train.py:300] Updating best model with epoch: 12 loss: 0.39624939531087877, as its less than the best loss plus eps 0.0001.
+2022-12-02 19:44:10,860 [INFO] [train.py:262] Epoch: 13
+2022-12-02 19:44:10,862 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:44:10,864 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 19:44:19,528 [INFO] [train.py:137]   batch 0/1000  loss: 0.37239349  lr: 2.575e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 19:44:53,356 [INFO] [train.py:137]   batch 100/1000  loss: 0.36357933  lr: 1.007e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:45:28,660 [INFO] [train.py:137]   batch 200/1000  loss: 0.32130173  lr: 1.758e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 19:46:03,101 [INFO] [train.py:137]   batch 300/1000  loss: 0.44196323  lr: 2.507e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 19:46:38,329 [INFO] [train.py:137]   batch 400/1000  loss: 0.41288224  lr: 3.258e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-02 19:47:13,011 [INFO] [train.py:137]   batch 500/1000  loss: 0.47016063  lr: 3.993e-05  cpu_mem: 14.3%   gpu_mem: [38.2]%
+2022-12-02 19:47:47,760 [INFO] [train.py:137]   batch 600/1000  loss: 0.38845265  lr: 3.243e-05  cpu_mem: 14.8%   gpu_mem: [38.2]%
+2022-12-02 19:48:22,487 [INFO] [train.py:137]   batch 700/1000  loss: 0.38442379  lr: 2.492e-05  cpu_mem: 14.9%   gpu_mem: [38.2]%
+2022-12-02 19:48:56,872 [INFO] [train.py:137]   batch 800/1000  loss: 0.35538542  lr: 1.742e-05  cpu_mem: 14.9%   gpu_mem: [38.2]%
+2022-12-02 19:49:31,126 [INFO] [train.py:137]   batch 900/1000  loss: 0.2609483  lr: 9.925e-06  cpu_mem: 15.0%   gpu_mem: [38.2]%
+2022-12-02 19:50:02,734 [INFO] [metadata.py:31] train_wall_time: 351.86754274368286
+2022-12-02 19:50:02,737 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35186754274368287
+2022-12-02 19:50:02,738 [INFO] [metadata.py:31] train_loss: 0.4187115125209093
+2022-12-02 19:50:02,743 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 19:56:49,582 [INFO] [metadata.py:31] val_clean_map: 0.8913012146949768
+2022-12-02 19:56:49,586 [INFO] [metadata.py:31] val_clean_map_50: 0.9992671012878418
+2022-12-02 19:56:49,589 [INFO] [metadata.py:31] val_clean_map_75: 0.9956144094467163
+2022-12-02 19:56:49,592 [INFO] [metadata.py:31] val_clean_map_small: 0.8808392286300659
+2022-12-02 19:56:49,595 [INFO] [metadata.py:31] val_clean_map_medium: 0.8869884610176086
+2022-12-02 19:56:49,598 [INFO] [metadata.py:31] val_clean_map_large: 0.8653894662857056
+2022-12-02 19:56:49,601 [INFO] [metadata.py:31] val_clean_mar_1: 0.8709732294082642
+2022-12-02 19:56:49,604 [INFO] [metadata.py:31] val_clean_mar_10: 0.920371413230896
+2022-12-02 19:56:49,607 [INFO] [metadata.py:31] val_clean_mar_100: 0.920371413230896
+2022-12-02 19:56:49,609 [INFO] [metadata.py:31] val_clean_mar_small: 0.9184961318969727
+2022-12-02 19:56:49,613 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9210191965103149
+2022-12-02 19:56:49,615 [INFO] [metadata.py:31] val_clean_mar_large: 0.9130052328109741
+2022-12-02 19:56:49,617 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9013773798942566, 0.8818256855010986, 0.8792261481285095, 0.9027379155158997, 0.8891049027442932, 0.8942609429359436, 0.8964893221855164, 0.8838396072387695, 0.896931529045105, 0.8859078884124756, 0.9028194546699524, 0.8833261132240295, 0.8836144208908081, 0.8934393525123596, 0.9018362760543823, 0.8840837478637695]
+2022-12-02 19:56:49,619 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9270340800285339, 0.906747043132782, 0.9108823537826538, 0.928205132484436, 0.9227882623672485, 0.9250666499137878, 0.9225888252258301, 0.9139024615287781, 0.9231382608413696, 0.9162561297416687, 0.9305343627929688, 0.9131313562393188, 0.9164178967475891, 0.9228426814079285, 0.9310992360115051, 0.9153085947036743]
+2022-12-02 19:56:49,620 [INFO] [metadata.py:31] val_clean_wall_time: 406.87586545944214
+2022-12-02 19:56:49,622 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.068758654594421
+2022-12-02 19:56:49,624 [INFO] [metadata.py:31] val_clean_loss: 0.385466488301754
+2022-12-02 19:56:49,628 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 19:56:49,630 [INFO] [metadata.py:31] val_loss: 0.385466488301754
+2022-12-02 19:56:49,632 [INFO] [train.py:300] Updating best model with epoch: 13 loss: 0.385466488301754, as its less than the best loss plus eps 0.0001.
+2022-12-02 19:56:49,678 [INFO] [train.py:262] Epoch: 14
+2022-12-02 19:56:49,678 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:56:49,678 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 19:56:58,284 [INFO] [train.py:137]   batch 0/1000  loss: 0.30578655  lr: 2.575e-06  cpu_mem: 15.1%   gpu_mem: [38.2]%
+2022-12-02 19:57:33,243 [INFO] [train.py:137]   batch 100/1000  loss: 0.34624082  lr: 1.007e-05  cpu_mem: 15.3%   gpu_mem: [38.2]%
+2022-12-02 19:58:08,507 [INFO] [train.py:137]   batch 200/1000  loss: 0.39671686  lr: 1.758e-05  cpu_mem: 15.3%   gpu_mem: [38.2]%
+2022-12-02 19:58:43,192 [INFO] [train.py:137]   batch 300/1000  loss: 0.35428688  lr: 2.507e-05  cpu_mem: 15.4%   gpu_mem: [38.2]%
+2022-12-02 19:59:17,820 [INFO] [train.py:137]   batch 400/1000  loss: 0.48361471  lr: 3.258e-05  cpu_mem: 15.5%   gpu_mem: [38.2]%
+2022-12-02 19:59:52,869 [INFO] [train.py:137]   batch 500/1000  loss: 0.51668602  lr: 3.993e-05  cpu_mem: 15.5%   gpu_mem: [38.2]%
+2022-12-02 20:00:27,717 [INFO] [train.py:137]   batch 600/1000  loss: 0.68330812  lr: 3.243e-05  cpu_mem: 15.6%   gpu_mem: [38.2]%
+2022-12-02 20:01:02,572 [INFO] [train.py:137]   batch 700/1000  loss: 0.45229676  lr: 2.492e-05  cpu_mem: 15.6%   gpu_mem: [38.2]%
+2022-12-02 20:01:37,672 [INFO] [train.py:137]   batch 800/1000  loss: 0.31241366  lr: 1.742e-05  cpu_mem: 15.6%   gpu_mem: [38.2]%
+2022-12-02 20:02:13,302 [INFO] [train.py:137]   batch 900/1000  loss: 0.43758085  lr: 9.925e-06  cpu_mem: 15.7%   gpu_mem: [38.2]%
+2022-12-02 20:02:44,543 [INFO] [metadata.py:31] train_wall_time: 354.86289858818054
+2022-12-02 20:02:44,545 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35486289858818054
+2022-12-02 20:02:44,547 [INFO] [metadata.py:31] train_loss: 0.40400469714403153
+2022-12-02 20:02:44,551 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 20:09:34,500 [INFO] [metadata.py:31] val_clean_map: 0.8962457180023193
+2022-12-02 20:09:34,506 [INFO] [metadata.py:31] val_clean_map_50: 0.9987436532974243
+2022-12-02 20:09:34,510 [INFO] [metadata.py:31] val_clean_map_75: 0.9956439137458801
+2022-12-02 20:09:34,515 [INFO] [metadata.py:31] val_clean_map_small: 0.8831984400749207
+2022-12-02 20:09:34,520 [INFO] [metadata.py:31] val_clean_map_medium: 0.8922848105430603
+2022-12-02 20:09:34,525 [INFO] [metadata.py:31] val_clean_map_large: 0.8646928071975708
+2022-12-02 20:09:34,530 [INFO] [metadata.py:31] val_clean_mar_1: 0.8749008178710938
+2022-12-02 20:09:34,534 [INFO] [metadata.py:31] val_clean_mar_10: 0.9246088266372681
+2022-12-02 20:09:34,539 [INFO] [metadata.py:31] val_clean_mar_100: 0.9246088266372681
+2022-12-02 20:09:34,544 [INFO] [metadata.py:31] val_clean_mar_small: 0.919732928276062
+2022-12-02 20:09:34,548 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9262111783027649
+2022-12-02 20:09:34,549 [INFO] [metadata.py:31] val_clean_mar_large: 0.9152795672416687
+2022-12-02 20:09:34,549 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9078548550605774, 0.889857292175293, 0.8848692774772644, 0.9080036878585815, 0.8899700045585632, 0.8972597718238831, 0.8950042128562927, 0.8901782631874084, 0.9077281355857849, 0.8877995014190674, 0.9120160341262817, 0.8875156044960022, 0.8940528631210327, 0.8999431729316711, 0.9009914398193359, 0.8868881464004517]
+2022-12-02 20:09:34,550 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9325459599494934, 0.9156626462936401, 0.9135295152664185, 0.9337995648384094, 0.9235924482345581, 0.9269334077835083, 0.9261420965194702, 0.9202438592910767, 0.9308509826660156, 0.9187191724777222, 0.9376590847969055, 0.9161616563796997, 0.922387957572937, 0.9261420965194702, 0.9310992360115051, 0.918271541595459]
+2022-12-02 20:09:34,550 [INFO] [metadata.py:31] val_clean_wall_time: 409.9987289905548
+2022-12-02 20:09:34,551 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.099987289905548
+2022-12-02 20:09:34,551 [INFO] [metadata.py:31] val_clean_loss: 0.3800670519471169
+2022-12-02 20:09:34,554 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 20:09:34,555 [INFO] [metadata.py:31] val_loss: 0.3800670519471169
+2022-12-02 20:09:34,555 [INFO] [train.py:300] Updating best model with epoch: 14 loss: 0.3800670519471169, as its less than the best loss plus eps 0.0001.
+2022-12-02 20:09:34,580 [INFO] [train.py:262] Epoch: 15
+2022-12-02 20:09:34,580 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:09:34,581 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 20:09:43,634 [INFO] [train.py:137]   batch 0/1000  loss: 0.38401845  lr: 2.575e-06  cpu_mem: 15.7%   gpu_mem: [38.2]%
+2022-12-02 20:10:19,589 [INFO] [train.py:137]   batch 100/1000  loss: 0.311573  lr: 1.007e-05  cpu_mem: 15.8%   gpu_mem: [38.2]%
+2022-12-02 20:10:55,162 [INFO] [train.py:137]   batch 200/1000  loss: 0.41013247  lr: 1.758e-05  cpu_mem: 15.9%   gpu_mem: [38.2]%
+2022-12-02 20:11:29,148 [INFO] [train.py:137]   batch 300/1000  loss: 0.36122942  lr: 2.507e-05  cpu_mem: 15.9%   gpu_mem: [38.2]%
+2022-12-02 20:12:03,537 [INFO] [train.py:137]   batch 400/1000  loss: 0.44926655  lr: 3.258e-05  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 20:12:37,532 [INFO] [train.py:137]   batch 500/1000  loss: 0.51613486  lr: 3.993e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 20:13:11,483 [INFO] [train.py:137]   batch 600/1000  loss: 0.35881987  lr: 3.243e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 20:13:46,543 [INFO] [train.py:137]   batch 700/1000  loss: 0.41693628  lr: 2.492e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 20:14:21,437 [INFO] [train.py:137]   batch 800/1000  loss: 0.42652324  lr: 1.742e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 20:14:55,461 [INFO] [train.py:137]   batch 900/1000  loss: 0.3985523  lr: 9.925e-06  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 20:15:27,269 [INFO] [metadata.py:31] train_wall_time: 352.6863691806793
+2022-12-02 20:15:27,271 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3526863691806793
+2022-12-02 20:15:27,273 [INFO] [metadata.py:31] train_loss: 0.3840534721314907
+2022-12-02 20:15:27,277 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 20:22:10,772 [INFO] [metadata.py:31] val_clean_map: 0.8964371085166931
+2022-12-02 20:22:10,798 [INFO] [metadata.py:31] val_clean_map_50: 0.9993314743041992
+2022-12-02 20:22:10,803 [INFO] [metadata.py:31] val_clean_map_75: 0.9955509305000305
+2022-12-02 20:22:10,808 [INFO] [metadata.py:31] val_clean_map_small: 0.8833004832267761
+2022-12-02 20:22:10,813 [INFO] [metadata.py:31] val_clean_map_medium: 0.8942774534225464
+2022-12-02 20:22:10,818 [INFO] [metadata.py:31] val_clean_map_large: 0.8739768266677856
+2022-12-02 20:22:10,823 [INFO] [metadata.py:31] val_clean_mar_1: 0.87495356798172
+2022-12-02 20:22:10,827 [INFO] [metadata.py:31] val_clean_mar_10: 0.9247061610221863
+2022-12-02 20:22:10,832 [INFO] [metadata.py:31] val_clean_mar_100: 0.9247061610221863
+2022-12-02 20:22:10,837 [INFO] [metadata.py:31] val_clean_mar_small: 0.9194672703742981
+2022-12-02 20:22:10,841 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9264280200004578
+2022-12-02 20:22:10,843 [INFO] [metadata.py:31] val_clean_mar_large: 0.9083265066146851
+2022-12-02 20:22:10,845 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9103987812995911, 0.8871504068374634, 0.8879735469818115, 0.9078177213668823, 0.8941522836685181, 0.9005837440490723, 0.90165776014328, 0.8886739611625671, 0.907951831817627, 0.8888349533081055, 0.9111850261688232, 0.8907262086868286, 0.8909046649932861, 0.8953174352645874, 0.9026069641113281, 0.8770586848258972]
+2022-12-02 20:22:10,848 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9335958361625671, 0.9142168164253235, 0.9164706468582153, 0.9342657923698425, 0.926005482673645, 0.9290666580200195, 0.9269035458564758, 0.9202438592910767, 0.9337766766548157, 0.9187191724777222, 0.9379135370254517, 0.9181817770004272, 0.9199005365371704, 0.9243655204772949, 0.9305629730224609, 0.911111056804657]
+2022-12-02 20:22:10,851 [INFO] [metadata.py:31] val_clean_wall_time: 403.57315731048584
+2022-12-02 20:22:10,856 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.035731573104858
+2022-12-02 20:22:10,859 [INFO] [metadata.py:31] val_clean_loss: 0.36905485689640044
+2022-12-02 20:22:10,866 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 20:22:10,868 [INFO] [metadata.py:31] val_loss: 0.36905485689640044
+2022-12-02 20:22:10,870 [INFO] [train.py:300] Updating best model with epoch: 15 loss: 0.36905485689640044, as its less than the best loss plus eps 0.0001.
+2022-12-02 20:22:10,922 [INFO] [train.py:262] Epoch: 16
+2022-12-02 20:22:10,924 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:22:10,927 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 20:22:17,044 [INFO] [train.py:137]   batch 0/1000  loss: 0.31638145  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 20:22:53,290 [INFO] [train.py:137]   batch 100/1000  loss: 0.32736012  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 20:23:27,213 [INFO] [train.py:137]   batch 200/1000  loss: 0.26758522  lr: 1.758e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 20:24:01,991 [INFO] [train.py:137]   batch 300/1000  loss: 0.48241782  lr: 2.507e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:24:35,641 [INFO] [train.py:137]   batch 400/1000  loss: 0.55358171  lr: 3.258e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:25:10,109 [INFO] [train.py:137]   batch 500/1000  loss: 0.39989838  lr: 3.993e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 20:25:44,790 [INFO] [train.py:137]   batch 600/1000  loss: 0.38067278  lr: 3.243e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 20:26:18,601 [INFO] [train.py:137]   batch 700/1000  loss: 0.32439017  lr: 2.492e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 20:26:53,137 [INFO] [train.py:137]   batch 800/1000  loss:  0.41112  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 20:27:27,366 [INFO] [train.py:137]   batch 900/1000  loss: 0.35574612  lr: 9.925e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 20:27:58,649 [INFO] [metadata.py:31] train_wall_time: 347.71935963630676
+2022-12-02 20:27:58,652 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34771935963630674
+2022-12-02 20:27:58,655 [INFO] [metadata.py:31] train_loss: 0.37395469008386134
+2022-12-02 20:27:58,661 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 20:34:43,302 [INFO] [metadata.py:31] val_clean_map: 0.9004551768302917
+2022-12-02 20:34:43,309 [INFO] [metadata.py:31] val_clean_map_50: 0.9993460774421692
+2022-12-02 20:34:43,315 [INFO] [metadata.py:31] val_clean_map_75: 0.9961414933204651
+2022-12-02 20:34:43,320 [INFO] [metadata.py:31] val_clean_map_small: 0.8881560564041138
+2022-12-02 20:34:43,326 [INFO] [metadata.py:31] val_clean_map_medium: 0.8964834213256836
+2022-12-02 20:34:43,332 [INFO] [metadata.py:31] val_clean_map_large: 0.8770690560340881
+2022-12-02 20:34:43,340 [INFO] [metadata.py:31] val_clean_mar_1: 0.8782072067260742
+2022-12-02 20:34:43,347 [INFO] [metadata.py:31] val_clean_mar_10: 0.9280346632003784
+2022-12-02 20:34:43,353 [INFO] [metadata.py:31] val_clean_mar_100: 0.9280346632003784
+2022-12-02 20:34:43,358 [INFO] [metadata.py:31] val_clean_mar_small: 0.9202898144721985
+2022-12-02 20:34:43,363 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9301834106445312
+2022-12-02 20:34:43,366 [INFO] [metadata.py:31] val_clean_mar_large: 0.9150282740592957
+2022-12-02 20:34:43,369 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9140648245811462, 0.8946227431297302, 0.8883336186408997, 0.9162977933883667, 0.9011608362197876, 0.9101401567459106, 0.9109549522399902, 0.8914809226989746, 0.9064940810203552, 0.8916655778884888, 0.9103946089744568, 0.8896155953407288, 0.8905941843986511, 0.8963169455528259, 0.9038349986076355, 0.8913099765777588]
+2022-12-02 20:34:43,373 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9372702836990356, 0.9207229614257812, 0.9170588254928589, 0.9419580698013306, 0.9302949905395508, 0.9370666742324829, 0.9317258596420288, 0.921951174736023, 0.9337765574455261, 0.9206897020339966, 0.938167929649353, 0.9196969866752625, 0.9194029569625854, 0.9263960123062134, 0.9316353797912598, 0.9207407832145691]
+2022-12-02 20:34:43,377 [INFO] [metadata.py:31] val_clean_wall_time: 404.7124662399292
+2022-12-02 20:34:43,380 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.047124662399292
+2022-12-02 20:34:43,385 [INFO] [metadata.py:31] val_clean_loss: 0.361465594470501
+2022-12-02 20:34:43,393 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 20:34:43,397 [INFO] [metadata.py:31] val_loss: 0.361465594470501
+2022-12-02 20:34:43,402 [INFO] [train.py:300] Updating best model with epoch: 16 loss: 0.361465594470501, as its less than the best loss plus eps 0.0001.
+2022-12-02 20:34:43,457 [INFO] [train.py:262] Epoch: 17
+2022-12-02 20:34:43,461 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:34:43,464 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 20:34:50,795 [INFO] [train.py:137]   batch 0/1000  loss: 0.24894394  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:35:25,818 [INFO] [train.py:137]   batch 100/1000  loss: 0.28964686  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 20:36:00,284 [INFO] [train.py:137]   batch 200/1000  loss: 0.32528272  lr: 1.758e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 20:36:33,979 [INFO] [train.py:137]   batch 300/1000  loss: 0.3327961  lr: 2.507e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 20:37:07,857 [INFO] [train.py:137]   batch 400/1000  loss: 0.29541817  lr: 3.258e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 20:37:42,777 [INFO] [train.py:137]   batch 500/1000  loss: 0.51304096  lr: 3.993e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 20:38:16,902 [INFO] [train.py:137]   batch 600/1000  loss: 0.56868219  lr: 3.243e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 20:38:51,011 [INFO] [train.py:137]   batch 700/1000  loss: 0.35772765  lr: 2.492e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-02 20:39:25,745 [INFO] [train.py:137]   batch 800/1000  loss: 0.29844171  lr: 1.742e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 20:39:59,969 [INFO] [train.py:137]   batch 900/1000  loss: 0.34926486  lr: 9.925e-06  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-02 20:40:30,538 [INFO] [metadata.py:31] train_wall_time: 347.07005047798157
+2022-12-02 20:40:30,541 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34707005047798156
+2022-12-02 20:40:30,543 [INFO] [metadata.py:31] train_loss: 0.3593152659535408
+2022-12-02 20:40:30,547 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 20:47:16,774 [INFO] [metadata.py:31] val_clean_map: 0.9030684232711792
+2022-12-02 20:47:16,779 [INFO] [metadata.py:31] val_clean_map_50: 0.9993529319763184
+2022-12-02 20:47:16,785 [INFO] [metadata.py:31] val_clean_map_75: 0.9955555200576782
+2022-12-02 20:47:16,789 [INFO] [metadata.py:31] val_clean_map_small: 0.8894794583320618
+2022-12-02 20:47:16,793 [INFO] [metadata.py:31] val_clean_map_medium: 0.8996056318283081
+2022-12-02 20:47:16,796 [INFO] [metadata.py:31] val_clean_map_large: 0.8923704028129578
+2022-12-02 20:47:16,800 [INFO] [metadata.py:31] val_clean_mar_1: 0.8800331354141235
+2022-12-02 20:47:16,803 [INFO] [metadata.py:31] val_clean_mar_10: 0.9302080869674683
+2022-12-02 20:47:16,807 [INFO] [metadata.py:31] val_clean_mar_100: 0.9302080869674683
+2022-12-02 20:47:16,810 [INFO] [metadata.py:31] val_clean_mar_small: 0.9247215390205383
+2022-12-02 20:47:16,814 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9316720962524414
+2022-12-02 20:47:16,817 [INFO] [metadata.py:31] val_clean_mar_large: 0.9315986633300781
+2022-12-02 20:47:16,821 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9161049127578735, 0.8992045521736145, 0.8966144919395447, 0.9168896675109863, 0.904583215713501, 0.9035670757293701, 0.9106545448303223, 0.8935470581054688, 0.9162079691886902, 0.8918908834457397, 0.914003849029541, 0.8937235474586487, 0.8949532508850098, 0.8958930969238281, 0.9115543961524963, 0.8897022008895874]
+2022-12-02 20:47:16,825 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9391077160835266, 0.9238554239273071, 0.9229412078857422, 0.9396269917488098, 0.9332440495491028, 0.9306666254997253, 0.9357867240905762, 0.9241463541984558, 0.9404255151748657, 0.9238916635513306, 0.9394402503967285, 0.9209596514701843, 0.9251243472099304, 0.9263960123062134, 0.9367292523384094, 0.9209877252578735]
+2022-12-02 20:47:16,829 [INFO] [metadata.py:31] val_clean_wall_time: 406.2786102294922
+2022-12-02 20:47:16,832 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.062786102294922
+2022-12-02 20:47:16,836 [INFO] [metadata.py:31] val_clean_loss: 0.35517507761716843
+2022-12-02 20:47:16,841 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 20:47:16,845 [INFO] [metadata.py:31] val_loss: 0.35517507761716843
+2022-12-02 20:47:16,848 [INFO] [train.py:300] Updating best model with epoch: 17 loss: 0.35517507761716843, as its less than the best loss plus eps 0.0001.
+2022-12-02 20:47:16,910 [INFO] [train.py:262] Epoch: 18
+2022-12-02 20:47:16,913 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:47:16,916 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 20:47:25,109 [INFO] [train.py:137]   batch 0/1000  loss: 0.36698195  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 20:47:58,880 [INFO] [train.py:137]   batch 100/1000  loss: 0.33404064  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 20:48:32,945 [INFO] [train.py:137]   batch 200/1000  loss: 0.3711158  lr: 1.758e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 20:49:06,786 [INFO] [train.py:137]   batch 300/1000  loss: 0.32597631  lr: 2.507e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 20:49:40,818 [INFO] [train.py:137]   batch 400/1000  loss: 0.4653267  lr: 3.258e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 20:50:15,177 [INFO] [train.py:137]   batch 500/1000  loss: 0.41995689  lr: 3.993e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 20:50:49,277 [INFO] [train.py:137]   batch 600/1000  loss: 0.34009191  lr: 3.243e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:51:23,153 [INFO] [train.py:137]   batch 700/1000  loss: 0.31059849  lr: 2.492e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:51:57,089 [INFO] [train.py:137]   batch 800/1000  loss: 0.37195331  lr: 1.742e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:52:31,340 [INFO] [train.py:137]   batch 900/1000  loss: 0.28763717  lr: 9.925e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 20:53:02,379 [INFO] [metadata.py:31] train_wall_time: 345.4587392807007
+2022-12-02 20:53:02,381 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3454587392807007
+2022-12-02 20:53:02,383 [INFO] [metadata.py:31] train_loss: 0.3446935575157404
+2022-12-02 20:53:02,387 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 20:59:46,270 [INFO] [metadata.py:31] val_clean_map: 0.9025092720985413
+2022-12-02 20:59:46,276 [INFO] [metadata.py:31] val_clean_map_50: 0.9993604421615601
+2022-12-02 20:59:46,282 [INFO] [metadata.py:31] val_clean_map_75: 0.9960831999778748
+2022-12-02 20:59:46,286 [INFO] [metadata.py:31] val_clean_map_small: 0.8905643224716187
+2022-12-02 20:59:46,292 [INFO] [metadata.py:31] val_clean_map_medium: 0.8988713622093201
+2022-12-02 20:59:46,297 [INFO] [metadata.py:31] val_clean_map_large: 0.8862407803535461
+2022-12-02 20:59:46,302 [INFO] [metadata.py:31] val_clean_mar_1: 0.8804892301559448
+2022-12-02 20:59:46,308 [INFO] [metadata.py:31] val_clean_mar_10: 0.9303533434867859
+2022-12-02 20:59:46,313 [INFO] [metadata.py:31] val_clean_mar_100: 0.9303533434867859
+2022-12-02 20:59:46,319 [INFO] [metadata.py:31] val_clean_mar_small: 0.9247872233390808
+2022-12-02 20:59:46,324 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9317337870597839
+2022-12-02 20:59:46,327 [INFO] [metadata.py:31] val_clean_mar_large: 0.9246118664741516
+2022-12-02 20:59:46,331 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9137195944786072, 0.8975766897201538, 0.886857271194458, 0.9126231670379639, 0.9023516178131104, 0.9042041897773743, 0.9156553149223328, 0.8905887007713318, 0.9152356386184692, 0.8908635973930359, 0.919384241104126, 0.8960970044136047, 0.8945943117141724, 0.8982408046722412, 0.910101592540741, 0.8920556902885437]
+2022-12-02 20:59:46,335 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9372703433036804, 0.924096405506134, 0.9176471829414368, 0.9405595064163208, 0.9329758882522583, 0.9312000274658203, 0.9395939111709595, 0.9202438592910767, 0.9393616914749146, 0.9211822748184204, 0.9447836875915527, 0.9237373471260071, 0.9248755574226379, 0.9286802411079407, 0.9367291331291199, 0.9227160215377808]
+2022-12-02 20:59:46,338 [INFO] [metadata.py:31] val_clean_wall_time: 403.94883918762207
+2022-12-02 20:59:46,342 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.039488391876221
+2022-12-02 20:59:46,346 [INFO] [metadata.py:31] val_clean_loss: 0.3466361303627491
+2022-12-02 20:59:46,351 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 20:59:46,355 [INFO] [metadata.py:31] val_loss: 0.3466361303627491
+2022-12-02 20:59:46,360 [INFO] [train.py:300] Updating best model with epoch: 18 loss: 0.3466361303627491, as its less than the best loss plus eps 0.0001.
+2022-12-02 20:59:46,389 [INFO] [train.py:262] Epoch: 19
+2022-12-02 20:59:46,391 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:59:46,393 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 20:59:53,195 [INFO] [train.py:137]   batch 0/1000  loss: 0.18573233  lr: 2.575e-06  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:00:27,186 [INFO] [train.py:137]   batch 100/1000  loss: 0.18541186  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:01:01,552 [INFO] [train.py:137]   batch 200/1000  loss: 0.38510901  lr: 1.758e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 21:01:34,930 [INFO] [train.py:137]   batch 300/1000  loss: 0.31266144  lr: 2.507e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 21:02:08,786 [INFO] [train.py:137]   batch 400/1000  loss: 0.36069825  lr: 3.258e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 21:02:42,953 [INFO] [train.py:137]   batch 500/1000  loss: 0.41075137  lr: 3.993e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 21:03:16,419 [INFO] [train.py:137]   batch 600/1000  loss: 0.3882733  lr: 3.243e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 21:03:50,501 [INFO] [train.py:137]   batch 700/1000  loss: 0.32343161  lr: 2.492e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 21:04:25,218 [INFO] [train.py:137]   batch 800/1000  loss: 0.33141741  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 21:04:59,247 [INFO] [train.py:137]   batch 900/1000  loss: 0.25171915  lr: 9.925e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 21:05:30,033 [INFO] [metadata.py:31] train_wall_time: 343.63782238960266
+2022-12-02 21:05:30,036 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34363782238960267
+2022-12-02 21:05:30,038 [INFO] [metadata.py:31] train_loss: 0.33399495273828506
+2022-12-02 21:05:30,042 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 21:12:15,115 [INFO] [metadata.py:31] val_clean_map: 0.9038198590278625
+2022-12-02 21:12:15,121 [INFO] [metadata.py:31] val_clean_map_50: 0.9993670582771301
+2022-12-02 21:12:15,127 [INFO] [metadata.py:31] val_clean_map_75: 0.9947998523712158
+2022-12-02 21:12:15,132 [INFO] [metadata.py:31] val_clean_map_small: 0.890342116355896
+2022-12-02 21:12:15,139 [INFO] [metadata.py:31] val_clean_map_medium: 0.9010008573532104
+2022-12-02 21:12:15,143 [INFO] [metadata.py:31] val_clean_map_large: 0.896186113357544
+2022-12-02 21:12:15,149 [INFO] [metadata.py:31] val_clean_mar_1: 0.8815387487411499
+2022-12-02 21:12:15,156 [INFO] [metadata.py:31] val_clean_mar_10: 0.931432843208313
+2022-12-02 21:12:15,162 [INFO] [metadata.py:31] val_clean_mar_100: 0.931432843208313
+2022-12-02 21:12:15,166 [INFO] [metadata.py:31] val_clean_mar_small: 0.9263858795166016
+2022-12-02 21:12:15,170 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9331539273262024
+2022-12-02 21:12:15,174 [INFO] [metadata.py:31] val_clean_mar_large: 0.9088201522827148
+2022-12-02 21:12:15,177 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9133118987083435, 0.8945844769477844, 0.8939703702926636, 0.9149461388587952, 0.899256706237793, 0.9101169109344482, 0.9135876893997192, 0.8932775259017944, 0.9172447323799133, 0.8947986960411072, 0.918106198310852, 0.8919978737831116, 0.896403968334198, 0.9027402997016907, 0.9116703271865845, 0.8951037526130676]
+2022-12-02 21:12:15,181 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9367454648017883, 0.9228914976119995, 0.9241177439689636, 0.9407925605773926, 0.9294906854629517, 0.935200035572052, 0.9368020296096802, 0.9224389791488647, 0.9406914710998535, 0.9256157875061035, 0.9442747831344604, 0.9199495315551758, 0.9268655776977539, 0.9304569363594055, 0.9396783113479614, 0.9269136190414429]
+2022-12-02 21:12:15,185 [INFO] [metadata.py:31] val_clean_wall_time: 405.14094376564026
+2022-12-02 21:12:15,189 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.051409437656402
+2022-12-02 21:12:15,192 [INFO] [metadata.py:31] val_clean_loss: 0.34362316444516183
+2022-12-02 21:12:15,198 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 21:12:15,201 [INFO] [metadata.py:31] val_loss: 0.34362316444516183
+2022-12-02 21:12:15,205 [INFO] [train.py:300] Updating best model with epoch: 19 loss: 0.34362316444516183, as its less than the best loss plus eps 0.0001.
+2022-12-02 21:12:15,240 [INFO] [train.py:262] Epoch: 20
+2022-12-02 21:12:15,246 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:12:15,250 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 21:12:23,005 [INFO] [train.py:137]   batch 0/1000  loss: 0.31285077  lr: 2.575e-06  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:12:57,271 [INFO] [train.py:137]   batch 100/1000  loss: 0.44094384  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 21:13:32,021 [INFO] [train.py:137]   batch 200/1000  loss: 0.2614817  lr: 1.758e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 21:14:06,403 [INFO] [train.py:137]   batch 300/1000  loss: 0.32956257  lr: 2.507e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 21:14:41,257 [INFO] [train.py:137]   batch 400/1000  loss: 0.29992115  lr: 3.258e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:15:15,349 [INFO] [train.py:137]   batch 500/1000  loss: 0.3649525  lr: 3.993e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:15:49,646 [INFO] [train.py:137]   batch 600/1000  loss: 0.3575272  lr: 3.243e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:16:24,382 [INFO] [train.py:137]   batch 700/1000  loss: 0.29064614  lr: 2.492e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:16:59,735 [INFO] [train.py:137]   batch 800/1000  loss: 0.29303989  lr: 1.742e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:17:33,766 [INFO] [train.py:137]   batch 900/1000  loss: 0.27734387  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 21:18:04,730 [INFO] [metadata.py:31] train_wall_time: 349.4756269454956
+2022-12-02 21:18:04,733 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3494756269454956
+2022-12-02 21:18:04,735 [INFO] [metadata.py:31] train_loss: 0.32355315554142
+2022-12-02 21:18:04,740 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 21:24:48,672 [INFO] [metadata.py:31] val_clean_map: 0.9065157771110535
+2022-12-02 21:24:48,679 [INFO] [metadata.py:31] val_clean_map_50: 0.9993672966957092
+2022-12-02 21:24:48,684 [INFO] [metadata.py:31] val_clean_map_75: 0.9948177337646484
+2022-12-02 21:24:48,689 [INFO] [metadata.py:31] val_clean_map_small: 0.889366090297699
+2022-12-02 21:24:48,695 [INFO] [metadata.py:31] val_clean_map_medium: 0.9028909206390381
+2022-12-02 21:24:48,700 [INFO] [metadata.py:31] val_clean_map_large: 0.9170941114425659
+2022-12-02 21:24:48,704 [INFO] [metadata.py:31] val_clean_mar_1: 0.883857250213623
+2022-12-02 21:24:48,709 [INFO] [metadata.py:31] val_clean_mar_10: 0.9341357350349426
+2022-12-02 21:24:48,713 [INFO] [metadata.py:31] val_clean_mar_100: 0.9341357350349426
+2022-12-02 21:24:48,716 [INFO] [metadata.py:31] val_clean_mar_small: 0.925923228263855
+2022-12-02 21:24:48,719 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9361478090286255
+2022-12-02 21:24:48,722 [INFO] [metadata.py:31] val_clean_mar_large: 0.9317466616630554
+2022-12-02 21:24:48,726 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9143332242965698, 0.892589807510376, 0.894881546497345, 0.9160347580909729, 0.909674346446991, 0.9096237421035767, 0.9172154664993286, 0.9009963274002075, 0.9167512059211731, 0.8934114575386047, 0.9201552867889404, 0.8997213244438171, 0.9016036987304688, 0.9077843427658081, 0.9143435955047607, 0.8951317071914673]
+2022-12-02 21:24:48,729 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.938845157623291, 0.9195181131362915, 0.9244117736816406, 0.9407925605773926, 0.9415550231933594, 0.9370667338371277, 0.9418781399726868, 0.9292682409286499, 0.938829779624939, 0.926354706287384, 0.9445292353630066, 0.9277776479721069, 0.9303482174873352, 0.9357868432998657, 0.9415550231933594, 0.9276543855667114]
+2022-12-02 21:24:48,732 [INFO] [metadata.py:31] val_clean_wall_time: 403.99040484428406
+2022-12-02 21:24:48,735 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.039904048442841
+2022-12-02 21:24:48,738 [INFO] [metadata.py:31] val_clean_loss: 0.33822715118527413
+2022-12-02 21:24:48,744 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 21:24:48,747 [INFO] [metadata.py:31] val_loss: 0.33822715118527413
+2022-12-02 21:24:48,751 [INFO] [train.py:300] Updating best model with epoch: 20 loss: 0.33822715118527413, as its less than the best loss plus eps 0.0001.
+2022-12-02 21:24:48,808 [INFO] [train.py:262] Epoch: 21
+2022-12-02 21:24:48,811 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:24:48,813 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 21:24:53,884 [INFO] [train.py:137]   batch 0/1000  loss: 0.23125455  lr: 2.575e-06  cpu_mem: 12.8%   gpu_mem: [38.2]%
+2022-12-02 21:25:31,407 [INFO] [train.py:137]   batch 100/1000  loss: 0.26894987  lr: 1.007e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 21:26:05,880 [INFO] [train.py:137]   batch 200/1000  loss: 0.30609113  lr: 1.758e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 21:26:40,130 [INFO] [train.py:137]   batch 300/1000  loss: 0.39842755  lr: 2.507e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 21:27:15,001 [INFO] [train.py:137]   batch 400/1000  loss: 0.28550795  lr: 3.258e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:27:48,954 [INFO] [train.py:137]   batch 500/1000  loss: 0.35799968  lr: 3.993e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:28:22,707 [INFO] [train.py:137]   batch 600/1000  loss: 0.34166753  lr: 3.243e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:28:56,490 [INFO] [train.py:137]   batch 700/1000  loss: 0.32574955  lr: 2.492e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:29:30,027 [INFO] [train.py:137]   batch 800/1000  loss: 0.29034114  lr: 1.742e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 21:30:03,694 [INFO] [train.py:137]   batch 900/1000  loss: 0.28567779  lr: 9.925e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 21:30:34,495 [INFO] [metadata.py:31] train_wall_time: 345.6793088912964
+2022-12-02 21:30:34,499 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3456793088912964
+2022-12-02 21:30:34,502 [INFO] [metadata.py:31] train_loss: 0.31297533690929413
+2022-12-02 21:30:34,508 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 21:37:18,515 [INFO] [metadata.py:31] val_clean_map: 0.9064381718635559
+2022-12-02 21:37:18,518 [INFO] [metadata.py:31] val_clean_map_50: 0.9993656277656555
+2022-12-02 21:37:18,523 [INFO] [metadata.py:31] val_clean_map_75: 0.9960737228393555
+2022-12-02 21:37:18,528 [INFO] [metadata.py:31] val_clean_map_small: 0.8868666887283325
+2022-12-02 21:37:18,532 [INFO] [metadata.py:31] val_clean_map_medium: 0.9027141332626343
+2022-12-02 21:37:18,537 [INFO] [metadata.py:31] val_clean_map_large: 0.9006224274635315
+2022-12-02 21:37:18,541 [INFO] [metadata.py:31] val_clean_mar_1: 0.8831159472465515
+2022-12-02 21:37:18,544 [INFO] [metadata.py:31] val_clean_mar_10: 0.9335454106330872
+2022-12-02 21:37:18,548 [INFO] [metadata.py:31] val_clean_mar_100: 0.9335454106330872
+2022-12-02 21:37:18,552 [INFO] [metadata.py:31] val_clean_mar_small: 0.9258928298950195
+2022-12-02 21:37:18,557 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9357757568359375
+2022-12-02 21:37:18,561 [INFO] [metadata.py:31] val_clean_mar_large: 0.9177963137626648
+2022-12-02 21:37:18,563 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9132097959518433, 0.9045687317848206, 0.8919398188591003, 0.912790834903717, 0.9078549742698669, 0.912639856338501, 0.9157827496528625, 0.9015604257583618, 0.916061282157898, 0.8989739418029785, 0.9212061166763306, 0.8992102146148682, 0.8980982899665833, 0.9045389890670776, 0.9117786884307861, 0.8927958607673645]
+2022-12-02 21:37:18,564 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9377952814102173, 0.9303614497184753, 0.9226471185684204, 0.9379953145980835, 0.9372655153274536, 0.9399999380111694, 0.9398477673530579, 0.9278049468994141, 0.9393616914749146, 0.926354706287384, 0.9468193054199219, 0.9262626767158508, 0.9251243472099304, 0.9312183260917664, 0.9402145147323608, 0.9276543855667114]
+2022-12-02 21:37:18,566 [INFO] [metadata.py:31] val_clean_wall_time: 404.05498003959656
+2022-12-02 21:37:18,568 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.040549800395966
+2022-12-02 21:37:18,570 [INFO] [metadata.py:31] val_clean_loss: 0.33757412165403367
+2022-12-02 21:37:18,577 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 21:37:18,581 [INFO] [metadata.py:31] val_loss: 0.33757412165403367
+2022-12-02 21:37:18,585 [INFO] [train.py:300] Updating best model with epoch: 21 loss: 0.33757412165403367, as its less than the best loss plus eps 0.0001.
+2022-12-02 21:37:18,639 [INFO] [train.py:262] Epoch: 22
+2022-12-02 21:37:18,643 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:37:18,646 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 21:37:26,943 [INFO] [train.py:137]   batch 0/1000  loss: 0.2522656  lr: 2.575e-06  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 21:38:00,573 [INFO] [train.py:137]   batch 100/1000  loss: 0.24041578  lr: 1.007e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 21:38:35,095 [INFO] [train.py:137]   batch 200/1000  loss: 0.26011878  lr: 1.758e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 21:39:08,786 [INFO] [train.py:137]   batch 300/1000  loss: 0.2366882  lr: 2.507e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 21:39:42,715 [INFO] [train.py:137]   batch 400/1000  loss: 0.3859084  lr: 3.258e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:40:16,539 [INFO] [train.py:137]   batch 500/1000  loss: 0.38940659  lr: 3.993e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:40:50,787 [INFO] [train.py:137]   batch 600/1000  loss: 0.30135214  lr: 3.243e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:41:25,521 [INFO] [train.py:137]   batch 700/1000  loss: 0.25649479  lr: 2.492e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:41:59,092 [INFO] [train.py:137]   batch 800/1000  loss: 0.24956399  lr: 1.742e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:42:33,290 [INFO] [train.py:137]   batch 900/1000  loss: 0.24511698  lr: 9.925e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 21:43:03,407 [INFO] [metadata.py:31] train_wall_time: 344.7576711177826
+2022-12-02 21:43:03,410 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3447576711177826
+2022-12-02 21:43:03,412 [INFO] [metadata.py:31] train_loss: 0.3012604783773422
+2022-12-02 21:43:03,417 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 21:49:48,208 [INFO] [metadata.py:31] val_clean_map: 0.906954288482666
+2022-12-02 21:49:48,213 [INFO] [metadata.py:31] val_clean_map_50: 0.9993587732315063
+2022-12-02 21:49:48,217 [INFO] [metadata.py:31] val_clean_map_75: 0.995438814163208
+2022-12-02 21:49:48,222 [INFO] [metadata.py:31] val_clean_map_small: 0.8851080536842346
+2022-12-02 21:49:48,227 [INFO] [metadata.py:31] val_clean_map_medium: 0.9057981371879578
+2022-12-02 21:49:48,231 [INFO] [metadata.py:31] val_clean_map_large: 0.8933196067810059
+2022-12-02 21:49:48,236 [INFO] [metadata.py:31] val_clean_mar_1: 0.8841423988342285
+2022-12-02 21:49:48,241 [INFO] [metadata.py:31] val_clean_mar_10: 0.9344766736030579
+2022-12-02 21:49:48,246 [INFO] [metadata.py:31] val_clean_mar_100: 0.9344766736030579
+2022-12-02 21:49:48,249 [INFO] [metadata.py:31] val_clean_mar_small: 0.9267290234565735
+2022-12-02 21:49:48,253 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9365701675415039
+2022-12-02 21:49:48,255 [INFO] [metadata.py:31] val_clean_mar_large: 0.9302380681037903
+2022-12-02 21:49:48,257 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9216607213020325, 0.8995093107223511, 0.8954182863235474, 0.9159149527549744, 0.9093384146690369, 0.9124654531478882, 0.9130434989929199, 0.9029167294502258, 0.9163841009140015, 0.8986524343490601, 0.9149775505065918, 0.9001753926277161, 0.9009251594543457, 0.9020944833755493, 0.9166680574417114, 0.89112389087677]
+2022-12-02 21:49:48,260 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.943569540977478, 0.9281927943229675, 0.9261765480041504, 0.9403263330459595, 0.9410188794136047, 0.9384000897407532, 0.9360405802726746, 0.9312194585800171, 0.9401594996452332, 0.9283251762390137, 0.9432570338249207, 0.927020251750946, 0.9296019673347473, 0.9307106733322144, 0.9431635737419128, 0.9244444966316223]
+2022-12-02 21:49:48,262 [INFO] [metadata.py:31] val_clean_wall_time: 404.84304547309875
+2022-12-02 21:49:48,265 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.048430454730988
+2022-12-02 21:49:48,268 [INFO] [metadata.py:31] val_clean_loss: 0.3354631792008877
+2022-12-02 21:49:48,273 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 21:49:48,277 [INFO] [metadata.py:31] val_loss: 0.3354631792008877
+2022-12-02 21:49:48,281 [INFO] [train.py:300] Updating best model with epoch: 22 loss: 0.3354631792008877, as its less than the best loss plus eps 0.0001.
+2022-12-02 21:49:48,313 [INFO] [train.py:262] Epoch: 23
+2022-12-02 21:49:48,316 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:49:48,318 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 21:49:55,637 [INFO] [train.py:137]   batch 0/1000  loss: 0.20475064  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 21:50:29,804 [INFO] [train.py:137]   batch 100/1000  loss: 0.24674119  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 21:51:04,063 [INFO] [train.py:137]   batch 200/1000  loss: 0.2677598  lr: 1.758e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:51:38,107 [INFO] [train.py:137]   batch 300/1000  loss: 0.26170376  lr: 2.507e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:52:13,099 [INFO] [train.py:137]   batch 400/1000  loss: 0.30589613  lr: 3.258e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 21:52:47,124 [INFO] [train.py:137]   batch 500/1000  loss: 0.26179945  lr: 3.993e-05  cpu_mem: 11.5%   gpu_mem: [38.2]%
+2022-12-02 21:53:21,519 [INFO] [train.py:137]   batch 600/1000  loss: 0.27441663  lr: 3.243e-05  cpu_mem: 11.5%   gpu_mem: [38.2]%
+2022-12-02 21:53:55,950 [INFO] [train.py:137]   batch 700/1000  loss: 0.27067536  lr: 2.492e-05  cpu_mem: 11.6%   gpu_mem: [38.2]%
+2022-12-02 21:54:30,085 [INFO] [train.py:137]   batch 800/1000  loss: 0.26654086  lr: 1.742e-05  cpu_mem: 11.6%   gpu_mem: [38.2]%
+2022-12-02 21:55:05,251 [INFO] [train.py:137]   batch 900/1000  loss: 0.26795214  lr: 9.925e-06  cpu_mem: 11.6%   gpu_mem: [38.2]%
+2022-12-02 21:55:35,891 [INFO] [metadata.py:31] train_wall_time: 347.57055497169495
+2022-12-02 21:55:35,895 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3475705549716949
+2022-12-02 21:55:35,897 [INFO] [metadata.py:31] train_loss: 0.2947589817494154
+2022-12-02 21:55:35,903 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 22:02:19,997 [INFO] [metadata.py:31] val_clean_map: 0.9095755219459534
+2022-12-02 22:02:20,004 [INFO] [metadata.py:31] val_clean_map_50: 0.9993654489517212
+2022-12-02 22:02:20,010 [INFO] [metadata.py:31] val_clean_map_75: 0.9961573481559753
+2022-12-02 22:02:20,014 [INFO] [metadata.py:31] val_clean_map_small: 0.8953728079795837
+2022-12-02 22:02:20,020 [INFO] [metadata.py:31] val_clean_map_medium: 0.9057113528251648
+2022-12-02 22:02:20,025 [INFO] [metadata.py:31] val_clean_map_large: 0.8939534425735474
+2022-12-02 22:02:20,031 [INFO] [metadata.py:31] val_clean_mar_1: 0.8867771029472351
+2022-12-02 22:02:20,036 [INFO] [metadata.py:31] val_clean_mar_10: 0.9369937181472778
+2022-12-02 22:02:20,045 [INFO] [metadata.py:31] val_clean_mar_100: 0.9369937181472778
+2022-12-02 22:02:20,051 [INFO] [metadata.py:31] val_clean_mar_small: 0.9289783239364624
+2022-12-02 22:02:20,054 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9392014741897583
+2022-12-02 22:02:20,058 [INFO] [metadata.py:31] val_clean_mar_large: 0.9314435720443726
+2022-12-02 22:02:20,063 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9212953448295593, 0.9046815633773804, 0.90582674741745, 0.9213423132896423, 0.912148654460907, 0.9174033403396606, 0.9185950756072998, 0.8975210785865784, 0.9208199977874756, 0.8966339826583862, 0.9179214239120483, 0.9009699821472168, 0.9036300778388977, 0.9031546711921692, 0.9155585765838623, 0.8957046866416931]
+2022-12-02 22:02:20,066 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9433070421218872, 0.9308433532714844, 0.9332353472709656, 0.9449883699417114, 0.9431635737419128, 0.9418666958808899, 0.9423857927322388, 0.9273170232772827, 0.9460107088088989, 0.9283250570297241, 0.9450381994247437, 0.9297979474067688, 0.9320895075798035, 0.9332486987113953, 0.9426274299621582, 0.9276543855667114]
+2022-12-02 22:02:20,069 [INFO] [metadata.py:31] val_clean_wall_time: 404.1631238460541
+2022-12-02 22:02:20,075 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.041631238460541
+2022-12-02 22:02:20,082 [INFO] [metadata.py:31] val_clean_loss: 0.3303674292564392
+2022-12-02 22:02:20,093 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 22:02:20,098 [INFO] [metadata.py:31] val_loss: 0.3303674292564392
+2022-12-02 22:02:20,103 [INFO] [train.py:300] Updating best model with epoch: 23 loss: 0.3303674292564392, as its less than the best loss plus eps 0.0001.
+2022-12-02 22:02:20,164 [INFO] [train.py:262] Epoch: 24
+2022-12-02 22:02:20,167 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:02:20,170 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 22:02:28,826 [INFO] [train.py:137]   batch 0/1000  loss: 0.34027004  lr: 2.575e-06  cpu_mem: 11.4%   gpu_mem: [38.2]%
+2022-12-02 22:03:02,816 [INFO] [train.py:137]   batch 100/1000  loss: 0.25048047  lr: 1.007e-05  cpu_mem: 11.5%   gpu_mem: [38.2]%
+2022-12-02 22:03:37,656 [INFO] [train.py:137]   batch 200/1000  loss: 0.33446291  lr: 1.758e-05  cpu_mem: 11.6%   gpu_mem: [38.2]%
+2022-12-02 22:04:12,793 [INFO] [train.py:137]   batch 300/1000  loss: 0.36427504  lr: 2.507e-05  cpu_mem: 11.6%   gpu_mem: [38.2]%
+2022-12-02 22:04:47,636 [INFO] [train.py:137]   batch 400/1000  loss: 0.26924247  lr: 3.258e-05  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 22:05:21,231 [INFO] [train.py:137]   batch 500/1000  loss: 0.41524678  lr: 3.993e-05  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 22:05:55,261 [INFO] [train.py:137]   batch 600/1000  loss: 0.30767915  lr: 3.243e-05  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 22:06:28,908 [INFO] [train.py:137]   batch 700/1000  loss: 0.28780246  lr: 2.492e-05  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 22:07:02,114 [INFO] [train.py:137]   batch 800/1000  loss: 0.2371103  lr: 1.742e-05  cpu_mem: 11.7%   gpu_mem: [38.2]%
+2022-12-02 22:07:36,683 [INFO] [train.py:137]   batch 900/1000  loss: 0.2596575  lr: 9.925e-06  cpu_mem: 11.8%   gpu_mem: [38.2]%
+2022-12-02 22:08:07,561 [INFO] [metadata.py:31] train_wall_time: 347.3869745731354
+2022-12-02 22:08:07,565 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3473869745731354
+2022-12-02 22:08:07,568 [INFO] [metadata.py:31] train_loss: 0.2847869323939085
+2022-12-02 22:08:07,574 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 22:14:52,716 [INFO] [metadata.py:31] val_clean_map: 0.9127501845359802
+2022-12-02 22:14:52,722 [INFO] [metadata.py:31] val_clean_map_50: 0.9993610382080078
+2022-12-02 22:14:52,727 [INFO] [metadata.py:31] val_clean_map_75: 0.9949230551719666
+2022-12-02 22:14:52,733 [INFO] [metadata.py:31] val_clean_map_small: 0.90047687292099
+2022-12-02 22:14:52,739 [INFO] [metadata.py:31] val_clean_map_medium: 0.9093390703201294
+2022-12-02 22:14:52,744 [INFO] [metadata.py:31] val_clean_map_large: 0.919037401676178
+2022-12-02 22:14:52,750 [INFO] [metadata.py:31] val_clean_mar_1: 0.8887468576431274
+2022-12-02 22:14:52,755 [INFO] [metadata.py:31] val_clean_mar_10: 0.9392595291137695
+2022-12-02 22:14:52,760 [INFO] [metadata.py:31] val_clean_mar_100: 0.9392595291137695
+2022-12-02 22:14:52,763 [INFO] [metadata.py:31] val_clean_mar_small: 0.9305022954940796
+2022-12-02 22:14:52,766 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9416324496269226
+2022-12-02 22:14:52,769 [INFO] [metadata.py:31] val_clean_mar_large: 0.9408578872680664
+2022-12-02 22:14:52,773 [INFO] [metadata.py:31] val_clean_map_per_class: [0.928751528263092, 0.907202959060669, 0.9100909233093262, 0.9232998490333557, 0.9142753481864929, 0.9194558262825012, 0.9237558245658875, 0.9004946947097778, 0.9254371523857117, 0.9027193784713745, 0.9203479290008545, 0.9045291543006897, 0.9016756415367126, 0.9051375389099121, 0.9225099086761475, 0.8943197727203369]
+2022-12-02 22:14:52,777 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9485564231872559, 0.9332529902458191, 0.9370588064193726, 0.947552502155304, 0.9434316754341125, 0.9456000328063965, 0.9467005729675293, 0.9295122027397156, 0.9489361047744751, 0.9322660565376282, 0.9445292353630066, 0.9308081865310669, 0.9313432574272156, 0.9332486987113953, 0.9474531412124634, 0.9279012680053711]
+2022-12-02 22:14:52,780 [INFO] [metadata.py:31] val_clean_wall_time: 405.20293521881104
+2022-12-02 22:14:52,783 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.052029352188111
+2022-12-02 22:14:52,785 [INFO] [metadata.py:31] val_clean_loss: 0.3295255799591541
+2022-12-02 22:14:52,790 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 22:14:52,794 [INFO] [metadata.py:31] val_loss: 0.3295255799591541
+2022-12-02 22:14:52,797 [INFO] [train.py:300] Updating best model with epoch: 24 loss: 0.3295255799591541, as its less than the best loss plus eps 0.0001.
+2022-12-02 22:14:52,852 [INFO] [train.py:262] Epoch: 25
+2022-12-02 22:14:52,855 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:14:52,858 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 22:14:59,133 [INFO] [train.py:137]   batch 0/1000  loss: 0.27270457  lr: 2.575e-06  cpu_mem: 11.3%   gpu_mem: [38.2]%
+2022-12-02 22:15:34,151 [INFO] [train.py:137]   batch 100/1000  loss: 0.23859535  lr: 1.007e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:16:08,205 [INFO] [train.py:137]   batch 200/1000  loss: 0.2780425  lr: 1.758e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:16:41,793 [INFO] [train.py:137]   batch 300/1000  loss: 0.26036787  lr: 2.507e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:17:15,643 [INFO] [train.py:137]   batch 400/1000  loss: 0.31974334  lr: 3.258e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:17:49,769 [INFO] [train.py:137]   batch 500/1000  loss: 0.34496146  lr: 3.993e-05  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:18:23,911 [INFO] [train.py:137]   batch 600/1000  loss: 0.3992987  lr: 3.243e-05  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:18:58,350 [INFO] [train.py:137]   batch 700/1000  loss: 0.24095669  lr: 2.492e-05  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:19:32,139 [INFO] [train.py:137]   batch 800/1000  loss: 0.28355631  lr: 1.742e-05  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:20:06,372 [INFO] [train.py:137]   batch 900/1000  loss: 0.27536628  lr: 9.925e-06  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:20:37,940 [INFO] [metadata.py:31] train_wall_time: 345.0784707069397
+2022-12-02 22:20:37,944 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3450784707069397
+2022-12-02 22:20:37,946 [INFO] [metadata.py:31] train_loss: 0.2798954210430384
+2022-12-02 22:20:37,951 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 22:27:22,181 [INFO] [metadata.py:31] val_clean_map: 0.9141558408737183
+2022-12-02 22:27:22,186 [INFO] [metadata.py:31] val_clean_map_50: 0.9993625283241272
+2022-12-02 22:27:22,191 [INFO] [metadata.py:31] val_clean_map_75: 0.99606853723526
+2022-12-02 22:27:22,195 [INFO] [metadata.py:31] val_clean_map_small: 0.8952563405036926
+2022-12-02 22:27:22,200 [INFO] [metadata.py:31] val_clean_map_medium: 0.9119651317596436
+2022-12-02 22:27:22,206 [INFO] [metadata.py:31] val_clean_map_large: 0.9164479970932007
+2022-12-02 22:27:22,211 [INFO] [metadata.py:31] val_clean_mar_1: 0.8895999193191528
+2022-12-02 22:27:22,217 [INFO] [metadata.py:31] val_clean_mar_10: 0.9402804374694824
+2022-12-02 22:27:22,222 [INFO] [metadata.py:31] val_clean_mar_100: 0.9402804374694824
+2022-12-02 22:27:22,227 [INFO] [metadata.py:31] val_clean_mar_small: 0.9303770065307617
+2022-12-02 22:27:22,232 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9429453611373901
+2022-12-02 22:27:22,235 [INFO] [metadata.py:31] val_clean_mar_large: 0.9348141551017761
+2022-12-02 22:27:22,238 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9239117503166199, 0.9120103716850281, 0.9023762345314026, 0.9249285459518433, 0.915840744972229, 0.9179805517196655, 0.9246035814285278, 0.9090867638587952, 0.9220848083496094, 0.9028312563896179, 0.9300978779792786, 0.8998842835426331, 0.9060655832290649, 0.9080941081047058, 0.9232648015022278, 0.9034339785575867]
+2022-12-02 22:27:22,241 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9461942911148071, 0.9378312826156616, 0.931176483631134, 0.9482517242431641, 0.9463807344436646, 0.9423999786376953, 0.9479695558547974, 0.9358536601066589, 0.9457446336746216, 0.9325122833251953, 0.9519084095954895, 0.927020251750946, 0.9338308572769165, 0.9347715377807617, 0.9490616917610168, 0.9335802793502808]
+2022-12-02 22:27:22,243 [INFO] [metadata.py:31] val_clean_wall_time: 404.2886919975281
+2022-12-02 22:27:22,245 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.042886919975281
+2022-12-02 22:27:22,248 [INFO] [metadata.py:31] val_clean_loss: 0.32377465173602105
+2022-12-02 22:27:22,252 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 22:27:22,256 [INFO] [metadata.py:31] val_loss: 0.32377465173602105
+2022-12-02 22:27:22,259 [INFO] [train.py:300] Updating best model with epoch: 25 loss: 0.32377465173602105, as its less than the best loss plus eps 0.0001.
+2022-12-02 22:27:22,315 [INFO] [train.py:262] Epoch: 26
+2022-12-02 22:27:22,318 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:27:22,321 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 22:27:30,187 [INFO] [train.py:137]   batch 0/1000  loss: 0.19873036  lr: 2.575e-06  cpu_mem: 12.0%   gpu_mem: [38.2]%
+2022-12-02 22:28:05,722 [INFO] [train.py:137]   batch 100/1000  loss: 0.30457479  lr: 1.007e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:28:40,719 [INFO] [train.py:137]   batch 200/1000  loss: 0.26412496  lr: 1.758e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
+2022-12-02 22:29:16,105 [INFO] [train.py:137]   batch 300/1000  loss: 0.25215012  lr: 2.507e-05  cpu_mem: 12.3%   gpu_mem: [38.2]%
+2022-12-02 22:29:52,227 [INFO] [train.py:137]   batch 400/1000  loss: 0.42132807  lr: 3.258e-05  cpu_mem: 12.4%   gpu_mem: [38.2]%
+2022-12-02 22:30:27,725 [INFO] [train.py:137]   batch 500/1000  loss: 0.42047456  lr: 3.993e-05  cpu_mem: 12.6%   gpu_mem: [38.2]%
+2022-12-02 22:31:02,789 [INFO] [train.py:137]   batch 600/1000  loss: 0.27939802  lr: 3.243e-05  cpu_mem: 12.7%   gpu_mem: [38.2]%
+2022-12-02 22:31:37,864 [INFO] [train.py:137]   batch 700/1000  loss: 0.24842076  lr: 2.492e-05  cpu_mem: 12.8%   gpu_mem: [38.2]%
+2022-12-02 22:32:13,123 [INFO] [train.py:137]   batch 800/1000  loss: 0.31008619  lr: 1.742e-05  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 22:32:48,115 [INFO] [train.py:137]   batch 900/1000  loss: 0.22284223  lr: 9.925e-06  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 22:33:19,422 [INFO] [metadata.py:31] train_wall_time: 357.09710335731506
+2022-12-02 22:33:19,425 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35709710335731504
+2022-12-02 22:33:19,427 [INFO] [metadata.py:31] train_loss: 0.2723443401902914
+2022-12-02 22:33:19,431 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 22:40:04,461 [INFO] [metadata.py:31] val_clean_map: 0.9139887094497681
+2022-12-02 22:40:04,467 [INFO] [metadata.py:31] val_clean_map_50: 0.9993641972541809
+2022-12-02 22:40:04,471 [INFO] [metadata.py:31] val_clean_map_75: 0.9974849224090576
+2022-12-02 22:40:04,476 [INFO] [metadata.py:31] val_clean_map_small: 0.8890966773033142
+2022-12-02 22:40:04,480 [INFO] [metadata.py:31] val_clean_map_medium: 0.9123089909553528
+2022-12-02 22:40:04,482 [INFO] [metadata.py:31] val_clean_map_large: 0.9166119694709778
+2022-12-02 22:40:04,484 [INFO] [metadata.py:31] val_clean_mar_1: 0.8898105621337891
+2022-12-02 22:40:04,486 [INFO] [metadata.py:31] val_clean_mar_10: 0.9403549432754517
+2022-12-02 22:40:04,488 [INFO] [metadata.py:31] val_clean_mar_100: 0.9403549432754517
+2022-12-02 22:40:04,489 [INFO] [metadata.py:31] val_clean_mar_small: 0.9292557835578918
+2022-12-02 22:40:04,490 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9432191848754883
+2022-12-02 22:40:04,490 [INFO] [metadata.py:31] val_clean_mar_large: 0.9360214471817017
+2022-12-02 22:40:04,491 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9259489178657532, 0.9125052094459534, 0.9082770347595215, 0.9193015098571777, 0.9121692180633545, 0.9145127534866333, 0.922646701335907, 0.9063249230384827, 0.9309314489364624, 0.9035065770149231, 0.9264518022537231, 0.903104841709137, 0.9023745656013489, 0.9061896204948425, 0.9256830215454102, 0.9038914442062378]
+2022-12-02 22:40:04,491 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9467191696166992, 0.9366265535354614, 0.9358823895454407, 0.9442890286445618, 0.9436997175216675, 0.9410666227340698, 0.9441624879837036, 0.9319512248039246, 0.9507978558540344, 0.9362069368362427, 0.9511450529098511, 0.931313157081604, 0.9323382377624512, 0.9350253939628601, 0.9501340985298157, 0.9343210458755493]
+2022-12-02 22:40:04,492 [INFO] [metadata.py:31] val_clean_wall_time: 405.0585548877716
+2022-12-02 22:40:04,492 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.0505855488777165
+2022-12-02 22:40:04,493 [INFO] [metadata.py:31] val_clean_loss: 0.3219302497804165
+2022-12-02 22:40:04,496 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 22:40:04,496 [INFO] [metadata.py:31] val_loss: 0.3219302497804165
+2022-12-02 22:40:04,497 [INFO] [train.py:300] Updating best model with epoch: 26 loss: 0.3219302497804165, as its less than the best loss plus eps 0.0001.
+2022-12-02 22:40:04,548 [INFO] [train.py:262] Epoch: 27
+2022-12-02 22:40:04,550 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:40:04,551 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 22:40:13,087 [INFO] [train.py:137]   batch 0/1000  loss: 0.25223634  lr: 2.575e-06  cpu_mem: 12.7%   gpu_mem: [38.2]%
+2022-12-02 22:40:48,164 [INFO] [train.py:137]   batch 100/1000  loss: 0.28161117  lr: 1.007e-05  cpu_mem: 12.8%   gpu_mem: [38.2]%
+2022-12-02 22:41:22,630 [INFO] [train.py:137]   batch 200/1000  loss: 0.15258202  lr: 1.758e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
+2022-12-02 22:41:57,419 [INFO] [train.py:137]   batch 300/1000  loss: 0.34211931  lr: 2.507e-05  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 22:42:32,091 [INFO] [train.py:137]   batch 400/1000  loss: 0.25779095  lr: 3.258e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 22:43:07,446 [INFO] [train.py:137]   batch 500/1000  loss: 0.39551479  lr: 3.993e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 22:43:43,309 [INFO] [train.py:137]   batch 600/1000  loss: 0.2672497  lr: 3.243e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 22:44:18,200 [INFO] [train.py:137]   batch 700/1000  loss: 0.25913334  lr: 2.492e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 22:44:52,376 [INFO] [train.py:137]   batch 800/1000  loss: 0.30074859  lr: 1.742e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 22:45:28,075 [INFO] [train.py:137]   batch 900/1000  loss: 0.20495355  lr: 9.925e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 22:45:59,647 [INFO] [metadata.py:31] train_wall_time: 355.09251642227173
+2022-12-02 22:45:59,649 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35509251642227174
+2022-12-02 22:45:59,651 [INFO] [metadata.py:31] train_loss: 0.2639398204535246
+2022-12-02 22:45:59,656 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 22:52:45,449 [INFO] [metadata.py:31] val_clean_map: 0.9130603075027466
+2022-12-02 22:52:45,454 [INFO] [metadata.py:31] val_clean_map_50: 0.9993764162063599
+2022-12-02 22:52:45,459 [INFO] [metadata.py:31] val_clean_map_75: 0.9975053668022156
+2022-12-02 22:52:45,463 [INFO] [metadata.py:31] val_clean_map_small: 0.8936200737953186
+2022-12-02 22:52:45,468 [INFO] [metadata.py:31] val_clean_map_medium: 0.9125866889953613
+2022-12-02 22:52:45,473 [INFO] [metadata.py:31] val_clean_map_large: 0.9261407852172852
+2022-12-02 22:52:45,477 [INFO] [metadata.py:31] val_clean_mar_1: 0.8892556428909302
+2022-12-02 22:52:45,482 [INFO] [metadata.py:31] val_clean_mar_10: 0.9399975538253784
+2022-12-02 22:52:45,486 [INFO] [metadata.py:31] val_clean_mar_100: 0.9399975538253784
+2022-12-02 22:52:45,490 [INFO] [metadata.py:31] val_clean_mar_small: 0.9297569394111633
+2022-12-02 22:52:45,494 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9427005648612976
+2022-12-02 22:52:45,496 [INFO] [metadata.py:31] val_clean_mar_large: 0.9389002919197083
+2022-12-02 22:52:45,498 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9310479164123535, 0.9061864018440247, 0.900328516960144, 0.9219008088111877, 0.9148991107940674, 0.9175935983657837, 0.9254651069641113, 0.9044986963272095, 0.920669436454773, 0.9048037528991699, 0.9254820942878723, 0.9068831205368042, 0.903883695602417, 0.9058868288993835, 0.9206647276878357, 0.8987722992897034]
+2022-12-02 22:52:45,500 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9517061114311218, 0.9342168569564819, 0.9302941560745239, 0.9452215433120728, 0.9458445310592651, 0.9429333806037903, 0.9482232928276062, 0.9319513440132141, 0.9457446336746216, 0.9352216720581055, 0.9498727917671204, 0.9340909123420715, 0.9338308572769165, 0.9350253939628601, 0.946648895740509, 0.929135799407959]
+2022-12-02 22:52:45,501 [INFO] [metadata.py:31] val_clean_wall_time: 405.84381341934204
+2022-12-02 22:52:45,503 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.058438134193421
+2022-12-02 22:52:45,505 [INFO] [metadata.py:31] val_clean_loss: 0.323023574501276
+2022-12-02 22:52:45,509 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 22:52:45,511 [INFO] [metadata.py:31] val_loss: 0.323023574501276
+2022-12-02 22:52:45,541 [INFO] [train.py:262] Epoch: 28
+2022-12-02 22:52:45,542 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:52:45,542 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 22:52:54,434 [INFO] [train.py:137]   batch 0/1000  loss: 0.17919689  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 22:53:29,054 [INFO] [train.py:137]   batch 100/1000  loss: 0.21321699  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 22:54:04,474 [INFO] [train.py:137]   batch 200/1000  loss: 0.52909565  lr: 1.758e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 22:54:39,751 [INFO] [train.py:137]   batch 300/1000  loss: 0.21266732  lr: 2.507e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 22:55:15,451 [INFO] [train.py:137]   batch 400/1000  loss: 0.2234568  lr: 3.258e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 22:55:50,511 [INFO] [train.py:137]   batch 500/1000  loss: 0.28184226  lr: 3.993e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 22:56:25,641 [INFO] [train.py:137]   batch 600/1000  loss: 0.29405037  lr: 3.243e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 22:57:00,921 [INFO] [train.py:137]   batch 700/1000  loss: 0.22433467  lr: 2.492e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 22:57:36,146 [INFO] [train.py:137]   batch 800/1000  loss: 0.23482603  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 22:58:11,644 [INFO] [train.py:137]   batch 900/1000  loss: 0.19739518  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 22:58:42,684 [INFO] [metadata.py:31] train_wall_time: 357.14043521881104
+2022-12-02 22:58:42,687 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35714043521881106
+2022-12-02 22:58:42,688 [INFO] [metadata.py:31] train_loss: 0.26134599682688714
+2022-12-02 22:58:42,693 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 23:05:29,520 [INFO] [metadata.py:31] val_clean_map: 0.9166317582130432
+2022-12-02 23:05:29,525 [INFO] [metadata.py:31] val_clean_map_50: 0.9993609189987183
+2022-12-02 23:05:29,530 [INFO] [metadata.py:31] val_clean_map_75: 0.9968873858451843
+2022-12-02 23:05:29,535 [INFO] [metadata.py:31] val_clean_map_small: 0.8964507579803467
+2022-12-02 23:05:29,539 [INFO] [metadata.py:31] val_clean_map_medium: 0.9149196147918701
+2022-12-02 23:05:29,544 [INFO] [metadata.py:31] val_clean_map_large: 0.9379584789276123
+2022-12-02 23:05:29,548 [INFO] [metadata.py:31] val_clean_mar_1: 0.8921939730644226
+2022-12-02 23:05:29,553 [INFO] [metadata.py:31] val_clean_mar_10: 0.9429258108139038
+2022-12-02 23:05:29,558 [INFO] [metadata.py:31] val_clean_mar_100: 0.9429258108139038
+2022-12-02 23:05:29,562 [INFO] [metadata.py:31] val_clean_mar_small: 0.9297113418579102
+2022-12-02 23:05:29,567 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9463491439819336
+2022-12-02 23:05:29,571 [INFO] [metadata.py:31] val_clean_mar_large: 0.9517567753791809
+2022-12-02 23:05:29,574 [INFO] [metadata.py:31] val_clean_map_per_class: [0.927423894405365, 0.9113187789916992, 0.9067087769508362, 0.9284464120864868, 0.9179121851921082, 0.9191800951957703, 0.9250230193138123, 0.9087751507759094, 0.9279484152793884, 0.9044969081878662, 0.9288994073867798, 0.9039208292961121, 0.9104668498039246, 0.9093101620674133, 0.9269900321960449, 0.9092869162559509]
+2022-12-02 23:05:29,576 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9485565423965454, 0.9373494386672974, 0.9344118237495422, 0.9510490298271179, 0.9474531412124634, 0.9445333480834961, 0.9477157592773438, 0.935122013092041, 0.9497340321540833, 0.935960590839386, 0.9534351229667664, 0.9333332777023315, 0.9385571479797363, 0.938578724861145, 0.9520107507705688, 0.939012348651886]
+2022-12-02 23:05:29,578 [INFO] [metadata.py:31] val_clean_wall_time: 406.8830988407135
+2022-12-02 23:05:29,580 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.068830988407135
+2022-12-02 23:05:29,582 [INFO] [metadata.py:31] val_clean_loss: 0.3192766708135605
+2022-12-02 23:05:29,586 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 23:05:29,588 [INFO] [metadata.py:31] val_loss: 0.3192766708135605
+2022-12-02 23:05:29,590 [INFO] [train.py:300] Updating best model with epoch: 28 loss: 0.3192766708135605, as its less than the best loss plus eps 0.0001.
+2022-12-02 23:05:29,642 [INFO] [train.py:262] Epoch: 29
+2022-12-02 23:05:29,644 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:05:29,646 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 23:05:37,288 [INFO] [train.py:137]   batch 0/1000  loss: 0.18275011  lr: 2.575e-06  cpu_mem: 14.5%   gpu_mem: [38.2]%
+2022-12-02 23:06:12,686 [INFO] [train.py:137]   batch 100/1000  loss: 0.21596786  lr: 1.007e-05  cpu_mem: 14.7%   gpu_mem: [38.2]%
+2022-12-02 23:06:48,490 [INFO] [train.py:137]   batch 200/1000  loss: 0.23839465  lr: 1.758e-05  cpu_mem: 14.8%   gpu_mem: [38.2]%
+2022-12-02 23:07:23,875 [INFO] [train.py:137]   batch 300/1000  loss: 0.31477749  lr: 2.507e-05  cpu_mem: 14.9%   gpu_mem: [38.2]%
+2022-12-02 23:07:59,279 [INFO] [train.py:137]   batch 400/1000  loss: 0.21896686  lr: 3.258e-05  cpu_mem: 15.0%   gpu_mem: [38.2]%
+2022-12-02 23:08:34,572 [INFO] [train.py:137]   batch 500/1000  loss: 0.31816682  lr: 3.993e-05  cpu_mem: 15.0%   gpu_mem: [38.2]%
+2022-12-02 23:09:09,497 [INFO] [train.py:137]   batch 600/1000  loss: 0.33230856  lr: 3.243e-05  cpu_mem: 15.1%   gpu_mem: [38.2]%
+2022-12-02 23:09:44,472 [INFO] [train.py:137]   batch 700/1000  loss: 0.22814409  lr: 2.492e-05  cpu_mem: 15.1%   gpu_mem: [38.2]%
+2022-12-02 23:10:19,249 [INFO] [train.py:137]   batch 800/1000  loss: 0.21837124  lr: 1.742e-05  cpu_mem: 15.2%   gpu_mem: [38.2]%
+2022-12-02 23:10:54,372 [INFO] [train.py:137]   batch 900/1000  loss: 0.24462332  lr: 9.925e-06  cpu_mem: 15.2%   gpu_mem: [38.2]%
+2022-12-02 23:11:26,145 [INFO] [metadata.py:31] train_wall_time: 356.49685645103455
+2022-12-02 23:11:26,146 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35649685645103457
+2022-12-02 23:11:26,147 [INFO] [metadata.py:31] train_loss: 0.2523137780278921
+2022-12-02 23:11:26,150 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 23:18:12,744 [INFO] [metadata.py:31] val_clean_map: 0.9147096276283264
+2022-12-02 23:18:12,749 [INFO] [metadata.py:31] val_clean_map_50: 0.9993730783462524
+2022-12-02 23:18:12,753 [INFO] [metadata.py:31] val_clean_map_75: 0.9975049495697021
+2022-12-02 23:18:12,758 [INFO] [metadata.py:31] val_clean_map_small: 0.8922591805458069
+2022-12-02 23:18:12,762 [INFO] [metadata.py:31] val_clean_map_medium: 0.9123357534408569
+2022-12-02 23:18:12,766 [INFO] [metadata.py:31] val_clean_map_large: 0.9191674590110779
+2022-12-02 23:18:12,768 [INFO] [metadata.py:31] val_clean_mar_1: 0.8909343481063843
+2022-12-02 23:18:12,770 [INFO] [metadata.py:31] val_clean_mar_10: 0.9414825439453125
+2022-12-02 23:18:12,770 [INFO] [metadata.py:31] val_clean_mar_100: 0.9414825439453125
+2022-12-02 23:18:12,771 [INFO] [metadata.py:31] val_clean_mar_small: 0.9308958053588867
+2022-12-02 23:18:12,771 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9441987872123718
+2022-12-02 23:18:12,772 [INFO] [metadata.py:31] val_clean_mar_large: 0.9396260380744934
+2022-12-02 23:18:12,772 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9330689311027527, 0.9111126065254211, 0.9047549962997437, 0.9208662509918213, 0.9169074892997742, 0.9209586977958679, 0.9204587340354919, 0.9080039858818054, 0.9252762198448181, 0.9020801782608032, 0.9262214303016663, 0.9021708965301514, 0.9041104316711426, 0.9080503582954407, 0.9258185625076294, 0.9054946303367615]
+2022-12-02 23:18:12,773 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9535433053970337, 0.9375904202461243, 0.9341176748275757, 0.9442890882492065, 0.9445040822029114, 0.9456000328063965, 0.9441624879837036, 0.9360976219177246, 0.9497340321540833, 0.932758629322052, 0.9516539573669434, 0.9320706129074097, 0.9320895075798035, 0.938071072101593, 0.9504021406173706, 0.9370371103286743]
+2022-12-02 23:18:12,773 [INFO] [metadata.py:31] val_clean_wall_time: 406.62262415885925
+2022-12-02 23:18:12,774 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.066226241588592
+2022-12-02 23:18:12,774 [INFO] [metadata.py:31] val_clean_loss: 0.3181169141829014
+2022-12-02 23:18:12,777 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 23:18:12,777 [INFO] [metadata.py:31] val_loss: 0.3181169141829014
+2022-12-02 23:18:12,778 [INFO] [train.py:300] Updating best model with epoch: 29 loss: 0.3181169141829014, as its less than the best loss plus eps 0.0001.
+2022-12-02 23:18:12,803 [INFO] [train.py:262] Epoch: 30
+2022-12-02 23:18:12,803 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:18:12,804 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 23:18:21,025 [INFO] [train.py:137]   batch 0/1000  loss: 0.1890862  lr: 2.575e-06  cpu_mem: 15.2%   gpu_mem: [38.2]%
+2022-12-02 23:18:56,117 [INFO] [train.py:137]   batch 100/1000  loss: 0.13895854  lr: 1.007e-05  cpu_mem: 15.4%   gpu_mem: [38.2]%
+2022-12-02 23:19:31,374 [INFO] [train.py:137]   batch 200/1000  loss: 0.20780383  lr: 1.758e-05  cpu_mem: 15.5%   gpu_mem: [38.2]%
+2022-12-02 23:20:06,942 [INFO] [train.py:137]   batch 300/1000  loss: 0.24278757  lr: 2.507e-05  cpu_mem: 15.6%   gpu_mem: [38.2]%
+2022-12-02 23:20:42,631 [INFO] [train.py:137]   batch 400/1000  loss: 0.2774173  lr: 3.258e-05  cpu_mem: 15.6%   gpu_mem: [38.2]%
+2022-12-02 23:21:17,538 [INFO] [train.py:137]   batch 500/1000  loss: 0.26036641  lr: 3.993e-05  cpu_mem: 15.7%   gpu_mem: [38.2]%
+2022-12-02 23:21:52,906 [INFO] [train.py:137]   batch 600/1000  loss: 0.22641015  lr: 3.243e-05  cpu_mem: 15.7%   gpu_mem: [38.2]%
+2022-12-02 23:22:28,414 [INFO] [train.py:137]   batch 700/1000  loss: 0.25952327  lr: 2.492e-05  cpu_mem: 15.7%   gpu_mem: [38.2]%
+2022-12-02 23:23:03,166 [INFO] [train.py:137]   batch 800/1000  loss: 0.22032577  lr: 1.742e-05  cpu_mem: 15.8%   gpu_mem: [38.2]%
+2022-12-02 23:23:37,942 [INFO] [train.py:137]   batch 900/1000  loss: 0.23684834  lr: 9.925e-06  cpu_mem: 15.8%   gpu_mem: [38.2]%
+2022-12-02 23:24:09,529 [INFO] [metadata.py:31] train_wall_time: 356.7240912914276
+2022-12-02 23:24:09,530 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3567240912914276
+2022-12-02 23:24:09,531 [INFO] [metadata.py:31] train_loss: 0.24478853606432677
+2022-12-02 23:24:09,534 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 23:30:53,159 [INFO] [metadata.py:31] val_clean_map: 0.9167640209197998
+2022-12-02 23:30:53,163 [INFO] [metadata.py:31] val_clean_map_50: 0.9993687272071838
+2022-12-02 23:30:53,164 [INFO] [metadata.py:31] val_clean_map_75: 0.9968948364257812
+2022-12-02 23:30:53,166 [INFO] [metadata.py:31] val_clean_map_small: 0.8966511487960815
+2022-12-02 23:30:53,168 [INFO] [metadata.py:31] val_clean_map_medium: 0.9152856469154358
+2022-12-02 23:30:53,170 [INFO] [metadata.py:31] val_clean_map_large: 0.9044262766838074
+2022-12-02 23:30:53,171 [INFO] [metadata.py:31] val_clean_mar_1: 0.8924379348754883
+2022-12-02 23:30:53,173 [INFO] [metadata.py:31] val_clean_mar_10: 0.9430475234985352
+2022-12-02 23:30:53,175 [INFO] [metadata.py:31] val_clean_mar_100: 0.9430475234985352
+2022-12-02 23:30:53,177 [INFO] [metadata.py:31] val_clean_mar_small: 0.9307644963264465
+2022-12-02 23:30:53,179 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9461199641227722
+2022-12-02 23:30:53,181 [INFO] [metadata.py:31] val_clean_mar_large: 0.9438978433609009
+2022-12-02 23:30:53,183 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9344791769981384, 0.9082371592521667, 0.9148931503295898, 0.928777813911438, 0.9187538623809814, 0.9136255979537964, 0.9226016402244568, 0.9091792106628418, 0.931100606918335, 0.9114954471588135, 0.9264464974403381, 0.9116946458816528, 0.9037292003631592, 0.9110375642776489, 0.9218049049377441, 0.9003668427467346]
+2022-12-02 23:30:53,185 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9553806185722351, 0.9366265535354614, 0.9397059679031372, 0.9496504068374634, 0.9469168782234192, 0.9410667419433594, 0.9464467167854309, 0.9370731115341187, 0.9529255032539368, 0.9411330223083496, 0.9519084095954895, 0.9388888478279114, 0.9330846071243286, 0.9388324618339539, 0.948257327079773, 0.9308642148971558]
+2022-12-02 23:30:53,187 [INFO] [metadata.py:31] val_clean_wall_time: 403.65281343460083
+2022-12-02 23:30:53,189 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.036528134346009
+2022-12-02 23:30:53,191 [INFO] [metadata.py:31] val_clean_loss: 0.31708896562457084
+2022-12-02 23:30:53,197 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 23:30:53,200 [INFO] [metadata.py:31] val_loss: 0.31708896562457084
+2022-12-02 23:30:53,204 [INFO] [train.py:300] Updating best model with epoch: 30 loss: 0.31708896562457084, as its less than the best loss plus eps 0.0001.
+2022-12-02 23:30:53,234 [INFO] [train.py:262] Epoch: 31
+2022-12-02 23:30:53,236 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:30:53,238 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 23:31:00,949 [INFO] [train.py:137]   batch 0/1000  loss: 0.16654645  lr: 2.575e-06  cpu_mem: 12.6%   gpu_mem: [38.2]%
+2022-12-02 23:31:35,821 [INFO] [train.py:137]   batch 100/1000  loss: 0.17599513  lr: 1.007e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
+2022-12-02 23:32:11,244 [INFO] [train.py:137]   batch 200/1000  loss: 0.21906681  lr: 1.758e-05  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 23:32:45,643 [INFO] [train.py:137]   batch 300/1000  loss: 0.1465742  lr: 2.507e-05  cpu_mem: 13.0%   gpu_mem: [38.2]%
+2022-12-02 23:33:19,662 [INFO] [train.py:137]   batch 400/1000  loss: 0.23446926  lr: 3.258e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 23:33:53,497 [INFO] [train.py:137]   batch 500/1000  loss: 0.38249019  lr: 3.993e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-02 23:34:27,334 [INFO] [train.py:137]   batch 600/1000  loss: 0.26867583  lr: 3.243e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 23:35:01,886 [INFO] [train.py:137]   batch 700/1000  loss: 0.26733303  lr: 2.492e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 23:35:36,033 [INFO] [train.py:137]   batch 800/1000  loss: 0.20868859  lr: 1.742e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 23:36:09,716 [INFO] [train.py:137]   batch 900/1000  loss: 0.189064  lr: 9.925e-06  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 23:36:41,062 [INFO] [metadata.py:31] train_wall_time: 347.821325302124
+2022-12-02 23:36:41,065 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.347821325302124
+2022-12-02 23:36:41,068 [INFO] [metadata.py:31] train_loss: 0.23684141147881746
+2022-12-02 23:36:41,073 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 23:43:24,404 [INFO] [metadata.py:31] val_clean_map: 0.9169678092002869
+2022-12-02 23:43:24,410 [INFO] [metadata.py:31] val_clean_map_50: 0.9993727803230286
+2022-12-02 23:43:24,416 [INFO] [metadata.py:31] val_clean_map_75: 0.9968809485435486
+2022-12-02 23:43:24,421 [INFO] [metadata.py:31] val_clean_map_small: 0.8935019969940186
+2022-12-02 23:43:24,426 [INFO] [metadata.py:31] val_clean_map_medium: 0.9165451526641846
+2022-12-02 23:43:24,433 [INFO] [metadata.py:31] val_clean_map_large: 0.9199089407920837
+2022-12-02 23:43:24,437 [INFO] [metadata.py:31] val_clean_mar_1: 0.8925691843032837
+2022-12-02 23:43:24,444 [INFO] [metadata.py:31] val_clean_mar_10: 0.9434530138969421
+2022-12-02 23:43:24,447 [INFO] [metadata.py:31] val_clean_mar_100: 0.9434530138969421
+2022-12-02 23:43:24,450 [INFO] [metadata.py:31] val_clean_mar_small: 0.9294935464859009
+2022-12-02 23:43:24,454 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9469366073608398
+2022-12-02 23:43:24,457 [INFO] [metadata.py:31] val_clean_mar_large: 0.9398038983345032
+2022-12-02 23:43:24,460 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9271873235702515, 0.9071402549743652, 0.9115220904350281, 0.9294841289520264, 0.9216099381446838, 0.9222007989883423, 0.9263084530830383, 0.9113184809684753, 0.928007185459137, 0.9046252369880676, 0.9276860356330872, 0.9052191972732544, 0.9093886613845825, 0.9065598845481873, 0.9292191863059998, 0.9040085077285767]
+2022-12-02 23:43:24,463 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9509186744689941, 0.9349397420883179, 0.9385294914245605, 0.9510490298271179, 0.9490616917610168, 0.9464000463485718, 0.9500001072883606, 0.9378049969673157, 0.951595664024353, 0.9354680180549622, 0.9534351229667664, 0.934848427772522, 0.9375621676445007, 0.9362943768501282, 0.9522787928581238, 0.9350617527961731]
+2022-12-02 23:43:24,467 [INFO] [metadata.py:31] val_clean_wall_time: 403.391135931015
+2022-12-02 23:43:24,470 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.03391135931015
+2022-12-02 23:43:24,473 [INFO] [metadata.py:31] val_clean_loss: 0.3166135570406914
+2022-12-02 23:43:24,479 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 23:43:24,482 [INFO] [metadata.py:31] val_loss: 0.3166135570406914
+2022-12-02 23:43:24,485 [INFO] [train.py:300] Updating best model with epoch: 31 loss: 0.3166135570406914, as its less than the best loss plus eps 0.0001.
+2022-12-02 23:43:24,541 [INFO] [train.py:262] Epoch: 32
+2022-12-02 23:43:24,544 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:43:24,547 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 23:43:33,250 [INFO] [train.py:137]   batch 0/1000  loss: 0.21588326  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-02 23:44:07,768 [INFO] [train.py:137]   batch 100/1000  loss: 0.14913158  lr: 1.007e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-02 23:44:41,721 [INFO] [train.py:137]   batch 200/1000  loss: 0.23392121  lr: 1.758e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 23:45:15,324 [INFO] [train.py:137]   batch 300/1000  loss: 0.30089948  lr: 2.507e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-02 23:45:49,234 [INFO] [train.py:137]   batch 400/1000  loss: 0.21534006  lr: 3.258e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 23:46:24,402 [INFO] [train.py:137]   batch 500/1000  loss: 0.22598982  lr: 3.993e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 23:46:58,700 [INFO] [train.py:137]   batch 600/1000  loss: 0.3333365  lr: 3.243e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-02 23:47:32,689 [INFO] [train.py:137]   batch 700/1000  loss: 0.22771904  lr: 2.492e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 23:48:06,271 [INFO] [train.py:137]   batch 800/1000  loss: 0.2064015  lr: 1.742e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 23:48:40,503 [INFO] [train.py:137]   batch 900/1000  loss: 0.22502653  lr: 9.925e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 23:49:11,220 [INFO] [metadata.py:31] train_wall_time: 346.6686065196991
+2022-12-02 23:49:11,222 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3466686065196991
+2022-12-02 23:49:11,224 [INFO] [metadata.py:31] train_loss: 0.2356680979281664
+2022-12-02 23:49:11,228 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-02 23:55:56,154 [INFO] [metadata.py:31] val_clean_map: 0.918872058391571
+2022-12-02 23:55:56,158 [INFO] [metadata.py:31] val_clean_map_50: 0.9993695020675659
+2022-12-02 23:55:56,164 [INFO] [metadata.py:31] val_clean_map_75: 0.996149480342865
+2022-12-02 23:55:56,169 [INFO] [metadata.py:31] val_clean_map_small: 0.8998668193817139
+2022-12-02 23:55:56,174 [INFO] [metadata.py:31] val_clean_map_medium: 0.9180171489715576
+2022-12-02 23:55:56,177 [INFO] [metadata.py:31] val_clean_map_large: 0.9144781231880188
+2022-12-02 23:55:56,180 [INFO] [metadata.py:31] val_clean_mar_1: 0.8945900201797485
+2022-12-02 23:55:56,183 [INFO] [metadata.py:31] val_clean_mar_10: 0.9456701278686523
+2022-12-02 23:55:56,187 [INFO] [metadata.py:31] val_clean_mar_100: 0.9456701278686523
+2022-12-02 23:55:56,190 [INFO] [metadata.py:31] val_clean_mar_small: 0.9323148727416992
+2022-12-02 23:55:56,194 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9491701126098633
+2022-12-02 23:55:56,197 [INFO] [metadata.py:31] val_clean_mar_large: 0.9364277124404907
+2022-12-02 23:55:56,201 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9289793968200684, 0.9074397683143616, 0.9104501605033875, 0.9293355941772461, 0.9198735356330872, 0.9216253161430359, 0.9279647469520569, 0.917218029499054, 0.9300856590270996, 0.9087493419647217, 0.9321022629737854, 0.9045727849006653, 0.9130859375, 0.9110251069068909, 0.9328989386558533, 0.9065479040145874]
+2022-12-02 23:55:56,204 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9527559280395508, 0.9368675351142883, 0.938529372215271, 0.9531469345092773, 0.9490617513656616, 0.9485334157943726, 0.9517766237258911, 0.9431707262992859, 0.9526596069335938, 0.9369457960128784, 0.9559796452522278, 0.9348484873771667, 0.9422885179519653, 0.9408629536628723, 0.95576411485672, 0.9375308752059937]
+2022-12-02 23:55:56,207 [INFO] [metadata.py:31] val_clean_wall_time: 404.9769456386566
+2022-12-02 23:55:56,211 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.049769456386566
+2022-12-02 23:55:56,217 [INFO] [metadata.py:31] val_clean_loss: 0.3156698301434517
+2022-12-02 23:55:56,224 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-02 23:55:56,227 [INFO] [metadata.py:31] val_loss: 0.3156698301434517
+2022-12-02 23:55:56,231 [INFO] [train.py:300] Updating best model with epoch: 32 loss: 0.3156698301434517, as its less than the best loss plus eps 0.0001.
+2022-12-02 23:55:56,286 [INFO] [train.py:262] Epoch: 33
+2022-12-02 23:55:56,288 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:55:56,290 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-02 23:56:05,257 [INFO] [train.py:137]   batch 0/1000  loss: 0.17484331  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-02 23:56:38,658 [INFO] [train.py:137]   batch 100/1000  loss: 0.2163118  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-02 23:57:12,780 [INFO] [train.py:137]   batch 200/1000  loss: 0.18793289  lr: 1.758e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 23:57:46,797 [INFO] [train.py:137]   batch 300/1000  loss: 0.24974276  lr: 2.507e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-02 23:58:21,596 [INFO] [train.py:137]   batch 400/1000  loss: 0.18458869  lr: 3.258e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 23:58:56,463 [INFO] [train.py:137]   batch 500/1000  loss: 0.27360821  lr: 3.993e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-02 23:59:30,994 [INFO] [train.py:137]   batch 600/1000  loss: 0.26947963  lr: 3.243e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:00:05,991 [INFO] [train.py:137]   batch 700/1000  loss: 0.35003626  lr: 2.492e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:00:40,547 [INFO] [train.py:137]   batch 800/1000  loss: 0.16496922  lr: 1.742e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 00:01:14,563 [INFO] [train.py:137]   batch 900/1000  loss: 0.18017137  lr: 9.925e-06  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 00:01:46,048 [INFO] [metadata.py:31] train_wall_time: 349.75555062294006
+2022-12-03 00:01:46,050 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34975555062294006
+2022-12-03 00:01:46,052 [INFO] [metadata.py:31] train_loss: 0.22733506230264902
+2022-12-03 00:01:46,056 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 00:08:28,231 [INFO] [metadata.py:31] val_clean_map: 0.916068971157074
+2022-12-03 00:08:28,237 [INFO] [metadata.py:31] val_clean_map_50: 0.9993717670440674
+2022-12-03 00:08:28,242 [INFO] [metadata.py:31] val_clean_map_75: 0.9968671798706055
+2022-12-03 00:08:28,247 [INFO] [metadata.py:31] val_clean_map_small: 0.8923022150993347
+2022-12-03 00:08:28,252 [INFO] [metadata.py:31] val_clean_map_medium: 0.9160242080688477
+2022-12-03 00:08:28,258 [INFO] [metadata.py:31] val_clean_map_large: 0.900051474571228
+2022-12-03 00:08:28,263 [INFO] [metadata.py:31] val_clean_mar_1: 0.8920224905014038
+2022-12-03 00:08:28,267 [INFO] [metadata.py:31] val_clean_mar_10: 0.9427831768989563
+2022-12-03 00:08:28,270 [INFO] [metadata.py:31] val_clean_mar_100: 0.9427831768989563
+2022-12-03 00:08:28,273 [INFO] [metadata.py:31] val_clean_mar_small: 0.9320217370986938
+2022-12-03 00:08:28,276 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9454182386398315
+2022-12-03 00:08:28,279 [INFO] [metadata.py:31] val_clean_mar_large: 0.9459201097488403
+2022-12-03 00:08:28,280 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9268526434898376, 0.9110445976257324, 0.9127090573310852, 0.9259064793586731, 0.908571183681488, 0.9172237515449524, 0.9219331741333008, 0.9106375575065613, 0.9306973814964294, 0.9113848805427551, 0.9252141714096069, 0.9026609659194946, 0.9124448895454407, 0.9083097577095032, 0.9255247712135315, 0.9059869647026062]
+2022-12-03 00:08:28,282 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9506561160087585, 0.9368674159049988, 0.9376470446586609, 0.9501165151596069, 0.9423592686653137, 0.944266676902771, 0.9469543695449829, 0.9395122528076172, 0.951595664024353, 0.9401477575302124, 0.9488550424575806, 0.9310606122016907, 0.9407960176467896, 0.9388325810432434, 0.9490616917610168, 0.9358024597167969]
+2022-12-03 00:08:28,284 [INFO] [metadata.py:31] val_clean_wall_time: 402.2258367538452
+2022-12-03 00:08:28,286 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.022258367538452
+2022-12-03 00:08:28,288 [INFO] [metadata.py:31] val_clean_loss: 0.31598169550299643
+2022-12-03 00:08:28,292 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 00:08:28,294 [INFO] [metadata.py:31] val_loss: 0.31598169550299643
+2022-12-03 00:08:28,309 [INFO] [train.py:262] Epoch: 34
+2022-12-03 00:08:28,311 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:08:28,313 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 00:08:33,434 [INFO] [train.py:137]   batch 0/1000  loss: 0.23533414  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:09:10,648 [INFO] [train.py:137]   batch 100/1000  loss: 0.20668441  lr: 1.007e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:09:45,033 [INFO] [train.py:137]   batch 200/1000  loss: 0.23400705  lr: 1.758e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 00:10:19,785 [INFO] [train.py:137]   batch 300/1000  loss: 0.22511236  lr: 2.507e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 00:10:54,429 [INFO] [train.py:137]   batch 400/1000  loss: 0.16586554  lr: 3.258e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 00:11:28,983 [INFO] [train.py:137]   batch 500/1000  loss: 0.21797608  lr: 3.993e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-03 00:12:04,114 [INFO] [train.py:137]   batch 600/1000  loss: 0.27258763  lr: 3.243e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-03 00:12:38,414 [INFO] [train.py:137]   batch 700/1000  loss: 0.22082868  lr: 2.492e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
+2022-12-03 00:13:12,623 [INFO] [train.py:137]   batch 800/1000  loss: 0.20830196  lr: 1.742e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-03 00:13:48,082 [INFO] [train.py:137]   batch 900/1000  loss: 0.19686674  lr: 9.925e-06  cpu_mem: 14.2%   gpu_mem: [38.2]%
+2022-12-03 00:14:19,101 [INFO] [metadata.py:31] train_wall_time: 350.7853226661682
+2022-12-03 00:14:19,105 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3507853226661682
+2022-12-03 00:14:19,108 [INFO] [metadata.py:31] train_loss: 0.22108483397960663
+2022-12-03 00:14:19,113 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 00:21:02,810 [INFO] [metadata.py:31] val_clean_map: 0.9187389612197876
+2022-12-03 00:21:02,817 [INFO] [metadata.py:31] val_clean_map_50: 0.9993699789047241
+2022-12-03 00:21:02,822 [INFO] [metadata.py:31] val_clean_map_75: 0.9947985410690308
+2022-12-03 00:21:02,829 [INFO] [metadata.py:31] val_clean_map_small: 0.8960008025169373
+2022-12-03 00:21:02,834 [INFO] [metadata.py:31] val_clean_map_medium: 0.9186736345291138
+2022-12-03 00:21:02,839 [INFO] [metadata.py:31] val_clean_map_large: 0.9188662171363831
+2022-12-03 00:21:02,846 [INFO] [metadata.py:31] val_clean_mar_1: 0.8944395780563354
+2022-12-03 00:21:02,850 [INFO] [metadata.py:31] val_clean_mar_10: 0.9453459978103638
+2022-12-03 00:21:02,855 [INFO] [metadata.py:31] val_clean_mar_100: 0.9453459978103638
+2022-12-03 00:21:02,859 [INFO] [metadata.py:31] val_clean_mar_small: 0.9321017265319824
+2022-12-03 00:21:02,863 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9486501812934875
+2022-12-03 00:21:02,866 [INFO] [metadata.py:31] val_clean_mar_large: 0.9474266171455383
+2022-12-03 00:21:02,868 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9326650500297546, 0.9170216917991638, 0.9174690842628479, 0.9253541827201843, 0.9143020510673523, 0.9259681105613708, 0.9256587624549866, 0.9119158387184143, 0.9326702952384949, 0.9078690409660339, 0.9305059313774109, 0.9071407318115234, 0.9082061052322388, 0.909883975982666, 0.9280520081520081, 0.9051398634910583]
+2022-12-03 00:21:02,870 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9540683031082153, 0.9443373680114746, 0.9435294270515442, 0.9498834609985352, 0.9455764889717102, 0.9493333697319031, 0.9494924545288086, 0.9392682909965515, 0.9537234306335449, 0.9394088983535767, 0.954961895942688, 0.9345958828926086, 0.9388059377670288, 0.9398476481437683, 0.9538874626159668, 0.9348148107528687]
+2022-12-03 00:21:02,872 [INFO] [metadata.py:31] val_clean_wall_time: 403.75471568107605
+2022-12-03 00:21:02,873 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.037547156810761
+2022-12-03 00:21:02,875 [INFO] [metadata.py:31] val_clean_loss: 0.31478910475969313
+2022-12-03 00:21:02,879 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 00:21:02,881 [INFO] [metadata.py:31] val_loss: 0.31478910475969313
+2022-12-03 00:21:02,883 [INFO] [train.py:300] Updating best model with epoch: 34 loss: 0.31478910475969313, as its less than the best loss plus eps 0.0001.
+2022-12-03 00:21:02,913 [INFO] [train.py:262] Epoch: 35
+2022-12-03 00:21:02,915 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:21:02,916 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 00:21:10,535 [INFO] [train.py:137]   batch 0/1000  loss: 0.26731294  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
+2022-12-03 00:21:44,743 [INFO] [train.py:137]   batch 100/1000  loss: 0.19656214  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-03 00:22:19,034 [INFO] [train.py:137]   batch 200/1000  loss: 0.20366199  lr: 1.758e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-03 00:22:53,527 [INFO] [train.py:137]   batch 300/1000  loss: 0.22953255  lr: 2.507e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-03 00:23:27,880 [INFO] [train.py:137]   batch 400/1000  loss: 0.24493308  lr: 3.258e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:24:02,141 [INFO] [train.py:137]   batch 500/1000  loss: 0.28781149  lr: 3.993e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:24:36,206 [INFO] [train.py:137]   batch 600/1000  loss: 0.2791068  lr: 3.243e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:25:10,308 [INFO] [train.py:137]   batch 700/1000  loss: 0.18174291  lr: 2.492e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:25:44,783 [INFO] [train.py:137]   batch 800/1000  loss: 0.17872983  lr: 1.742e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 00:26:18,785 [INFO] [train.py:137]   batch 900/1000  loss: 0.17391083  lr: 9.925e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 00:26:49,523 [INFO] [metadata.py:31] train_wall_time: 346.6040778160095
+2022-12-03 00:26:49,525 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34660407781600955
+2022-12-03 00:26:49,527 [INFO] [metadata.py:31] train_loss: 0.21892919017374515
+2022-12-03 00:26:49,532 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 00:33:32,129 [INFO] [metadata.py:31] val_clean_map: 0.9180173277854919
+2022-12-03 00:33:32,134 [INFO] [metadata.py:31] val_clean_map_50: 0.999366819858551
+2022-12-03 00:33:32,138 [INFO] [metadata.py:31] val_clean_map_75: 0.9967870712280273
+2022-12-03 00:33:32,143 [INFO] [metadata.py:31] val_clean_map_small: 0.8962692022323608
+2022-12-03 00:33:32,148 [INFO] [metadata.py:31] val_clean_map_medium: 0.9166510105133057
+2022-12-03 00:33:32,152 [INFO] [metadata.py:31] val_clean_map_large: 0.9293176531791687
+2022-12-03 00:33:32,157 [INFO] [metadata.py:31] val_clean_mar_1: 0.8932056427001953
+2022-12-03 00:33:32,161 [INFO] [metadata.py:31] val_clean_mar_10: 0.9440261721611023
+2022-12-03 00:33:32,163 [INFO] [metadata.py:31] val_clean_mar_100: 0.9440261721611023
+2022-12-03 00:33:32,165 [INFO] [metadata.py:31] val_clean_mar_small: 0.9327289462089539
+2022-12-03 00:33:32,167 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9467574954032898
+2022-12-03 00:33:32,169 [INFO] [metadata.py:31] val_clean_mar_large: 0.9493972659111023
+2022-12-03 00:33:32,171 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9321365356445312, 0.9130481481552124, 0.9123426675796509, 0.9273537397384644, 0.9142420291900635, 0.9168533682823181, 0.9265996217727661, 0.9151180982589722, 0.9343060851097107, 0.9090665578842163, 0.9276390671730042, 0.90631103515625, 0.9076077938079834, 0.9140902161598206, 0.9260807633399963, 0.9054816961288452]
+2022-12-03 00:33:32,173 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9535433053970337, 0.9387952089309692, 0.9391177296638489, 0.9494172930717468, 0.9453083276748657, 0.9421333074569702, 0.9492385983467102, 0.9404878616333008, 0.9545212984085083, 0.9362069368362427, 0.9531806707382202, 0.9361110925674438, 0.9375621676445007, 0.9423858523368835, 0.9498659372329712, 0.9365431666374207]
+2022-12-03 00:33:32,175 [INFO] [metadata.py:31] val_clean_wall_time: 402.641033411026
+2022-12-03 00:33:32,176 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.02641033411026
+2022-12-03 00:33:32,178 [INFO] [metadata.py:31] val_clean_loss: 0.31757470935583115
+2022-12-03 00:33:32,182 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 00:33:32,184 [INFO] [metadata.py:31] val_loss: 0.31757470935583115
+2022-12-03 00:33:32,200 [INFO] [train.py:262] Epoch: 36
+2022-12-03 00:33:32,202 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:33:32,204 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 00:33:37,569 [INFO] [train.py:137]   batch 0/1000  loss: 0.14425448  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-03 00:34:13,636 [INFO] [train.py:137]   batch 100/1000  loss: 0.13658583  lr: 1.007e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:34:47,826 [INFO] [train.py:137]   batch 200/1000  loss: 0.13840906  lr: 1.758e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:35:22,557 [INFO] [train.py:137]   batch 300/1000  loss: 0.21768078  lr: 2.507e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 00:35:57,433 [INFO] [train.py:137]   batch 400/1000  loss: 0.19348496  lr: 3.258e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 00:36:31,524 [INFO] [train.py:137]   batch 500/1000  loss: 0.25487942  lr: 3.993e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:37:05,851 [INFO] [train.py:137]   batch 600/1000  loss: 0.19766098  lr: 3.243e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:37:41,572 [INFO] [train.py:137]   batch 700/1000  loss: 0.21448673  lr: 2.492e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:38:16,305 [INFO] [train.py:137]   batch 800/1000  loss: 0.27479836  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:38:50,226 [INFO] [train.py:137]   batch 900/1000  loss: 0.11940286  lr: 9.925e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:39:20,979 [INFO] [metadata.py:31] train_wall_time: 348.7726078033447
+2022-12-03 00:39:20,982 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34877260780334474
+2022-12-03 00:39:20,983 [INFO] [metadata.py:31] train_loss: 0.21236666820943356
+2022-12-03 00:39:20,988 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 00:46:05,693 [INFO] [metadata.py:31] val_clean_map: 0.9194995760917664
+2022-12-03 00:46:05,700 [INFO] [metadata.py:31] val_clean_map_50: 0.9993672370910645
+2022-12-03 00:46:05,705 [INFO] [metadata.py:31] val_clean_map_75: 0.9967676401138306
+2022-12-03 00:46:05,713 [INFO] [metadata.py:31] val_clean_map_small: 0.9013081192970276
+2022-12-03 00:46:05,719 [INFO] [metadata.py:31] val_clean_map_medium: 0.9181867241859436
+2022-12-03 00:46:05,723 [INFO] [metadata.py:31] val_clean_map_large: 0.9349179863929749
+2022-12-03 00:46:05,726 [INFO] [metadata.py:31] val_clean_mar_1: 0.8950768709182739
+2022-12-03 00:46:05,729 [INFO] [metadata.py:31] val_clean_mar_10: 0.9459942579269409
+2022-12-03 00:46:05,733 [INFO] [metadata.py:31] val_clean_mar_100: 0.9459942579269409
+2022-12-03 00:46:05,736 [INFO] [metadata.py:31] val_clean_mar_small: 0.9331059455871582
+2022-12-03 00:46:05,738 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9490371942520142
+2022-12-03 00:46:05,743 [INFO] [metadata.py:31] val_clean_mar_large: 0.9510037302970886
+2022-12-03 00:46:05,748 [INFO] [metadata.py:31] val_clean_map_per_class: [0.932362973690033, 0.9109542965888977, 0.9105689525604248, 0.9325648546218872, 0.9183168411254883, 0.9256845116615295, 0.9304096698760986, 0.9166502356529236, 0.931154727935791, 0.9059780836105347, 0.9325727820396423, 0.9080761671066284, 0.9085144400596619, 0.9085002541542053, 0.93275386095047, 0.9069313406944275]
+2022-12-03 00:46:05,754 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9556430578231812, 0.9380723237991333, 0.9379412531852722, 0.9557110071182251, 0.9506702423095703, 0.9493333697319031, 0.951015293598175, 0.942439079284668, 0.9550531506538391, 0.9371920824050903, 0.9564886093139648, 0.9363635778427124, 0.9383084177970886, 0.9388324618339539, 0.9563003778457642, 0.9365431666374207]
+2022-12-03 00:46:05,756 [INFO] [metadata.py:31] val_clean_wall_time: 404.765743970871
+2022-12-03 00:46:05,758 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.0476574397087095
+2022-12-03 00:46:05,760 [INFO] [metadata.py:31] val_clean_loss: 0.31697707548737525
+2022-12-03 00:46:05,766 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 00:46:05,769 [INFO] [metadata.py:31] val_loss: 0.31697707548737525
+2022-12-03 00:46:05,785 [INFO] [train.py:262] Epoch: 37
+2022-12-03 00:46:05,787 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:46:05,789 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 00:46:14,186 [INFO] [train.py:137]   batch 0/1000  loss: 0.14267804  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:46:48,262 [INFO] [train.py:137]   batch 100/1000  loss:  0.24991  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 00:47:23,478 [INFO] [train.py:137]   batch 200/1000  loss: 0.15923402  lr: 1.758e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:47:57,110 [INFO] [train.py:137]   batch 300/1000  loss: 0.15428744  lr: 2.507e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:48:31,588 [INFO] [train.py:137]   batch 400/1000  loss: 0.21332891  lr: 3.258e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:49:06,795 [INFO] [train.py:137]   batch 500/1000  loss: 0.37484735  lr: 3.993e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:49:41,254 [INFO] [train.py:137]   batch 600/1000  loss: 0.217007  lr: 3.243e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:50:15,164 [INFO] [train.py:137]   batch 700/1000  loss: 0.15982254  lr: 2.492e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:50:49,487 [INFO] [train.py:137]   batch 800/1000  loss: 0.19654772  lr: 1.742e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:51:24,432 [INFO] [train.py:137]   batch 900/1000  loss: 0.35540119  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 00:51:55,860 [INFO] [metadata.py:31] train_wall_time: 350.0687928199768
+2022-12-03 00:51:55,862 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3500687928199768
+2022-12-03 00:51:55,864 [INFO] [metadata.py:31] train_loss: 0.20581870846450329
+2022-12-03 00:51:55,869 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 00:58:42,198 [INFO] [metadata.py:31] val_clean_map: 0.9206843376159668
+2022-12-03 00:58:42,203 [INFO] [metadata.py:31] val_clean_map_50: 0.9993718266487122
+2022-12-03 00:58:42,208 [INFO] [metadata.py:31] val_clean_map_75: 0.9959620833396912
+2022-12-03 00:58:42,213 [INFO] [metadata.py:31] val_clean_map_small: 0.8970051407814026
+2022-12-03 00:58:42,218 [INFO] [metadata.py:31] val_clean_map_medium: 0.9197403788566589
+2022-12-03 00:58:42,223 [INFO] [metadata.py:31] val_clean_map_large: 0.8829832077026367
+2022-12-03 00:58:42,227 [INFO] [metadata.py:31] val_clean_mar_1: 0.8960291147232056
+2022-12-03 00:58:42,232 [INFO] [metadata.py:31] val_clean_mar_10: 0.9470324516296387
+2022-12-03 00:58:42,237 [INFO] [metadata.py:31] val_clean_mar_100: 0.9470324516296387
+2022-12-03 00:58:42,241 [INFO] [metadata.py:31] val_clean_mar_small: 0.9314824938774109
+2022-12-03 00:58:42,247 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9507877230644226
+2022-12-03 00:58:42,252 [INFO] [metadata.py:31] val_clean_mar_large: 0.9497512578964233
+2022-12-03 00:58:42,255 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9392538070678711, 0.9135354161262512, 0.9100397825241089, 0.9289700388908386, 0.9277628660202026, 0.926750659942627, 0.9304214119911194, 0.9161549210548401, 0.9358991980552673, 0.9085281491279602, 0.9268877506256104, 0.9075602889060974, 0.9100461006164551, 0.9127887487411499, 0.9292412996292114, 0.9071098566055298]
+2022-12-03 00:58:42,260 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.960629940032959, 0.9392770528793335, 0.9370588064193726, 0.952913761138916, 0.9549597501754761, 0.949866771697998, 0.9538071751594543, 0.9429268836975098, 0.9566489458084106, 0.9394088983535767, 0.9526718258857727, 0.9371212124824524, 0.9380596876144409, 0.9441624879837036, 0.9552279710769653, 0.9377778172492981]
+2022-12-03 00:58:42,262 [INFO] [metadata.py:31] val_clean_wall_time: 406.390909910202
+2022-12-03 00:58:42,264 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.063909099102021
+2022-12-03 00:58:42,266 [INFO] [metadata.py:31] val_clean_loss: 0.319653951972723
+2022-12-03 00:58:42,270 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 00:58:42,272 [INFO] [metadata.py:31] val_loss: 0.319653951972723
+2022-12-03 00:58:42,289 [INFO] [train.py:262] Epoch: 38
+2022-12-03 00:58:42,291 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:58:42,293 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 00:58:50,205 [INFO] [train.py:137]   batch 0/1000  loss: 0.16731279  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 00:59:24,771 [INFO] [train.py:137]   batch 100/1000  loss: 0.13025734  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 00:59:58,542 [INFO] [train.py:137]   batch 200/1000  loss: 0.14300381  lr: 1.758e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 01:00:33,299 [INFO] [train.py:137]   batch 300/1000  loss: 0.22344114  lr: 2.507e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 01:01:07,547 [INFO] [train.py:137]   batch 400/1000  loss: 0.22441167  lr: 3.258e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 01:01:42,125 [INFO] [train.py:137]   batch 500/1000  loss: 0.18626352  lr: 3.993e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 01:02:16,898 [INFO] [train.py:137]   batch 600/1000  loss: 0.26860726  lr: 3.243e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 01:02:51,616 [INFO] [train.py:137]   batch 700/1000  loss: 0.25107282  lr: 2.492e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 01:03:25,881 [INFO] [train.py:137]   batch 800/1000  loss: 0.1801776  lr: 1.742e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
+2022-12-03 01:03:59,880 [INFO] [train.py:137]   batch 900/1000  loss: 0.19326821  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 01:04:31,447 [INFO] [metadata.py:31] train_wall_time: 349.15147042274475
+2022-12-03 01:04:31,449 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.34915147042274475
+2022-12-03 01:04:31,451 [INFO] [metadata.py:31] train_loss: 0.202690074197948
+2022-12-03 01:04:31,456 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 01:11:20,135 [INFO] [metadata.py:31] val_clean_map: 0.9190593957901001
+2022-12-03 01:11:20,140 [INFO] [metadata.py:31] val_clean_map_50: 0.9993699789047241
+2022-12-03 01:11:20,145 [INFO] [metadata.py:31] val_clean_map_75: 0.9973694682121277
+2022-12-03 01:11:20,150 [INFO] [metadata.py:31] val_clean_map_small: 0.8961718082427979
+2022-12-03 01:11:20,154 [INFO] [metadata.py:31] val_clean_map_medium: 0.9175500869750977
+2022-12-03 01:11:20,159 [INFO] [metadata.py:31] val_clean_map_large: 0.9380872249603271
+2022-12-03 01:11:20,164 [INFO] [metadata.py:31] val_clean_mar_1: 0.8948604464530945
+2022-12-03 01:11:20,168 [INFO] [metadata.py:31] val_clean_mar_10: 0.9458217620849609
+2022-12-03 01:11:20,173 [INFO] [metadata.py:31] val_clean_mar_100: 0.9458217620849609
+2022-12-03 01:11:20,175 [INFO] [metadata.py:31] val_clean_mar_small: 0.931464672088623
+2022-12-03 01:11:20,176 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9493387341499329
+2022-12-03 01:11:20,178 [INFO] [metadata.py:31] val_clean_mar_large: 0.9567395448684692
+2022-12-03 01:11:20,180 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9316585659980774, 0.9107300639152527, 0.9080052971839905, 0.9260292649269104, 0.9169091582298279, 0.9263244271278381, 0.926211416721344, 0.9133673310279846, 0.9334118366241455, 0.9090050458908081, 0.9325805902481079, 0.9136025905609131, 0.9111490249633789, 0.9130431413650513, 0.9282277226448059, 0.9046953916549683]
+2022-12-03 01:11:20,182 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9532808065414429, 0.9383131861686707, 0.9358823895454407, 0.9510489702224731, 0.9504021406173706, 0.9496000409126282, 0.9477157592773438, 0.9412195086479187, 0.9561170339584351, 0.9411330223083496, 0.9557251930236816, 0.9416666030883789, 0.9405471682548523, 0.9426396489143372, 0.9525469541549683, 0.9353086352348328]
+2022-12-03 01:11:20,184 [INFO] [metadata.py:31] val_clean_wall_time: 408.72629618644714
+2022-12-03 01:11:20,186 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.087262961864472
+2022-12-03 01:11:20,188 [INFO] [metadata.py:31] val_clean_loss: 0.3209999033808708
+2022-12-03 01:11:20,192 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 01:11:20,194 [INFO] [metadata.py:31] val_loss: 0.3209999033808708
+2022-12-03 01:11:20,234 [INFO] [train.py:262] Epoch: 39
+2022-12-03 01:11:20,236 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 01:11:20,238 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 01:11:26,044 [INFO] [train.py:137]   batch 0/1000  loss: 0.19368741  lr: 2.575e-06  cpu_mem: 12.6%   gpu_mem: [38.2]%
+2022-12-03 01:12:03,603 [INFO] [train.py:137]   batch 100/1000  loss: 0.14389101  lr: 1.007e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
+2022-12-03 01:12:39,135 [INFO] [train.py:137]   batch 200/1000  loss: 0.1909648  lr: 1.758e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
+2022-12-03 01:13:14,765 [INFO] [train.py:137]   batch 300/1000  loss: 0.24745539  lr: 2.507e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
+2022-12-03 01:13:50,279 [INFO] [train.py:137]   batch 400/1000  loss: 0.21962795  lr: 3.258e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
+2022-12-03 01:14:25,354 [INFO] [train.py:137]   batch 500/1000  loss: 0.21927355  lr: 3.993e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
+2022-12-03 01:15:00,306 [INFO] [train.py:137]   batch 600/1000  loss: 0.31266388  lr: 3.243e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
+2022-12-03 01:15:34,937 [INFO] [train.py:137]   batch 700/1000  loss: 0.19589928  lr: 2.492e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
+2022-12-03 01:16:10,119 [INFO] [train.py:137]   batch 800/1000  loss: 0.19879857  lr: 1.742e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
+2022-12-03 01:16:45,585 [INFO] [train.py:137]   batch 900/1000  loss: 0.18721294  lr: 9.925e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
+2022-12-03 01:17:16,836 [INFO] [metadata.py:31] train_wall_time: 356.59337854385376
+2022-12-03 01:17:16,838 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.35659337854385376
+2022-12-03 01:17:16,840 [INFO] [metadata.py:31] train_loss: 0.19673248867690563
+2022-12-03 01:17:16,843 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 01:24:02,194 [INFO] [metadata.py:31] val_clean_map: 0.9199530482292175
+2022-12-03 01:24:02,199 [INFO] [metadata.py:31] val_clean_map_50: 0.9993733167648315
+2022-12-03 01:24:02,204 [INFO] [metadata.py:31] val_clean_map_75: 0.9961304068565369
+2022-12-03 01:24:02,208 [INFO] [metadata.py:31] val_clean_map_small: 0.898385226726532
+2022-12-03 01:24:02,213 [INFO] [metadata.py:31] val_clean_map_medium: 0.920149028301239
+2022-12-03 01:24:02,217 [INFO] [metadata.py:31] val_clean_map_large: 0.9261395931243896
+2022-12-03 01:24:02,222 [INFO] [metadata.py:31] val_clean_mar_1: 0.8954819440841675
+2022-12-03 01:24:02,226 [INFO] [metadata.py:31] val_clean_mar_10: 0.946766197681427
+2022-12-03 01:24:02,231 [INFO] [metadata.py:31] val_clean_mar_100: 0.946766197681427
+2022-12-03 01:24:02,234 [INFO] [metadata.py:31] val_clean_mar_small: 0.9312289357185364
+2022-12-03 01:24:02,236 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9504998326301575
+2022-12-03 01:24:02,238 [INFO] [metadata.py:31] val_clean_mar_large: 0.9533283114433289
+2022-12-03 01:24:02,239 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9327907562255859, 0.915282130241394, 0.9096713662147522, 0.926211953163147, 0.9226336479187012, 0.9223057627677917, 0.9321697354316711, 0.9124800562858582, 0.9353689551353455, 0.9090391993522644, 0.9349257349967957, 0.9045590758323669, 0.9091201424598694, 0.9140810966491699, 0.931424617767334, 0.9071849584579468]
+2022-12-03 01:24:02,241 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9564304351806641, 0.9431325793266296, 0.9373529553413391, 0.9510490298271179, 0.9533513188362122, 0.9474667310714722, 0.9543148279190063, 0.9387804269790649, 0.9563829302787781, 0.9403941035270691, 0.9590331315994263, 0.9353534579277039, 0.9385571479797363, 0.9436548948287964, 0.9552279710769653, 0.9377778172492981]
+2022-12-03 01:24:02,243 [INFO] [metadata.py:31] val_clean_wall_time: 405.39965558052063
+2022-12-03 01:24:02,245 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.053996555805206
+2022-12-03 01:24:02,247 [INFO] [metadata.py:31] val_clean_loss: 0.3200621935725212
+2022-12-03 01:24:02,251 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 01:24:02,253 [INFO] [metadata.py:31] val_loss: 0.3200621935725212
+2022-12-03 01:24:02,296 [INFO] [train.py:262] Epoch: 40
+2022-12-03 01:24:02,298 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 01:24:02,301 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
+2022-12-03 01:24:10,504 [INFO] [train.py:137]   batch 0/1000  loss: 0.14172456  lr: 2.575e-06  cpu_mem: 14.3%   gpu_mem: [38.2]%
+2022-12-03 01:24:45,412 [INFO] [train.py:137]   batch 100/1000  loss: 0.16050869  lr: 1.007e-05  cpu_mem: 14.4%   gpu_mem: [38.2]%
+2022-12-03 01:25:20,737 [INFO] [train.py:137]   batch 200/1000  loss: 0.12517232  lr: 1.758e-05  cpu_mem: 14.5%   gpu_mem: [38.2]%
+2022-12-03 01:25:55,636 [INFO] [train.py:137]   batch 300/1000  loss: 0.18231617  lr: 2.507e-05  cpu_mem: 14.6%   gpu_mem: [38.2]%
+2022-12-03 01:26:30,123 [INFO] [train.py:137]   batch 400/1000  loss: 0.22052544  lr: 3.258e-05  cpu_mem: 14.7%   gpu_mem: [38.2]%
+2022-12-03 01:27:05,494 [INFO] [train.py:137]   batch 500/1000  loss: 0.27595931  lr: 3.993e-05  cpu_mem: 14.7%   gpu_mem: [38.2]%
+2022-12-03 01:27:40,903 [INFO] [train.py:137]   batch 600/1000  loss: 0.25026345  lr: 3.243e-05  cpu_mem: 14.8%   gpu_mem: [38.2]%
+2022-12-03 01:28:16,196 [INFO] [train.py:137]   batch 700/1000  loss: 0.15288696  lr: 2.492e-05  cpu_mem: 14.8%   gpu_mem: [38.2]%
+2022-12-03 01:28:52,120 [INFO] [train.py:137]   batch 800/1000  loss: 0.23322925  lr: 1.742e-05  cpu_mem: 14.9%   gpu_mem: [38.2]%
+2022-12-03 01:29:27,088 [INFO] [train.py:137]   batch 900/1000  loss: 0.13405342  lr: 9.925e-06  cpu_mem: 14.9%   gpu_mem: [38.2]%
+2022-12-03 01:29:58,744 [INFO] [metadata.py:31] train_wall_time: 356.43998169898987
+2022-12-03 01:29:58,746 [INFO] [metadata.py:31] train_wall_time_per_batch: 0.3564399816989899
+2022-12-03 01:29:58,748 [INFO] [metadata.py:31] train_loss: 0.19292610093206167
+2022-12-03 01:29:58,753 [INFO] [train.py:279] Evaluating model against clean eval dataset
+2022-12-03 01:36:44,423 [INFO] [metadata.py:31] val_clean_map: 0.9225832223892212
+2022-12-03 01:36:44,428 [INFO] [metadata.py:31] val_clean_map_50: 0.9993715286254883
+2022-12-03 01:36:44,434 [INFO] [metadata.py:31] val_clean_map_75: 0.9955136775970459
+2022-12-03 01:36:44,438 [INFO] [metadata.py:31] val_clean_map_small: 0.8989618420600891
+2022-12-03 01:36:44,445 [INFO] [metadata.py:31] val_clean_map_medium: 0.9229841232299805
+2022-12-03 01:36:44,450 [INFO] [metadata.py:31] val_clean_map_large: 0.9415073394775391
+2022-12-03 01:36:44,455 [INFO] [metadata.py:31] val_clean_mar_1: 0.8973301649093628
+2022-12-03 01:36:44,461 [INFO] [metadata.py:31] val_clean_mar_10: 0.9487660527229309
+2022-12-03 01:36:44,464 [INFO] [metadata.py:31] val_clean_mar_100: 0.9487660527229309
+2022-12-03 01:36:44,466 [INFO] [metadata.py:31] val_clean_mar_small: 0.933222770690918
+2022-12-03 01:36:44,468 [INFO] [metadata.py:31] val_clean_mar_medium: 0.9524409174919128
+2022-12-03 01:36:44,471 [INFO] [metadata.py:31] val_clean_mar_large: 0.9645723104476929
+2022-12-03 01:36:44,474 [INFO] [metadata.py:31] val_clean_map_per_class: [0.9452346563339233, 0.911906361579895, 0.9113496541976929, 0.9276272058486938, 0.9221019744873047, 0.928023099899292, 0.9282796382904053, 0.9192773103713989, 0.9366623759269714, 0.9114160537719727, 0.9383714199066162, 0.9089856147766113, 0.9114318490028381, 0.9163336157798767, 0.9316745400428772, 0.912656307220459]
+2022-12-03 01:36:44,478 [INFO] [metadata.py:31] val_clean_mar_100_per_class: [0.9637795686721802, 0.940481960773468, 0.9405882954597473, 0.9524475336074829, 0.9520108103752136, 0.9541333913803101, 0.9522843360900879, 0.9446342587471008, 0.9569149017333984, 0.9403940439224243, 0.9605598449707031, 0.9388889074325562, 0.9402984380722046, 0.9454315304756165, 0.9546917080879211, 0.9427160024642944]
+2022-12-03 01:36:44,481 [INFO] [metadata.py:31] val_clean_wall_time: 405.72631001472473
+2022-12-03 01:36:44,485 [INFO] [metadata.py:31] val_clean_wall_time_per_batch: 4.057263100147248
+2022-12-03 01:36:44,488 [INFO] [metadata.py:31] val_clean_loss: 0.3172860583662987
+2022-12-03 01:36:44,494 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
+2022-12-03 01:36:44,497 [INFO] [metadata.py:31] val_loss: 0.3172860583662987
+2022-12-03 01:36:44,500 [INFO] [train.py:300] Updating best model with epoch: 40 loss: 0.3172860583662987, as its less than the best loss plus eps 0.0001.
+2022-12-03 01:36:44,558 [INFO] [train.py:322] Evaluating model against clean test dataset
+2022-12-03 01:43:31,680 [INFO] [metadata.py:31] test_clean_map: 0.9203243255615234
+2022-12-03 01:43:31,685 [INFO] [metadata.py:31] test_clean_map_50: 0.9975247383117676
+2022-12-03 01:43:31,690 [INFO] [metadata.py:31] test_clean_map_75: 0.9953741431236267
+2022-12-03 01:43:31,695 [INFO] [metadata.py:31] test_clean_map_small: 0.8907649517059326
+2022-12-03 01:43:31,699 [INFO] [metadata.py:31] test_clean_map_medium: 0.9233664274215698
+2022-12-03 01:43:31,704 [INFO] [metadata.py:31] test_clean_map_large: 0.8913828730583191
+2022-12-03 01:43:31,708 [INFO] [metadata.py:31] test_clean_mar_1: 0.8888148069381714
+2022-12-03 01:43:31,711 [INFO] [metadata.py:31] test_clean_mar_10: 0.9475248456001282
+2022-12-03 01:43:31,713 [INFO] [metadata.py:31] test_clean_mar_100: 0.9475248456001282
+2022-12-03 01:43:31,715 [INFO] [metadata.py:31] test_clean_mar_small: 0.9288989305496216
+2022-12-03 01:43:31,717 [INFO] [metadata.py:31] test_clean_mar_medium: 0.952083945274353
+2022-12-03 01:43:31,719 [INFO] [metadata.py:31] test_clean_mar_large: 0.9434307217597961
+2022-12-03 01:43:31,720 [INFO] [metadata.py:31] test_clean_map_per_class: [0.9321269989013672, 0.9038610458374023, 0.9281249046325684, 0.9338064789772034, 0.9344233274459839, 0.9271982312202454, 0.9208143353462219, 0.919167160987854, 0.9309244155883789, 0.9100538492202759, 0.9334228038787842, 0.9100615978240967, 0.9061634540557861, 0.9091764688491821, 0.9284582138061523, 0.8974050879478455]
+2022-12-03 01:43:31,723 [INFO] [metadata.py:31] test_clean_mar_100_per_class: [0.9540681838989258, 0.9341084361076355, 0.9521368145942688, 0.9557104110717773, 0.9584614634513855, 0.9526718258857727, 0.9454544186592102, 0.9481182098388672, 0.9546340703964233, 0.9399026036262512, 0.9578680992126465, 0.9404522776603699, 0.9391705393791199, 0.9410797953605652, 0.9540669322013855, 0.9324936866760254]
+2022-12-03 01:43:31,724 [INFO] [metadata.py:31] test_clean_wall_time: 407.1634738445282
+2022-12-03 01:43:31,726 [INFO] [metadata.py:31] test_clean_wall_time_per_batch: 4.071634738445282
+2022-12-03 01:43:31,728 [INFO] [metadata.py:31] test_clean_loss: 0.32668916404247283
+2022-12-03 01:43:31,732 [INFO] [train.py:325] Evaluating model against poisoned test dataset

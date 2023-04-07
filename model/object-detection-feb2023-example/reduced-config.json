@@ -1,0 +1,12 @@
+{
+  "model_architecture": "object_detection:ssd300_vgg16",
+  "source_dataset_background": "cityscapes",
+  "source_dataset_foreground": "synth-traffic-signs",
+  "img_shape": [
+    256,
+    256,
+    3
+  ],
+  "img_type": "uint8",
+  "number_classes": 16
+}
