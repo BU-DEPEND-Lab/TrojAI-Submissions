@@ -219,16 +219,43 @@ class Detector(AbstractDetector):
                 logging.info("Model predicted {} boxes, Ground Truth has {} boxes.".format(len(pred), len(ground_truth)))
                 # logging.info("Model: {}, Ground Truth: {}".format(examples_dir_entry.name, ground_truth))
 
-                pred_classes = [item['label'] for item in pred]
-                target_classes = [item['label'] for item in ground_truth]
-                loss_class = F.cross_entropy(torch.tensor(pred_classes).float(), torch.tensor(target_classes).float(), reduction="sum")
+                # Compute the distance between all bounding boxes
+                for i in range(len(pred)):
+                    pred[i]['dists'] = []
+                    for j in range(len(ground_truth)):
+                        pred[i]['dists'].append((F.l1_loss(pred[i]['bbox'], torch.tensor(list(ground_truth[i]['bbox'].values())).float(), reduction="none").sum(1).detach().item(), i))
+                        ground_truth[j]['dists'].append((F.l1_loss(pred[i]['bbox'], torch.tensor(list(ground_truth[i]['bbox'].values())).float(), reduction="none").sum(1).detach().item(), i))
+                for i in range(len(pred)):
+                    pred[i]['dists'] = pred[i]['dists'].sorted()
+                for j in range(len(ground_truth)):
+                    ground_truth[j]['dists'] = ground_truth[j]['dists'].sorted()
 
-                pred_bbs = torch.tensor([item['bbox'] for item in pred]).float()
-                target_bbs = torch.tensor([torch.tensor(list(item['bbox'].values())) for item in ground_truth]).float()
-                loss_bb = F.l1_loss(pred_bbs, target_bbs, reduction="none").sum(1)
-                loss_bb = loss_bb.sum()
+                # Compute the pred loss
+                pred_classes = [item['label'] for item in pred]
+                target_classes = [ground_truth[item['dists'][0][1]]['label'] for item in pred]
+                pred_loss_class = F.cross_entropy(torch.tensor(pred_classes).float(), torch.tensor(target_classes).float(), reduction="sum")
+
+                pred_bbs = [item['bbox'] for item in pred]
+                target_bbs = [list(ground_truth[item['dists'][0][1]]['bbox'].values()) for item in pred]
+                pred_loss_bb = F.l1_loss(torch.tensor(pred_bbs).float(), torch.tensor(target_bbs).float(), reduction="none").sum(1)
+                pred_loss_bb = loss_bb.sum()
                 
-                loss = loss_class + loss_bb
+                pred_loss = pred_loss_class + pred_loss_bb
+
+                # Compute the target loss
+                target_classes = [item['label'] for item in ground_truth]
+                pred_classes = [pred[item['dists'][0][1]]['label'] for item in ground_truth]
+                target_loss_class = F.cross_entropy(torch.tensor(target_classes).float(), torch.tensor(pred_classes).float(), reduction="sum")
+
+                target_bbs = [item['bbox'] for item in ground_truth]
+                pred_bbs = [list(pred[item['dists'][0][1]]['bbox'].values()) for item in ground_truth]
+                target_loss_bb = F.l1_loss(torch.tensor(target_bbs).float(), torch.tensor(pred_bbs).float(), reduction="none").sum(1)
+                target_loss_bb = target_loss_bb.sum()
+                
+                target_loss = target_loss_class + target_loss_bb
+
+                loss = pred_loss + target_loss / len(ground_truth)
+
                 loss.backward()
                 attr = image.grad.data.detach().cpu().numpy()
                 attr = attr.squeeze(0).permute((1, 2, 0))
