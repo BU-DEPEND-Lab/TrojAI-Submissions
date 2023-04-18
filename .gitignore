@@ -19,3 +19,5 @@ __pychache__
 
 token.pickle
 .cache
+learned_parameters/model.bin
+learned_parameters/model.bin

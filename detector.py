@@ -22,6 +22,12 @@ import torch
 import torchvision
 import skimage.io
 
+import tensorflow as tf
+
+from tensorflow.keras import datasets, layers, models
+
+import tensorflow.keras as keras
+import torch.nn.functional as F
 
 def center_to_corners_format(x):
     """
@@ -114,48 +120,7 @@ class Detector(AbstractDetector):
             self.weight_params["rso_seed"] = random_seed
             self.manual_configure(models_dirpath)
 
-    def manual_configure(self, models_dirpath: str):
-        """Configuration of the detector using the parameters from the metaparameters
-        JSON file.
-
-        Args:
-            models_dirpath: str - Path to the list of model to use for training
-        """
-        # Create the learned parameter folder if needed
-        if not os.path.exists(self.learned_parameters_dirpath):
-            os.makedirs(self.learned_parameters_dirpath)
-
-        # List all available model
-        model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
-        logging.info(f"Loading %d models...", len(model_path_list))
-
-        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
-
-        logging.info("Building RandomForest based on random features, with the provided mean and std.")
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = []
-        y = []
-        for model_arch in model_repr_dict.keys():
-            for model_index in range(len(model_repr_dict[model_arch])):
-                y.append(model_ground_truth_dict[model_arch][model_index])
-
-                model_feats = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1,self.input_features))
-                X.append(model_feats)
-        X = np.vstack(X)
-
-        logging.info("Training RandomForestRegressor model.")
-        model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
-        model.fit(X, y)
-
-        logging.info("Saving RandomForestRegressor model...")
-        with open(self.model_filepath, "wb") as fp:
-            pickle.dump(model, fp)
-
-        self.write_metaparameters()
-        logging.info("Configuration done!")
-
-
-    def inference_on_example_data(self, model, examples_dirpath):
+    def inference_on_example_data(self, model, examples_dirpath, **kwargs):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -165,6 +130,7 @@ class Detector(AbstractDetector):
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logging.info("Using compute device: {}".format(device))
+ 
 
         # move the model to the GPU in eval mode
         model.to(device)
@@ -175,6 +141,7 @@ class Detector(AbstractDetector):
 
         logging.info("Evaluating the model on the clean example images.")
         # Inference on models
+        attrs = []
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".png"):
                 # load the example image
@@ -193,6 +160,10 @@ class Detector(AbstractDetector):
 
                 # Convert to NCHW
                 image = image.unsqueeze(0)
+                image.requires_grad_()
+
+                model.zero_grad()
+                
 
                 # inference
                 outputs = model(image)
@@ -241,12 +212,125 @@ class Detector(AbstractDetector):
 
                 ground_truth_filepath = examples_dir_entry.path.replace('.png','.json')
 
-                with open(ground_truth_filepath, mode='r', encoding='utf-8') as f:
-                    ground_truth = jsonpickle.decode(f.read())
+                f = open(ground_truth_filepath, mode='r', encoding='utf-8')
+                ground_truth = jsonpickle.decode(f.read())
+                f.close()
 
                 logging.info("Model predicted {} boxes, Ground Truth has {} boxes.".format(len(pred), len(ground_truth)))
                 # logging.info("Model: {}, Ground Truth: {}".format(examples_dir_entry.name, ground_truth))
 
+                pred_classes = [item['label'] for item in pred]
+                target_classes = [item['label'] for item in ground_truth]
+                loss_class = F.cross_entropy(torch.tensor(pred_classes).float(), torch.tensor(target_classes).float(), reduction="sum")
+
+                pred_bbs = torch.tensor([item['bbox'] for item in pred]).float()
+                target_bbs = torch.tensor([torch.tensor(list(item['bbox'].values())) for item in ground_truth]).float()
+                loss_bb = F.l1_loss(pred_bbs, target_bbs, reduction="none").sum(1)
+                loss_bb = loss_bb.sum()
+                
+                loss = loss_class + loss_bb
+                loss.backward()
+                attr = image.grad.data.detach().cpu().numpy()
+                attr = attr.squeeze(0).permute((1, 2, 0))
+
+                attrs.append(attr)
+        return attrs
+
+
+    def manual_configure(self, models_dirpath: str):
+        """Configuration of the detector using the parameters from the metaparameters
+        JSON file.
+
+        Args:
+            models_dirpath: str - Path to the list of model to use for training
+        """
+        # Create the learned parameter folder if needed
+        if not os.path.exists(self.learned_parameters_dirpath):
+            os.makedirs(self.learned_parameters_dirpath)
+
+        # List all available model
+        model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
+        logging.info(f"Loading %d models...", len(model_path_list))
+
+        X = []
+        y = []
+        for model_filepath in model_path_list:
+            model, model_repr, model_class = load_model(os.path.join(model_filepath, 'model.pt'))
+            examples_dirpath = os.path.join(model_filepath, 'clean-example-data')
+            # Inferences on examples to demonstrate how it is done for a round
+            xs = self.inference_on_example_data(model, examples_dirpath)
+            xs = np.clip((np.asarray(xs) - np.mean(xs, axis=3)) / np.std(xs, axis=3), -1, 1) * 0.5 + 1
+            X = X + [x for x in xs]
+            y = y + [int(model_class)] * xs.shape[0]
+        
+        """
+
+        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
+
+        logging.info("Building RandomForest based on random features, with the provided mean and std.")
+        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
+        X = []
+        y = []
+        for model_arch in model_repr_dict.keys():
+            for model_index in range(len(model_repr_dict[model_arch])):
+                y.append(model_ground_truth_dict[model_arch][model_index])
+
+                model_feats = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1,self.input_features))
+                X.append(model_feats)
+        X = np.vstack(X)
+        
+        logging.info("Training RandomForestRegressor model.")
+        model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+        model.fit(X, y)
+
+        logging.info("Saving RandomForestRegressor model...")
+        with open(self.model_filepath, "wb") as fp:
+            pickle.dump(model, fp)
+        """
+        
+        
+        from sklearn.model_selection import train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 4)
+        
+        model = tf.keras.models.Sequential([
+            # Note the input shape is the desired size of the image 200x200 with 3 bytes color
+            # This is the first convolution
+            tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(256, 256, 3)),
+            tf.keras.layers.MaxPooling2D(2, 2),
+            # The second convolution
+            tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
+            tf.keras.layers.MaxPooling2D(2,2),
+            # The third convolution
+            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
+            tf.keras.layers.MaxPooling2D(2,2),
+            # The fourth convolution
+            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
+            tf.keras.layers.MaxPooling2D(2,2),
+            # # The fifth convolution
+            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
+            tf.keras.layers.MaxPooling2D(2,2),
+            # Flatten the results to feed into a DNN
+            tf.keras.layers.Flatten(),
+            # 512 neuron hidden layer
+            tf.keras.layers.Dense(512, activation='relu'),
+            # Only 1 output neuron. It will contain a value from 0-1 where 0 for 1 class ('dandelions') and 1 for the other ('grass')
+            tf.keras.layers.Dense(1, activation='sigmoid')])
+
+        model.compile(loss='binary_crossentropy',
+            optimizer='adam',
+            metrics='accuracy')
+
+        history = model.fit(X_train, y_train, batch_size=25, nb_epoch=500, validation_split = 0.2, verbose=1)
+        _, test_acc = model.evaluate(X_test, y_test, verbose=0)
+        logging.info(f"ACC: {test_acc}")
+        from sklearn.metrics import roc_curve
+        y_pred_keras = model.predict(X_test).ravel()
+        fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_test, y_pred_keras)
+        from sklearn.metrics import auc
+        auc_keras = auc(fpr_keras, tpr_keras)
+        logging.info(f"AUC: {auc_keras}")
+        self.write_metaparameters()
+        logging.info("Configuration done!")
 
     def infer(
         self,
@@ -254,8 +338,7 @@ class Detector(AbstractDetector):
         result_filepath,
         scratch_dirpath,
         examples_dirpath,
-        round_training_dataset_dirpath,
-    ):
+        round_training_dataset_dirpath):
         """Method to predict whether a model is poisoned (1) or clean (0).
 
         Args:
@@ -270,20 +353,24 @@ class Detector(AbstractDetector):
         model, model_repr, model_class = load_model(model_filepath)
 
         # Inferences on examples to demonstrate how it is done for a round
-        self.inference_on_example_data(model, examples_dirpath)
+        attrs = self.inference_on_example_data(model, examples_dirpath)
 
         # build a fake random feature vector for this model, in order to compute its probability of poisoning
         rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
         X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
 
         # load the RandomForest from the learned-params location
-        with open(self.model_filepath, "rb") as fp:
-            regressor: RandomForestRegressor = pickle.load(fp)
+        #with open(self.model_filepath, "rb") as fp:
+        #    regressor: RandomForestRegressor = pickle.load(fp)
+        model = keras.models.load_model(self.model_filepath)    
+        X = np.vstack(attrs)
+        X = np.clip((X - X.mean(axis = 3)) / X.std(axis = 3), min = -1, max = 1) * 0.5 + 0.5
 
         # use the RandomForest to predict the trojan probability based on the feature vector X
-        probability = regressor.predict(X)[0]
+        #probability = regressor.predict(X)[0]
+        probability = model.predict(X).mean()
         # clip the probability to reasonable values
-        probability = np.clip(probability, a_min=0.01, a_max=0.99)
+        #probability = np.clip(probability, a_min=0.01, a_max=0.99)
 
         # write the trojan probability to the output file
         with open(result_filepath, "w") as fp:
