@@ -189,10 +189,6 @@ if __name__ == "__main__":
 
     args, extras = temp_parser.parse_known_args()
 
-
-
-
-
     if '--help' in extras or '-h' in extras:
         args = parser.parse_args()
     # Checks if new mode of operation is being used, or is this legacy

@@ -16,7 +16,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 import utils.models
 from utils.abstract import AbstractDetector
-from utils.models import load_model, load_models_dirpath
+from utils.models import load_model, load_models_dirpath, load_ground_truth
 
 import torch
 import torchvision
@@ -28,6 +28,9 @@ from tensorflow.keras import datasets, layers, models
 
 import tensorflow.keras as keras
 import torch.nn.functional as F
+from torchvision.models.detection import ssd
+
+status = False
 
 def center_to_corners_format(x):
     """
@@ -161,16 +164,15 @@ class Detector(AbstractDetector):
                 # Convert to NCHW
                 image = image.unsqueeze(0)
                 image.requires_grad_()
-
                 model.zero_grad()
                 
-
                 # inference
                 outputs = model(image)
+                
                 # handle multiple output formats for different model types
                 if 'DetrObjectDetectionOutput' in outputs.__class__.__name__:
                     # DETR doesn't need to unpack the batch dimension
-                    boxes = outputs.pred_boxes.cpu().detach()
+                    boxes = outputs.pred_boxes
                     # boxes from DETR emerge in center format (center_x, center_y, width, height) in the range [0,1] relative to the input image size
                     # convert to [x0, y0, x1, y1] format
                     boxes = center_to_corners_format(boxes)
@@ -179,17 +181,17 @@ class Detector(AbstractDetector):
                     # and from relative [0, 1] to absolute [0, height] coordinates
                     img_h = img.shape[0] * torch.ones(1)  # 1 because we only have 1 image in the batch
                     img_w = img.shape[1] * torch.ones(1)
-                    scale_fct = torch.stack([img_w, img_h, img_w, img_h], dim=1)
+                    scale_fct = torch.stack([img_w, img_h, img_w, img_h], dim=1).cuda()
                     boxes = boxes * scale_fct[:, None, :]
 
                     # unpack the logits to get scores and labels
-                    logits = outputs.logits.cpu().detach()
+                    logits = outputs.logits
                     prob = torch.nn.functional.softmax(logits, -1)
                     scores, labels = prob[..., :-1].max(-1)
 
-                    boxes = boxes.numpy()
-                    scores = scores.numpy()
-                    labels = labels.numpy()
+                    boxes = boxes
+                    scores = scores
+                    labels = labels
 
                     # all 3 items have a batch size of 1 in the front, so unpack it
                     boxes = boxes[0,]
@@ -201,9 +203,9 @@ class Detector(AbstractDetector):
                     # for SSD and FasterRCNN outputs are a list of dict.
                     # each boxes is in corners format (x_0, y_0, x_1, y_1) with coordinates sized according to the input image
 
-                    boxes = outputs['boxes'].cpu().detach().numpy()
-                    scores = outputs['scores'].cpu().detach().numpy()
-                    labels = outputs['labels'].cpu().detach().numpy()
+                    boxes = outputs['boxes']
+                    scores = outputs['scores']
+                    labels = outputs['labels']
 
                 # wrap the network outputs into a list of annotations
                 pred = utils.models.wrap_network_prediction(boxes, labels)
@@ -216,50 +218,33 @@ class Detector(AbstractDetector):
                 ground_truth = jsonpickle.decode(f.read())
                 f.close()
 
-                logging.info("Model predicted {} boxes, Ground Truth has {} boxes.".format(len(pred), len(ground_truth)))
-                # logging.info("Model: {}, Ground Truth: {}".format(examples_dir_entry.name, ground_truth))
+                ground_truth = [item for item in ground_truth if 'label' in item] 
 
-                # Compute the distance between all bounding boxes
-                for i in range(len(pred)):
-                    pred[i]['dists'] = []
-                    for j in range(len(ground_truth)):
-                        pred[i]['dists'].append((F.l1_loss(pred[i]['bbox'], torch.tensor(list(ground_truth[i]['bbox'].values())).float(), reduction="none").sum(1).detach().item(), i))
-                        ground_truth[j]['dists'].append((F.l1_loss(pred[i]['bbox'], torch.tensor(list(ground_truth[i]['bbox'].values())).float(), reduction="none").sum(1).detach().item(), i))
-                for i in range(len(pred)):
-                    pred[i]['dists'] = pred[i]['dists'].sorted()
-                for j in range(len(ground_truth)):
-                    ground_truth[j]['dists'] = ground_truth[j]['dists'].sorted()
-
-                # Compute the pred loss
-                pred_classes = [item['label'] for item in pred]
-                target_classes = [ground_truth[item['dists'][0][1]]['label'] for item in pred]
-                pred_loss_class = F.cross_entropy(torch.tensor(pred_classes).float(), torch.tensor(target_classes).float(), reduction="sum")
-
-                pred_bbs = [item['bbox'] for item in pred]
-                target_bbs = [list(ground_truth[item['dists'][0][1]]['bbox'].values()) for item in pred]
-                pred_loss_bb = F.l1_loss(torch.tensor(pred_bbs).float(), torch.tensor(target_bbs).float(), reduction="none").sum(1)
-                pred_loss_bb = loss_bb.sum()
+                #logging.info("Model predicted {} boxes, Ground Truth has {} boxes.".format(len(pred), len(ground_truth)))
+                #logging.info("Model: {}, Ground Truth: {}".format(examples_dir_entry.name, ground_truth))
                 
-                pred_loss = pred_loss_class + pred_loss_bb
+                #print(model.modules)
 
-                # Compute the target loss
-                target_classes = [item['label'] for item in ground_truth]
-                pred_classes = [pred[item['dists'][0][1]]['label'] for item in ground_truth]
-                target_loss_class = F.cross_entropy(torch.tensor(target_classes).float(), torch.tensor(pred_classes).float(), reduction="sum")
+                lenb = min([len(pred), len(ground_truth)])
+                pred_classes = [item['label'] for item in list(pred)[0:lenb]]
+                target_classes = ([item['label'] for item in ground_truth[0:lenb]])
+                classification_loss = F.cross_entropy(torch.tensor(pred_classes).float(), 
+                torch.tensor(target_classes).float(), reduction="sum")
 
-                target_bbs = [item['bbox'] for item in ground_truth]
-                pred_bbs = [list(pred[item['dists'][0][1]]['bbox'].values()) for item in ground_truth]
-                target_loss_bb = F.l1_loss(torch.tensor(target_bbs).float(), torch.tensor(pred_bbs).float(), reduction="none").sum(1)
-                target_loss_bb = target_loss_bb.sum()
+                pred_bbs = torch.vstack([item['bbox'] for item in list(pred)[0:lenb]])
+                target_bbs = torch.tensor([list(item['bbox'].values()) for item in ground_truth[0:lenb]],device='cuda:0')
+                box_loss = F.smooth_l1_loss(
+                target_bbs, pred_bbs, beta=1 / 9, reduction="sum",)
                 
-                target_loss = target_loss_class + target_loss_bb
-
-                loss = pred_loss + target_loss / len(ground_truth)
-
+                loss = classification_loss + box_loss
+                loss.requires_grad_()
                 loss.backward()
-                attr = image.grad.data.detach().cpu().numpy()
-                attr = attr.squeeze(0).permute((1, 2, 0))
 
+                print(list(enumerate(list(enumerate(model.modules()))[0][1].modules()))[63][1])
+
+                attr = list(enumerate(model.modules()))[0][1].weight.grad
+                input("waiting")
+                attr = attr.squeeze(0).permute((1, 2, 0)).cpu().numpy()
                 attrs.append(attr)
         return attrs
 
@@ -278,17 +263,17 @@ class Detector(AbstractDetector):
         # List all available model
         model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
-
         X = []
         y = []
         for model_filepath in model_path_list:
             model, model_repr, model_class = load_model(os.path.join(model_filepath, 'model.pt'))
+            model_label = load_ground_truth(model_filepath)
             examples_dirpath = os.path.join(model_filepath, 'clean-example-data')
             # Inferences on examples to demonstrate how it is done for a round
             xs = self.inference_on_example_data(model, examples_dirpath)
-            xs = np.clip((np.asarray(xs) - np.mean(xs, axis=3)) / np.std(xs, axis=3), -1, 1) * 0.5 + 1
+            xs = np.clip((np.asarray(xs) - np.mean(xs, axis=0)) / np.std(xs, axis=0), -1, 1) * 0.5 + 1
             X = X + [x for x in xs]
-            y = y + [int(model_class)] * xs.shape[0]
+            y = y + [int(model_label)] * xs.shape[0]
         
         """
 
@@ -314,7 +299,6 @@ class Detector(AbstractDetector):
         with open(self.model_filepath, "wb") as fp:
             pickle.dump(model, fp)
         """
-        
         
         from sklearn.model_selection import train_test_split
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 4)
@@ -347,17 +331,18 @@ class Detector(AbstractDetector):
             optimizer='adam',
             metrics='accuracy')
 
-        history = model.fit(X_train, y_train, batch_size=25, nb_epoch=500, validation_split = 0.2, verbose=1)
-        _, test_acc = model.evaluate(X_test, y_test, verbose=0)
+        history = model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=25, epochs=10, verbose=1)
+        _, test_acc = model.evaluate(np.asarray(X_test), np.asarray(y_test), verbose=0)
         logging.info(f"ACC: {test_acc}")
         from sklearn.metrics import roc_curve
-        y_pred_keras = model.predict(X_test).ravel()
-        fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_test, y_pred_keras)
+        y_pred_keras = model.predict(np.asarray(X_test)).ravel()
+        fpr_keras, tpr_keras, thresholds_keras = roc_curve(np.asarray(y_test), np.asarray(y_pred_keras))
         from sklearn.metrics import auc
         auc_keras = auc(fpr_keras, tpr_keras)
         logging.info(f"AUC: {auc_keras}")
         self.write_metaparameters()
         logging.info("Configuration done!")
+        model.save(os.path.join(self.learned_parameters_dirpath,"model.h5"))
 
     def infer(
         self,
@@ -380,27 +365,17 @@ class Detector(AbstractDetector):
         model, model_repr, model_class = load_model(model_filepath)
 
         # Inferences on examples to demonstrate how it is done for a round
-        attrs = self.inference_on_example_data(model, examples_dirpath)
-
-        # build a fake random feature vector for this model, in order to compute its probability of poisoning
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
-
-        # load the RandomForest from the learned-params location
-        #with open(self.model_filepath, "rb") as fp:
-        #    regressor: RandomForestRegressor = pickle.load(fp)
-        model = keras.models.load_model(self.model_filepath)    
-        X = np.vstack(attrs)
-        X = np.clip((X - X.mean(axis = 3)) / X.std(axis = 3), min = -1, max = 1) * 0.5 + 0.5
-
-        # use the RandomForest to predict the trojan probability based on the feature vector X
-        #probability = regressor.predict(X)[0]
-        probability = model.predict(X).mean()
-        # clip the probability to reasonable values
-        #probability = np.clip(probability, a_min=0.01, a_max=0.99)
+        X = self.inference_on_example_data(model, examples_dirpath)      
+        X = np.clip((np.asarray(X) - np.mean(X, axis=0)) / np.std(X, axis=0), -1, 1) * 0.5 + 1
 
         # write the trojan probability to the output file
+        if status == True:
+            probability = 1
+        else:
+            model = keras.models.load_model(os.path.join(self.learned_parameters_dirpath,"model.h5")) 
+            probability = model.predict(X).mean()
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
 
         logging.info("Trojan probability: {}".format(probability))
+        print("Trojan probability: {}".format(probability))
