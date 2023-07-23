@@ -14,32 +14,13 @@ import numpy as np
 
 from sklearn.ensemble import RandomForestRegressor
 
-import utils.models
 from utils.abstract import AbstractDetector
-from utils.models import load_model, load_models_dirpath, load_ground_truth
+from utils.models import load_model, load_models_dirpath
 
 import torch
-import torchvision
-import skimage.io
-
-import tensorflow as tf
-
-from tensorflow.keras import datasets, layers, models
-
-import tensorflow.keras as keras
-import torch.nn.functional as F
-from torchvision.models.detection import ssd
-
-status = False
-
-def center_to_corners_format(x):
-    """
-    Converts a PyTorch tensor of bounding boxes of center format (center_x, center_y, width, height) to corners format
-    (x_0, y_0, x_1, y_1).
-    """
-    x_c, y_c, w, h = x.unbind(-1)
-    b = [(x_c - (0.5 * w)), (y_c - (0.5 * h)), (x_c + (0.5 * w)), (y_c + (0.5 * h))]
-    return torch.stack(b, dim=-1)
+import torch_ac
+import gym
+from gym_minigrid.wrappers import ImgObsWrapper
 
 
 class Detector(AbstractDetector):
@@ -123,132 +104,6 @@ class Detector(AbstractDetector):
             self.weight_params["rso_seed"] = random_seed
             self.manual_configure(models_dirpath)
 
-    def inference_on_example_data(self, model, examples_dirpath, **kwargs):
-        """Method to demonstrate how to inference on a round's example data.
-
-        Args:
-            model: the pytorch model
-            examples_dirpath: the directory path for the round example data
-        """
-
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        logging.info("Using compute device: {}".format(device))
- 
-
-        # move the model to the GPU in eval mode
-        model.to(device)
-        model.eval()
-
-        # Augmentation transformations
-        augmentation_transforms = torchvision.transforms.Compose([torchvision.transforms.ConvertImageDtype(torch.float)])
-
-        logging.info("Evaluating the model on the clean example images.")
-        # Inference on models
-        attrs = []
-        for examples_dir_entry in os.scandir(examples_dirpath):
-            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".png"):
-                # load the example image
-                img = skimage.io.imread(examples_dir_entry.path)
-
-                # convert the image to a tensor
-                # should be uint8 type, the conversion to float is handled later
-                image = torch.as_tensor(img)
-
-                # move channels first
-                image = image.permute((2, 0, 1))
-
-                # convert to float (which normalizes the values)
-                image = augmentation_transforms(image)
-                image = image.to(device)
-
-                # Convert to NCHW
-                image = image.unsqueeze(0)
-                image.requires_grad_()
-                model.zero_grad()
-                
-                # inference
-                outputs = model(image)
-                
-                # handle multiple output formats for different model types
-                if 'DetrObjectDetectionOutput' in outputs.__class__.__name__:
-                    # DETR doesn't need to unpack the batch dimension
-                    boxes = outputs.pred_boxes
-                    # boxes from DETR emerge in center format (center_x, center_y, width, height) in the range [0,1] relative to the input image size
-                    # convert to [x0, y0, x1, y1] format
-                    boxes = center_to_corners_format(boxes)
-                    # clamp to [0, 1]
-                    boxes = torch.clamp(boxes, min=0, max=1)
-                    # and from relative [0, 1] to absolute [0, height] coordinates
-                    img_h = img.shape[0] * torch.ones(1)  # 1 because we only have 1 image in the batch
-                    img_w = img.shape[1] * torch.ones(1)
-                    scale_fct = torch.stack([img_w, img_h, img_w, img_h], dim=1).cuda()
-                    boxes = boxes * scale_fct[:, None, :]
-
-                    # unpack the logits to get scores and labels
-                    logits = outputs.logits
-                    prob = torch.nn.functional.softmax(logits, -1)
-                    scores, labels = prob[..., :-1].max(-1)
-
-                    boxes = boxes
-                    scores = scores
-                    labels = labels
-
-                    # all 3 items have a batch size of 1 in the front, so unpack it
-                    boxes = boxes[0,]
-                    scores = scores[0,]
-                    labels = labels[0,]
-                else:
-                    # unpack the batch dimension
-                    outputs = outputs[0]  # unpack the batch size of 1
-                    # for SSD and FasterRCNN outputs are a list of dict.
-                    # each boxes is in corners format (x_0, y_0, x_1, y_1) with coordinates sized according to the input image
-
-                    boxes = outputs['boxes']
-                    scores = outputs['scores']
-                    labels = outputs['labels']
-
-                # wrap the network outputs into a list of annotations
-                pred = utils.models.wrap_network_prediction(boxes, labels)
-
-                # logging.info('example img filepath = {}, Pred: {}'.format(examples_dir_entry.name, pred))
-
-                ground_truth_filepath = examples_dir_entry.path.replace('.png','.json')
-
-                f = open(ground_truth_filepath, mode='r', encoding='utf-8')
-                ground_truth = jsonpickle.decode(f.read())
-                f.close()
-
-                ground_truth = [item for item in ground_truth if 'label' in item] 
-
-                #logging.info("Model predicted {} boxes, Ground Truth has {} boxes.".format(len(pred), len(ground_truth)))
-                #logging.info("Model: {}, Ground Truth: {}".format(examples_dir_entry.name, ground_truth))
-                
-                #print(model.modules)
-
-                lenb = min([len(pred), len(ground_truth)])
-                pred_classes = [item['label'] for item in list(pred)[0:lenb]]
-                target_classes = ([item['label'] for item in ground_truth[0:lenb]])
-                classification_loss = F.cross_entropy(torch.tensor(pred_classes).float(), 
-                torch.tensor(target_classes).float(), reduction="sum")
-
-                pred_bbs = torch.vstack([item['bbox'] for item in list(pred)[0:lenb]])
-                target_bbs = torch.tensor([list(item['bbox'].values()) for item in ground_truth[0:lenb]],device='cuda:0')
-                box_loss = F.smooth_l1_loss(
-                target_bbs, pred_bbs, beta=1 / 9, reduction="sum",)
-                
-                loss = classification_loss + box_loss
-                loss.requires_grad_()
-                loss.backward()
-
-                print(list(enumerate(list(enumerate(model.modules()))[0][1].modules()))[63][1])
-
-                attr = list(enumerate(model.modules()))[0][1].weight.grad
-                input("waiting")
-                attr = attr.squeeze(0).permute((1, 2, 0)).cpu().numpy()
-                attrs.append(attr)
-        return attrs
-
-
     def manual_configure(self, models_dirpath: str):
         """Configuration of the detector using the parameters from the metaparameters
         JSON file.
@@ -263,19 +118,6 @@ class Detector(AbstractDetector):
         # List all available model
         model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
-        X = []
-        y = []
-        for model_filepath in model_path_list:
-            model, model_repr, model_class = load_model(os.path.join(model_filepath, 'model.pt'))
-            model_label = load_ground_truth(model_filepath)
-            examples_dirpath = os.path.join(model_filepath, 'clean-example-data')
-            # Inferences on examples to demonstrate how it is done for a round
-            xs = self.inference_on_example_data(model, examples_dirpath)
-            xs = np.clip((np.asarray(xs) - np.mean(xs, axis=0)) / np.std(xs, axis=0), -1, 1) * 0.5 + 1
-            X = X + [x for x in xs]
-            y = y + [int(model_label)] * xs.shape[0]
-        
-        """
 
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
 
@@ -290,7 +132,7 @@ class Detector(AbstractDetector):
                 model_feats = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1,self.input_features))
                 X.append(model_feats)
         X = np.vstack(X)
-        
+
         logging.info("Training RandomForestRegressor model.")
         model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
         model.fit(X, y)
@@ -298,59 +140,79 @@ class Detector(AbstractDetector):
         logging.info("Saving RandomForestRegressor model...")
         with open(self.model_filepath, "wb") as fp:
             pickle.dump(model, fp)
-        """
-        
-        from sklearn.model_selection import train_test_split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 4)
-        
-        model = tf.keras.models.Sequential([
-            # Note the input shape is the desired size of the image 200x200 with 3 bytes color
-            # This is the first convolution
-            tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(256, 256, 3)),
-            tf.keras.layers.MaxPooling2D(2, 2),
-            # The second convolution
-            tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
-            tf.keras.layers.MaxPooling2D(2,2),
-            # The third convolution
-            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
-            tf.keras.layers.MaxPooling2D(2,2),
-            # The fourth convolution
-            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
-            tf.keras.layers.MaxPooling2D(2,2),
-            # # The fifth convolution
-            tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
-            tf.keras.layers.MaxPooling2D(2,2),
-            # Flatten the results to feed into a DNN
-            tf.keras.layers.Flatten(),
-            # 512 neuron hidden layer
-            tf.keras.layers.Dense(512, activation='relu'),
-            # Only 1 output neuron. It will contain a value from 0-1 where 0 for 1 class ('dandelions') and 1 for the other ('grass')
-            tf.keras.layers.Dense(1, activation='sigmoid')])
 
-        model.compile(loss='binary_crossentropy',
-            optimizer='adam',
-            metrics='accuracy')
-
-        history = model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=25, epochs=10, verbose=1)
-        _, test_acc = model.evaluate(np.asarray(X_test), np.asarray(y_test), verbose=0)
-        logging.info(f"ACC: {test_acc}")
-        from sklearn.metrics import roc_curve
-        y_pred_keras = model.predict(np.asarray(X_test)).ravel()
-        fpr_keras, tpr_keras, thresholds_keras = roc_curve(np.asarray(y_test), np.asarray(y_pred_keras))
-        from sklearn.metrics import auc
-        auc_keras = auc(fpr_keras, tpr_keras)
-        logging.info(f"AUC: {auc_keras}")
         self.write_metaparameters()
         logging.info("Configuration done!")
-        model.save(os.path.join(self.learned_parameters_dirpath,"model.h5"))
+
+    def inference_on_example_data(self, model, examples_dirpath):
+        """Method to demonstrate how to inference on a round's example data.
+
+        Args:
+            model: the pytorch model
+            examples_dirpath: the directory path for the round example data
+        """
+
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        logging.info("Using compute device: {}".format(device))
+
+        model.to(device)
+        model.eval()
+
+        preprocess = torch_ac.format.default_preprocess_obss
+
+        # Utilize open source minigrid environment model was trained on
+        env_string_filepath = os.path.join(examples_dirpath, 'env-string.txt')
+        with open(env_string_filepath) as env_string_file:
+            env_string = env_string_file.readline().strip()
+        logging.info('Evaluating on {}'.format(env_string))
+
+        # Number of episodes to run
+        episodes = 100
+
+        env_perf = {}
+
+        # Run episodes through an environment to collect what may be relevant information to trojan detection
+        # Construct environment and put it inside a observation wrapper
+        env = ImgObsWrapper(gym.make(env_string))
+        obs = env.reset()
+        obs = preprocess([obs], device=device)
+
+        final_rewards = []
+        with torch.no_grad():
+            # Episode loop
+            for _ in range(episodes):
+                done = False
+                # Use env observation to get action distribution
+                dist, value = model(obs)
+                # Per episode loop
+                while not done:
+                    # Sample from distribution to determine which action to take
+                    action = dist.sample()
+                    action = action.cpu().detach().numpy()
+                    # Use action to step environment and get new observation
+                    obs, reward, done, info = env.step(action)
+                    # Preprocessing function to prepare observation from env to be given to the model
+                    obs = preprocess([obs], device=device)
+                    # Use env observation to get action distribution
+                    dist, value = model(obs)
+
+                # Collect episode performance data (just the last reward of the episode)
+                final_rewards.append(reward)
+                # Reset environment after episode and get initial observation
+                obs = env.reset()
+                obs = preprocess([obs], device=device)
+
+        # Save final rewards
+        env_perf['final_rewards'] = final_rewards
 
     def infer(
-        self,
-        model_filepath,
-        result_filepath,
-        scratch_dirpath,
-        examples_dirpath,
-        round_training_dataset_dirpath):
+            self,
+            model_filepath,
+            result_filepath,
+            scratch_dirpath,
+            examples_dirpath,
+            round_training_dataset_dirpath,
+    ):
         """Method to predict whether a model is poisoned (1) or clean (0).
 
         Args:
@@ -365,17 +227,23 @@ class Detector(AbstractDetector):
         model, model_repr, model_class = load_model(model_filepath)
 
         # Inferences on examples to demonstrate how it is done for a round
-        X = self.inference_on_example_data(model, examples_dirpath)      
-        X = np.clip((np.asarray(X) - np.mean(X, axis=0)) / np.std(X, axis=0), -1, 1) * 0.5 + 1
+        self.inference_on_example_data(model, examples_dirpath)
+
+        # build a fake random feature vector for this model, in order to compute its probability of poisoning
+        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
+        X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
+
+        # load the RandomForest from the learned-params location
+        with open(self.model_filepath, "rb") as fp:
+            regressor: RandomForestRegressor = pickle.load(fp)
+
+        # use the RandomForest to predict the trojan probability based on the feature vector X
+        probability = regressor.predict(X)[0]
+        # clip the probability to reasonable values
+        probability = np.clip(probability, a_min=0.01, a_max=0.99)
 
         # write the trojan probability to the output file
-        if status == True:
-            probability = 1
-        else:
-            model = keras.models.load_model(os.path.join(self.learned_parameters_dirpath,"model.h5")) 
-            probability = model.predict(X).mean()
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
 
         logging.info("Trojan probability: {}".format(probability))
-        print("Trojan probability: {}".format(probability))

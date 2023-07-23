@@ -5,29 +5,36 @@
 # You are solely responsible for determining the appropriateness of using and distributing the software and you assume all risks associated with its use, including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and the unavailability or interruption of operation. This software is not intended to be used in any situation where a failure could cause risk of injury or damage to property. The software developed by NIST employees is not subject to copyright protection within the United States.
 
 
-import os
+import re
 from collections import OrderedDict
+from os.path import join
+
 import torch
+from tqdm import tqdm
 
 
+def create_layer_map(model_repr_dict):
+    model_layer_map = {}
+    for (model_class, models) in model_repr_dict.items():
+        layers = models[0]
+        layer_names = list(layers.keys())
+        base_layer_names = list()
+        for item in layer_names:
+            toks = re.sub("(weight|bias|running_(mean|var)|num_batches_tracked)", "", item)
+            # remove any duplicate '.' separators
+            toks = re.sub("\\.+", ".", toks)
+            base_layer_names.append(toks)
+        # use dict.fromkeys instead of set() to preserve order
+        base_layer_names = list(dict.fromkeys(base_layer_names))
 
-def wrap_network_prediction(boxes, labels):
-    """
+        layer_map = OrderedDict()
+        for base_ln in base_layer_names:
+            re_query = "{}.+".format(base_ln.replace('.', '\.'))  # escape any '.' wildcards in the regex query
+            layer_map[base_ln] = [ln for ln in layer_names if re.match(re_query, ln) is not None]
 
-    Args:
-        boxes: numpy array [N x 4] of the box coordinates
-        labels: numpy array [N] of the labels
+        model_layer_map[model_class] = layer_map
 
-    Returns:
-        list({'bbox': box, 'label': label})
-    """
-    pred = list()
-    for k in range(boxes.shape[0]):
-        ann = dict()
-        ann['bbox'] = boxes[k, :].tolist()
-        ann['label'] = labels[k]
-        pred.append(ann)
-    return pred
+    return model_layer_map
 
 
 def load_model(model_filepath: str) -> (dict, str):
@@ -55,10 +62,10 @@ def load_ground_truth(model_dirpath: str):
         model_dirpath: str -
 
     Returns:
-        Ground truth value (int)
+
     """
 
-    with open(os.path.join(model_dirpath, "ground_truth.csv"), "r") as fp:
+    with open(join(model_dirpath, "ground_truth.csv"), "r") as fp:
         model_ground_truth = fp.readlines()[0]
 
     return int(model_ground_truth)
@@ -68,8 +75,10 @@ def load_models_dirpath(models_dirpath):
     model_repr_dict = {}
     model_ground_truth_dict = {}
 
-    for model_path in models_dirpath:
-        model, model_repr, model_class = load_model(os.path.join(model_path, "model.pt"))
+    for model_path in tqdm(models_dirpath):
+        model, model_repr, model_class = load_model(
+            join(model_path, "model.pt")
+        )
         model_ground_truth = load_ground_truth(model_path)
 
         # Build the list of models
