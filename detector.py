@@ -99,10 +99,15 @@ class Detector(AbstractDetector):
 
         Args:
             models_dirpath: str - Path to the list of model to use for training
-        """
+        
         for random_seed in np.random.randint(1000, 9999, 10):
             self.weight_params["rso_seed"] = random_seed
             self.manual_configure(models_dirpath)
+        """
+        from depend import Learner
+        learner = Learner(models_dirpath)
+        learner.run()
+        learner.export_metaparameters(os.path.join(self.learned_parameters_dirpath, os.path.basename(self.metaparameter_filepath)))
 
     def manual_configure(self, models_dirpath: str):
         """Configuration of the detector using the parameters from the metaparameters

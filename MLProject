@@ -1,0 +1,16 @@
+name: round13
+conda_env: conda_environment.yml
+entry_points:
+  main:
+    parameters:
+      learning_rate: {type: float, default: 0.3}
+      colsample_bytree: {type: float, default: 1.0}
+      subsample: {type: float, default: 1.0}
+    command: |
+      python entrypoint.py configure \
+      --scratch_dirpath=./scratch/ \
+      --metaparameters_filepath=./metaparameters.json \
+      --schema_filepath=./metaparameters_schema.json \
+      --learned_parameters_dirpath=./learned_parameters/ \
+      --configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round13/models 
+      

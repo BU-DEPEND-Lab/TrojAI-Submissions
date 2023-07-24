@@ -17,12 +17,17 @@ Your container will have access to these [Submission Compute Resources](https://
 3. [System Requirements](#system-requirements)
 4. [Example Data](#example-data)
 5. [Submission Instructions](#submission-instructions)
-6. [How to Build this Minimal Example](#how-to-build-this-minimal-example)
+6. [How to Build a Minimal Example](#how-to-build-this-minimal-example)
     1. [Install Anaconda Python](#install-anaconda-python)
     2. [Setup the Conda Environment](#setup-the-conda-environment)
     3. [Test Fake Detector Without Containerization](#test-fake-detector-without-containerization)
     4. [Package Solution into a Singularity Container](#package-solution-into-a-singularity-container)
-
+7. [How to Build This Project](#how-to-build-this-project)
+    1. [Install Poetry](#install-poetry)
+    2. [Setup a Poetry Project](#setup-the-poetry-project)
+    3. [Local Evaluation](#local-evaluation)
+    4. [Create a Submission](#create-a-submission)
+    
 --------------
 # Reusing the example detector
 
@@ -277,3 +282,20 @@ Package `detector.py` into a Singularity container.
     2023-03-02 17:11:06,207 [INFO] [detector.py:167] Evaluating on MiniGrid-LavaCrossingS9N1-v0
     2023-03-02 17:11:09,267 [INFO] [detector.py:249] Trojan probability: 0.12
     ```
+
+--------------
+# How to Build This Project 
+
+## Install Poetry
+Download the official installer
+```
+$curl -sSL https://install.python-poetry.org | python3 -
+```
+> Note: If you’re on macOS, then you may get an ssl.SSLCertVerificationError. This error can occur if you don’t have the default root certificates for the SSL module installed. You can install them by running a command script in your Python folder:
+```$ open "/Applications/{python_app_name}/Install Certificates.command``` 
+
+## Setup a Poetry Project 
+
+## Local Evaluation 
+
+## Create a Submission 

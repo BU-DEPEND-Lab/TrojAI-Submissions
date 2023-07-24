@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "depend"
+version = "0.1.0"
+description = "'trojai project lib'"
+authors = ["zwc662 <zwc662@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = "2.0.1"
+captum = "^0.6.0"
+optuna = "^3.2.0"
+mlflow = "^2.5.0"
+wandb = "^0.15.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

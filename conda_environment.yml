@@ -56,5 +56,7 @@ dependencies:
       - tqdm==4.65.0
       - trojai-rl==0.1.1
       - typing-extensions==4.4.0
-      - zipp==3.16.1
-prefix: /home/mmajurski/miniconda3/envs/trojai-example
+      - zipp==3.16.1 
+      - mlflow==2.5.0
+      - pip:
+        - depend/ --install-option="-e"
