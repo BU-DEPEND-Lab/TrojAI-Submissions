@@ -7,19 +7,18 @@ from contextlib import contextmanager
 from abc import ABC, abstractmethod      
 from typing import Any, Callable, Dict, Iterable, Optional
 from pydantic import BaseModel, PrivateAttr, field
+ 
 
-import mlflow
-import mlflow.pytorch
-
-from depend.utils.configs import TrainConfig
-from depend.logger import Logger
+from depend.utils.configs import LearnerConfig
+from depend.utils.data_loader import DataLoader
+from depend.core.loggers import Logger
 
 import wandb
 from torch.utils.tensorboard import SummaryWriter
 
 
 
-_TRAINERS: Dict[str, Any] = {} # registry
+_learnerS: Dict[str, Any] = {} # registry
 
 @contextmanager
 def catchtime() -> float:
@@ -27,14 +26,14 @@ def catchtime() -> float:
     yield lambda: perf_counter() - start
 
 
-def register_trainer(name):
-    """Decorator used to register a trainer
+def register_learner(name):
+    """Decorator used to register a learner
     Args:
-        name: Name of the trainer type to register
+        name: Name of the learner type to register
     """
 
     def register_class(cls, name):
-        _TRAINERS[name] = cls
+        _learnerS[name] = cls
         setattr(sys.modules[__name__], name, cls)
         return cls
 
@@ -48,7 +47,7 @@ def register_trainer(name):
 
     return cls
 
-class BaseTrainer(ABC):
+class BaseLearner(ABC):
     """
     Implements the functions to run a generic algorithm.
 
@@ -61,7 +60,6 @@ class BaseTrainer(ABC):
             checkpoint_interval: int,
             eval_interval: int,
 
-            pipeline: str,  # One of the pipelines in framework.pipeline
             project_name: str = 'DEPEND',
             entity_name: Optional[str] = None,
             group_name: Optional[str] = None,
@@ -77,7 +75,6 @@ class BaseTrainer(ABC):
             seed: int = 1000,
 
             minibatch_size: Optional[int] = None,
-            trainer_kwargs: Dict[str, Any] = field(default_factory=dict),  # Extra keyword arguments for the train
             ):
         
         
@@ -87,7 +84,7 @@ class BaseTrainer(ABC):
         self.checkpoint_interval = checkpoint_interval
         self.eval_interval = eval_interval
 
-        self.trainer_kwargs = trainer_kwargs 
+ 
         self.project_name = project_name 
         self.entity_name = entity_name 
         self.group_name = group_name 
@@ -102,22 +99,6 @@ class BaseTrainer(ABC):
         self.tracker = tracker
         self.tracker_kwargs = tracker_kwargs
         self.logging_dir = logging_dir
-        self.logger = Logger(results_dir=self.logging_dir, log_name="training_log", seed=self.seed, append=True)
-
-    @abstractmethod
-    def prepare_model(self): ...
-
-    @abstractmethod
-    def prepare_dataloaders(self): ...
-
-    @abstractmethod
-    def prepare_optimizer(self): ...
-
-    @abstractmethod
-    def train(self)-> Dict[str, float]: ... 
-
-    @abstractmethod
-    def evaluate(self)-> Dict[str, float]: ...
 
     def prepare_tracker(self): 
         if self.tracker == 'wandb':
@@ -137,7 +118,23 @@ class BaseTrainer(ABC):
                 )
             self.log_fn = lambda epoch, **kwargs: [summary_writer.add_scalar(k, v, epoch) for k,v in kwargs.items()]
         return self.log_fn
+ 
+    @abstractmethod
+    def train(self,
+        logger: Logger,
+        data_loader: DataLoader,
+        loss: Callable,
+        optimize: Callable
+        
+    )-> Dict[str, float]: ...
+ 
 
-
-
+    @abstractmethod
+    def evaluate(
+        self,
+        logger: Logger,
+        data_loader: DataLoader,
+        eval_fn: Callable,
+        **kwargs
+    )-> Dict[str, float]: ...
  

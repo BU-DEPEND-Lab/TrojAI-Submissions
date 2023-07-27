@@ -1,7 +1,7 @@
 __version__ = "0.1.0"
 
 import loggers
-import trainers
+import learners
 from dependent import Dependent
  
-__all__ = ['trainers', 'loggers', 'Dependent']
+__all__ = ['learners', 'loggers', 'Dependent']

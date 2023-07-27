@@ -27,7 +27,7 @@
 2022-12-02 16:52:50,954 [INFO] [train.py:208] Separating clean/poisoned validation data
 2022-12-02 16:52:51,785 [INFO] [train.py:210] Separating clean/poisoned test data
 2022-12-02 16:52:54,847 [INFO] [train.py:262] Epoch: 0
-2022-12-02 16:52:54,851 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 16:52:54,851 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 16:52:54,855 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 16:53:02,647 [INFO] [train.py:137]   batch 0/1000  loss: 57.445549  lr: 2.575e-06  cpu_mem: 12.2%   gpu_mem: [36.8]%
 2022-12-02 16:53:37,156 [INFO] [train.py:137]   batch 100/1000  loss: 14.159615  lr: 1.007e-05  cpu_mem: 12.3%   gpu_mem: [37.1]%
@@ -64,7 +64,7 @@
 2022-12-02 17:09:15,802 [INFO] [metadata.py:31] val_loss: 1.8916185915470123
 2022-12-02 17:09:15,804 [INFO] [train.py:300] Updating best model with epoch: 0 loss: 1.8916185915470123, as its less than the best loss plus eps 0.0001.
 2022-12-02 17:09:15,853 [INFO] [train.py:262] Epoch: 1
-2022-12-02 17:09:15,854 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:09:15,854 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 17:09:15,856 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 17:09:23,244 [INFO] [train.py:137]   batch 0/1000  loss: 2.012032  lr: 2.575e-06  cpu_mem: 13.0%   gpu_mem: [38.2]%
 2022-12-02 17:09:58,860 [INFO] [train.py:137]   batch 100/1000  loss: 2.0177124  lr: 1.007e-05  cpu_mem: 13.2%   gpu_mem: [38.2]%
@@ -101,7 +101,7 @@
 2022-12-02 17:23:13,788 [INFO] [metadata.py:31] val_loss: 1.1569488388299942
 2022-12-02 17:23:13,790 [INFO] [train.py:300] Updating best model with epoch: 1 loss: 1.1569488388299942, as its less than the best loss plus eps 0.0001.
 2022-12-02 17:23:13,819 [INFO] [train.py:262] Epoch: 2
-2022-12-02 17:23:13,821 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:23:13,821 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 17:23:13,823 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 17:23:21,634 [INFO] [train.py:137]   batch 0/1000  loss: 1.1466475  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
 2022-12-02 17:23:55,761 [INFO] [train.py:137]   batch 100/1000  loss: 1.1374984  lr: 1.007e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
@@ -138,7 +138,7 @@
 2022-12-02 17:36:35,977 [INFO] [metadata.py:31] val_loss: 0.9039910072088242
 2022-12-02 17:36:35,978 [INFO] [train.py:300] Updating best model with epoch: 2 loss: 0.9039910072088242, as its less than the best loss plus eps 0.0001.
 2022-12-02 17:36:36,000 [INFO] [train.py:262] Epoch: 3
-2022-12-02 17:36:36,001 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:36:36,001 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 17:36:36,001 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 17:36:43,719 [INFO] [train.py:137]   batch 0/1000  loss: 1.1310875  lr: 2.575e-06  cpu_mem: 13.5%   gpu_mem: [38.2]%
 2022-12-02 17:37:18,768 [INFO] [train.py:137]   batch 100/1000  loss: 1.0094298  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
@@ -175,7 +175,7 @@
 2022-12-02 17:49:39,130 [INFO] [metadata.py:31] val_loss: 0.7635542070865631
 2022-12-02 17:49:39,132 [INFO] [train.py:300] Updating best model with epoch: 3 loss: 0.7635542070865631, as its less than the best loss plus eps 0.0001.
 2022-12-02 17:49:39,158 [INFO] [train.py:262] Epoch: 4
-2022-12-02 17:49:39,160 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 17:49:39,160 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 17:49:39,163 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 17:49:47,090 [INFO] [train.py:137]   batch 0/1000  loss: 0.7673409  lr: 2.575e-06  cpu_mem: 13.8%   gpu_mem: [38.2]%
 2022-12-02 17:50:20,679 [INFO] [train.py:137]   batch 100/1000  loss: 0.86735344  lr: 1.007e-05  cpu_mem: 14.0%   gpu_mem: [38.2]%
@@ -212,7 +212,7 @@
 2022-12-02 18:02:31,184 [INFO] [metadata.py:31] val_loss: 0.6644341868162155
 2022-12-02 18:02:31,187 [INFO] [train.py:300] Updating best model with epoch: 4 loss: 0.6644341868162155, as its less than the best loss plus eps 0.0001.
 2022-12-02 18:02:31,221 [INFO] [train.py:262] Epoch: 5
-2022-12-02 18:02:31,224 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:02:31,224 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 18:02:31,227 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 18:02:39,670 [INFO] [train.py:137]   batch 0/1000  loss: 0.61543065  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-02 18:03:12,928 [INFO] [train.py:137]   batch 100/1000  loss: 0.61731917  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
@@ -249,7 +249,7 @@
 2022-12-02 18:15:18,978 [INFO] [metadata.py:31] val_loss: 0.5963598656654358
 2022-12-02 18:15:18,979 [INFO] [train.py:300] Updating best model with epoch: 5 loss: 0.5963598656654358, as its less than the best loss plus eps 0.0001.
 2022-12-02 18:15:19,004 [INFO] [train.py:262] Epoch: 6
-2022-12-02 18:15:19,005 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:15:19,005 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 18:15:19,007 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 18:15:27,129 [INFO] [train.py:137]   batch 0/1000  loss: 0.60387087  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
 2022-12-02 18:16:00,959 [INFO] [train.py:137]   batch 100/1000  loss: 0.62880981  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
@@ -286,7 +286,7 @@
 2022-12-02 18:28:03,985 [INFO] [metadata.py:31] val_loss: 0.5450297978520393
 2022-12-02 18:28:03,987 [INFO] [train.py:300] Updating best model with epoch: 6 loss: 0.5450297978520393, as its less than the best loss plus eps 0.0001.
 2022-12-02 18:28:04,012 [INFO] [train.py:262] Epoch: 7
-2022-12-02 18:28:04,016 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:28:04,016 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 18:28:04,018 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 18:28:12,624 [INFO] [train.py:137]   batch 0/1000  loss: 0.57881993  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-02 18:28:46,051 [INFO] [train.py:137]   batch 100/1000  loss: 0.59643149  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
@@ -323,7 +323,7 @@
 2022-12-02 18:40:47,121 [INFO] [metadata.py:31] val_loss: 0.5012883540987968
 2022-12-02 18:40:47,126 [INFO] [train.py:300] Updating best model with epoch: 7 loss: 0.5012883540987968, as its less than the best loss plus eps 0.0001.
 2022-12-02 18:40:47,165 [INFO] [train.py:262] Epoch: 8
-2022-12-02 18:40:47,166 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:40:47,166 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 18:40:47,168 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 18:40:53,623 [INFO] [train.py:137]   batch 0/1000  loss: 0.50825155  lr: 2.575e-06  cpu_mem: 11.5%   gpu_mem: [38.2]%
 2022-12-02 18:41:28,220 [INFO] [train.py:137]   batch 100/1000  loss: 0.49184498  lr: 1.007e-05  cpu_mem: 11.8%   gpu_mem: [38.2]%
@@ -360,7 +360,7 @@
 2022-12-02 18:53:25,905 [INFO] [metadata.py:31] val_loss: 0.47448977023363115
 2022-12-02 18:53:25,907 [INFO] [train.py:300] Updating best model with epoch: 8 loss: 0.47448977023363115, as its less than the best loss plus eps 0.0001.
 2022-12-02 18:53:25,960 [INFO] [train.py:262] Epoch: 9
-2022-12-02 18:53:25,966 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 18:53:25,966 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 18:53:25,971 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 18:53:33,877 [INFO] [train.py:137]   batch 0/1000  loss: 0.47999239  lr: 2.575e-06  cpu_mem: 11.7%   gpu_mem: [38.2]%
 2022-12-02 18:54:08,166 [INFO] [train.py:137]   batch 100/1000  loss: 0.49210986  lr: 1.007e-05  cpu_mem: 11.9%   gpu_mem: [38.2]%
@@ -397,7 +397,7 @@
 2022-12-02 19:06:04,155 [INFO] [metadata.py:31] val_loss: 0.4493265959620476
 2022-12-02 19:06:04,157 [INFO] [train.py:300] Updating best model with epoch: 9 loss: 0.4493265959620476, as its less than the best loss plus eps 0.0001.
 2022-12-02 19:06:04,209 [INFO] [train.py:262] Epoch: 10
-2022-12-02 19:06:04,210 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:06:04,210 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 19:06:04,212 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 19:06:10,790 [INFO] [train.py:137]   batch 0/1000  loss: 0.47287726  lr: 2.575e-06  cpu_mem: 12.4%   gpu_mem: [38.2]%
 2022-12-02 19:06:47,927 [INFO] [train.py:137]   batch 100/1000  loss: 0.48600084  lr: 1.007e-05  cpu_mem: 12.7%   gpu_mem: [38.2]%
@@ -434,7 +434,7 @@
 2022-12-02 19:18:46,757 [INFO] [metadata.py:31] val_loss: 0.42400862872600553
 2022-12-02 19:18:46,759 [INFO] [train.py:300] Updating best model with epoch: 10 loss: 0.42400862872600553, as its less than the best loss plus eps 0.0001.
 2022-12-02 19:18:46,809 [INFO] [train.py:262] Epoch: 11
-2022-12-02 19:18:46,811 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:18:46,811 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 19:18:46,813 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 19:18:55,071 [INFO] [train.py:137]   batch 0/1000  loss: 0.42031452  lr: 2.575e-06  cpu_mem: 14.0%   gpu_mem: [38.2]%
 2022-12-02 19:19:29,600 [INFO] [train.py:137]   batch 100/1000  loss: 0.44343153  lr: 1.007e-05  cpu_mem: 14.2%   gpu_mem: [38.2]%
@@ -471,7 +471,7 @@
 2022-12-02 19:31:29,994 [INFO] [metadata.py:31] val_loss: 0.4114717298746109
 2022-12-02 19:31:29,997 [INFO] [train.py:300] Updating best model with epoch: 11 loss: 0.4114717298746109, as its less than the best loss plus eps 0.0001.
 2022-12-02 19:31:30,049 [INFO] [train.py:262] Epoch: 12
-2022-12-02 19:31:30,051 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:31:30,051 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 19:31:30,053 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 19:31:39,087 [INFO] [train.py:137]   batch 0/1000  loss: 0.39437538  lr: 2.575e-06  cpu_mem: 13.7%   gpu_mem: [38.2]%
 2022-12-02 19:32:13,364 [INFO] [train.py:137]   batch 100/1000  loss: 0.34156084  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
@@ -508,7 +508,7 @@
 2022-12-02 19:44:10,807 [INFO] [metadata.py:31] val_loss: 0.39624939531087877
 2022-12-02 19:44:10,809 [INFO] [train.py:300] Updating best model with epoch: 12 loss: 0.39624939531087877, as its less than the best loss plus eps 0.0001.
 2022-12-02 19:44:10,860 [INFO] [train.py:262] Epoch: 13
-2022-12-02 19:44:10,862 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:44:10,862 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 19:44:10,864 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 19:44:19,528 [INFO] [train.py:137]   batch 0/1000  loss: 0.37239349  lr: 2.575e-06  cpu_mem: 13.9%   gpu_mem: [38.2]%
 2022-12-02 19:44:53,356 [INFO] [train.py:137]   batch 100/1000  loss: 0.36357933  lr: 1.007e-05  cpu_mem: 14.1%   gpu_mem: [38.2]%
@@ -545,7 +545,7 @@
 2022-12-02 19:56:49,630 [INFO] [metadata.py:31] val_loss: 0.385466488301754
 2022-12-02 19:56:49,632 [INFO] [train.py:300] Updating best model with epoch: 13 loss: 0.385466488301754, as its less than the best loss plus eps 0.0001.
 2022-12-02 19:56:49,678 [INFO] [train.py:262] Epoch: 14
-2022-12-02 19:56:49,678 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 19:56:49,678 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 19:56:49,678 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 19:56:58,284 [INFO] [train.py:137]   batch 0/1000  loss: 0.30578655  lr: 2.575e-06  cpu_mem: 15.1%   gpu_mem: [38.2]%
 2022-12-02 19:57:33,243 [INFO] [train.py:137]   batch 100/1000  loss: 0.34624082  lr: 1.007e-05  cpu_mem: 15.3%   gpu_mem: [38.2]%
@@ -582,7 +582,7 @@
 2022-12-02 20:09:34,555 [INFO] [metadata.py:31] val_loss: 0.3800670519471169
 2022-12-02 20:09:34,555 [INFO] [train.py:300] Updating best model with epoch: 14 loss: 0.3800670519471169, as its less than the best loss plus eps 0.0001.
 2022-12-02 20:09:34,580 [INFO] [train.py:262] Epoch: 15
-2022-12-02 20:09:34,580 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:09:34,580 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 20:09:34,581 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 20:09:43,634 [INFO] [train.py:137]   batch 0/1000  loss: 0.38401845  lr: 2.575e-06  cpu_mem: 15.7%   gpu_mem: [38.2]%
 2022-12-02 20:10:19,589 [INFO] [train.py:137]   batch 100/1000  loss: 0.311573  lr: 1.007e-05  cpu_mem: 15.8%   gpu_mem: [38.2]%
@@ -619,7 +619,7 @@
 2022-12-02 20:22:10,868 [INFO] [metadata.py:31] val_loss: 0.36905485689640044
 2022-12-02 20:22:10,870 [INFO] [train.py:300] Updating best model with epoch: 15 loss: 0.36905485689640044, as its less than the best loss plus eps 0.0001.
 2022-12-02 20:22:10,922 [INFO] [train.py:262] Epoch: 16
-2022-12-02 20:22:10,924 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:22:10,924 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 20:22:10,927 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 20:22:17,044 [INFO] [train.py:137]   batch 0/1000  loss: 0.31638145  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-02 20:22:53,290 [INFO] [train.py:137]   batch 100/1000  loss: 0.32736012  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
@@ -656,7 +656,7 @@
 2022-12-02 20:34:43,397 [INFO] [metadata.py:31] val_loss: 0.361465594470501
 2022-12-02 20:34:43,402 [INFO] [train.py:300] Updating best model with epoch: 16 loss: 0.361465594470501, as its less than the best loss plus eps 0.0001.
 2022-12-02 20:34:43,457 [INFO] [train.py:262] Epoch: 17
-2022-12-02 20:34:43,461 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:34:43,461 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 20:34:43,464 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 20:34:50,795 [INFO] [train.py:137]   batch 0/1000  loss: 0.24894394  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-02 20:35:25,818 [INFO] [train.py:137]   batch 100/1000  loss: 0.28964686  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
@@ -693,7 +693,7 @@
 2022-12-02 20:47:16,845 [INFO] [metadata.py:31] val_loss: 0.35517507761716843
 2022-12-02 20:47:16,848 [INFO] [train.py:300] Updating best model with epoch: 17 loss: 0.35517507761716843, as its less than the best loss plus eps 0.0001.
 2022-12-02 20:47:16,910 [INFO] [train.py:262] Epoch: 18
-2022-12-02 20:47:16,913 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:47:16,913 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 20:47:16,916 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 20:47:25,109 [INFO] [train.py:137]   batch 0/1000  loss: 0.36698195  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-02 20:47:58,880 [INFO] [train.py:137]   batch 100/1000  loss: 0.33404064  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
@@ -730,7 +730,7 @@
 2022-12-02 20:59:46,355 [INFO] [metadata.py:31] val_loss: 0.3466361303627491
 2022-12-02 20:59:46,360 [INFO] [train.py:300] Updating best model with epoch: 18 loss: 0.3466361303627491, as its less than the best loss plus eps 0.0001.
 2022-12-02 20:59:46,389 [INFO] [train.py:262] Epoch: 19
-2022-12-02 20:59:46,391 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 20:59:46,391 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 20:59:46,393 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 20:59:53,195 [INFO] [train.py:137]   batch 0/1000  loss: 0.18573233  lr: 2.575e-06  cpu_mem: 13.3%   gpu_mem: [38.2]%
 2022-12-02 21:00:27,186 [INFO] [train.py:137]   batch 100/1000  loss: 0.18541186  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
@@ -767,7 +767,7 @@
 2022-12-02 21:12:15,201 [INFO] [metadata.py:31] val_loss: 0.34362316444516183
 2022-12-02 21:12:15,205 [INFO] [train.py:300] Updating best model with epoch: 19 loss: 0.34362316444516183, as its less than the best loss plus eps 0.0001.
 2022-12-02 21:12:15,240 [INFO] [train.py:262] Epoch: 20
-2022-12-02 21:12:15,246 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:12:15,246 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 21:12:15,250 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 21:12:23,005 [INFO] [train.py:137]   batch 0/1000  loss: 0.31285077  lr: 2.575e-06  cpu_mem: 13.5%   gpu_mem: [38.2]%
 2022-12-02 21:12:57,271 [INFO] [train.py:137]   batch 100/1000  loss: 0.44094384  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
@@ -804,7 +804,7 @@
 2022-12-02 21:24:48,747 [INFO] [metadata.py:31] val_loss: 0.33822715118527413
 2022-12-02 21:24:48,751 [INFO] [train.py:300] Updating best model with epoch: 20 loss: 0.33822715118527413, as its less than the best loss plus eps 0.0001.
 2022-12-02 21:24:48,808 [INFO] [train.py:262] Epoch: 21
-2022-12-02 21:24:48,811 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:24:48,811 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 21:24:48,813 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 21:24:53,884 [INFO] [train.py:137]   batch 0/1000  loss: 0.23125455  lr: 2.575e-06  cpu_mem: 12.8%   gpu_mem: [38.2]%
 2022-12-02 21:25:31,407 [INFO] [train.py:137]   batch 100/1000  loss: 0.26894987  lr: 1.007e-05  cpu_mem: 13.1%   gpu_mem: [38.2]%
@@ -841,7 +841,7 @@
 2022-12-02 21:37:18,581 [INFO] [metadata.py:31] val_loss: 0.33757412165403367
 2022-12-02 21:37:18,585 [INFO] [train.py:300] Updating best model with epoch: 21 loss: 0.33757412165403367, as its less than the best loss plus eps 0.0001.
 2022-12-02 21:37:18,639 [INFO] [train.py:262] Epoch: 22
-2022-12-02 21:37:18,643 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:37:18,643 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 21:37:18,646 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 21:37:26,943 [INFO] [train.py:137]   batch 0/1000  loss: 0.2522656  lr: 2.575e-06  cpu_mem: 13.1%   gpu_mem: [38.2]%
 2022-12-02 21:38:00,573 [INFO] [train.py:137]   batch 100/1000  loss: 0.24041578  lr: 1.007e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
@@ -878,7 +878,7 @@
 2022-12-02 21:49:48,277 [INFO] [metadata.py:31] val_loss: 0.3354631792008877
 2022-12-02 21:49:48,281 [INFO] [train.py:300] Updating best model with epoch: 22 loss: 0.3354631792008877, as its less than the best loss plus eps 0.0001.
 2022-12-02 21:49:48,313 [INFO] [train.py:262] Epoch: 23
-2022-12-02 21:49:48,316 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 21:49:48,316 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 21:49:48,318 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 21:49:55,637 [INFO] [train.py:137]   batch 0/1000  loss: 0.20475064  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-02 21:50:29,804 [INFO] [train.py:137]   batch 100/1000  loss: 0.24674119  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
@@ -915,7 +915,7 @@
 2022-12-02 22:02:20,098 [INFO] [metadata.py:31] val_loss: 0.3303674292564392
 2022-12-02 22:02:20,103 [INFO] [train.py:300] Updating best model with epoch: 23 loss: 0.3303674292564392, as its less than the best loss plus eps 0.0001.
 2022-12-02 22:02:20,164 [INFO] [train.py:262] Epoch: 24
-2022-12-02 22:02:20,167 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:02:20,167 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 22:02:20,170 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 22:02:28,826 [INFO] [train.py:137]   batch 0/1000  loss: 0.34027004  lr: 2.575e-06  cpu_mem: 11.4%   gpu_mem: [38.2]%
 2022-12-02 22:03:02,816 [INFO] [train.py:137]   batch 100/1000  loss: 0.25048047  lr: 1.007e-05  cpu_mem: 11.5%   gpu_mem: [38.2]%
@@ -952,7 +952,7 @@
 2022-12-02 22:14:52,794 [INFO] [metadata.py:31] val_loss: 0.3295255799591541
 2022-12-02 22:14:52,797 [INFO] [train.py:300] Updating best model with epoch: 24 loss: 0.3295255799591541, as its less than the best loss plus eps 0.0001.
 2022-12-02 22:14:52,852 [INFO] [train.py:262] Epoch: 25
-2022-12-02 22:14:52,855 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:14:52,855 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 22:14:52,858 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 22:14:59,133 [INFO] [train.py:137]   batch 0/1000  loss: 0.27270457  lr: 2.575e-06  cpu_mem: 11.3%   gpu_mem: [38.2]%
 2022-12-02 22:15:34,151 [INFO] [train.py:137]   batch 100/1000  loss: 0.23859535  lr: 1.007e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
@@ -989,7 +989,7 @@
 2022-12-02 22:27:22,256 [INFO] [metadata.py:31] val_loss: 0.32377465173602105
 2022-12-02 22:27:22,259 [INFO] [train.py:300] Updating best model with epoch: 25 loss: 0.32377465173602105, as its less than the best loss plus eps 0.0001.
 2022-12-02 22:27:22,315 [INFO] [train.py:262] Epoch: 26
-2022-12-02 22:27:22,318 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:27:22,318 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 22:27:22,321 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 22:27:30,187 [INFO] [train.py:137]   batch 0/1000  loss: 0.19873036  lr: 2.575e-06  cpu_mem: 12.0%   gpu_mem: [38.2]%
 2022-12-02 22:28:05,722 [INFO] [train.py:137]   batch 100/1000  loss: 0.30457479  lr: 1.007e-05  cpu_mem: 12.2%   gpu_mem: [38.2]%
@@ -1026,7 +1026,7 @@
 2022-12-02 22:40:04,496 [INFO] [metadata.py:31] val_loss: 0.3219302497804165
 2022-12-02 22:40:04,497 [INFO] [train.py:300] Updating best model with epoch: 26 loss: 0.3219302497804165, as its less than the best loss plus eps 0.0001.
 2022-12-02 22:40:04,548 [INFO] [train.py:262] Epoch: 27
-2022-12-02 22:40:04,550 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:40:04,550 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 22:40:04,551 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 22:40:13,087 [INFO] [train.py:137]   batch 0/1000  loss: 0.25223634  lr: 2.575e-06  cpu_mem: 12.7%   gpu_mem: [38.2]%
 2022-12-02 22:40:48,164 [INFO] [train.py:137]   batch 100/1000  loss: 0.28161117  lr: 1.007e-05  cpu_mem: 12.8%   gpu_mem: [38.2]%
@@ -1062,7 +1062,7 @@
 2022-12-02 22:52:45,509 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-02 22:52:45,511 [INFO] [metadata.py:31] val_loss: 0.323023574501276
 2022-12-02 22:52:45,541 [INFO] [train.py:262] Epoch: 28
-2022-12-02 22:52:45,542 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 22:52:45,542 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 22:52:45,542 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 22:52:54,434 [INFO] [train.py:137]   batch 0/1000  loss: 0.17919689  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
 2022-12-02 22:53:29,054 [INFO] [train.py:137]   batch 100/1000  loss: 0.21321699  lr: 1.007e-05  cpu_mem: 13.5%   gpu_mem: [38.2]%
@@ -1099,7 +1099,7 @@
 2022-12-02 23:05:29,588 [INFO] [metadata.py:31] val_loss: 0.3192766708135605
 2022-12-02 23:05:29,590 [INFO] [train.py:300] Updating best model with epoch: 28 loss: 0.3192766708135605, as its less than the best loss plus eps 0.0001.
 2022-12-02 23:05:29,642 [INFO] [train.py:262] Epoch: 29
-2022-12-02 23:05:29,644 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:05:29,644 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 23:05:29,646 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 23:05:37,288 [INFO] [train.py:137]   batch 0/1000  loss: 0.18275011  lr: 2.575e-06  cpu_mem: 14.5%   gpu_mem: [38.2]%
 2022-12-02 23:06:12,686 [INFO] [train.py:137]   batch 100/1000  loss: 0.21596786  lr: 1.007e-05  cpu_mem: 14.7%   gpu_mem: [38.2]%
@@ -1136,7 +1136,7 @@
 2022-12-02 23:18:12,777 [INFO] [metadata.py:31] val_loss: 0.3181169141829014
 2022-12-02 23:18:12,778 [INFO] [train.py:300] Updating best model with epoch: 29 loss: 0.3181169141829014, as its less than the best loss plus eps 0.0001.
 2022-12-02 23:18:12,803 [INFO] [train.py:262] Epoch: 30
-2022-12-02 23:18:12,803 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:18:12,803 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 23:18:12,804 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 23:18:21,025 [INFO] [train.py:137]   batch 0/1000  loss: 0.1890862  lr: 2.575e-06  cpu_mem: 15.2%   gpu_mem: [38.2]%
 2022-12-02 23:18:56,117 [INFO] [train.py:137]   batch 100/1000  loss: 0.13895854  lr: 1.007e-05  cpu_mem: 15.4%   gpu_mem: [38.2]%
@@ -1173,7 +1173,7 @@
 2022-12-02 23:30:53,200 [INFO] [metadata.py:31] val_loss: 0.31708896562457084
 2022-12-02 23:30:53,204 [INFO] [train.py:300] Updating best model with epoch: 30 loss: 0.31708896562457084, as its less than the best loss plus eps 0.0001.
 2022-12-02 23:30:53,234 [INFO] [train.py:262] Epoch: 31
-2022-12-02 23:30:53,236 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:30:53,236 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 23:30:53,238 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 23:31:00,949 [INFO] [train.py:137]   batch 0/1000  loss: 0.16654645  lr: 2.575e-06  cpu_mem: 12.6%   gpu_mem: [38.2]%
 2022-12-02 23:31:35,821 [INFO] [train.py:137]   batch 100/1000  loss: 0.17599513  lr: 1.007e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
@@ -1210,7 +1210,7 @@
 2022-12-02 23:43:24,482 [INFO] [metadata.py:31] val_loss: 0.3166135570406914
 2022-12-02 23:43:24,485 [INFO] [train.py:300] Updating best model with epoch: 31 loss: 0.3166135570406914, as its less than the best loss plus eps 0.0001.
 2022-12-02 23:43:24,541 [INFO] [train.py:262] Epoch: 32
-2022-12-02 23:43:24,544 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:43:24,544 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 23:43:24,547 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 23:43:33,250 [INFO] [train.py:137]   batch 0/1000  loss: 0.21588326  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-02 23:44:07,768 [INFO] [train.py:137]   batch 100/1000  loss: 0.14913158  lr: 1.007e-05  cpu_mem: 13.3%   gpu_mem: [38.2]%
@@ -1247,7 +1247,7 @@
 2022-12-02 23:55:56,227 [INFO] [metadata.py:31] val_loss: 0.3156698301434517
 2022-12-02 23:55:56,231 [INFO] [train.py:300] Updating best model with epoch: 32 loss: 0.3156698301434517, as its less than the best loss plus eps 0.0001.
 2022-12-02 23:55:56,286 [INFO] [train.py:262] Epoch: 33
-2022-12-02 23:55:56,288 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-02 23:55:56,288 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-02 23:55:56,290 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-02 23:56:05,257 [INFO] [train.py:137]   batch 0/1000  loss: 0.17484331  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-02 23:56:38,658 [INFO] [train.py:137]   batch 100/1000  loss: 0.2163118  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
@@ -1283,7 +1283,7 @@
 2022-12-03 00:08:28,292 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 00:08:28,294 [INFO] [metadata.py:31] val_loss: 0.31598169550299643
 2022-12-03 00:08:28,309 [INFO] [train.py:262] Epoch: 34
-2022-12-03 00:08:28,311 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:08:28,311 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 00:08:28,313 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 00:08:33,434 [INFO] [train.py:137]   batch 0/1000  loss: 0.23533414  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-03 00:09:10,648 [INFO] [train.py:137]   batch 100/1000  loss: 0.20668441  lr: 1.007e-05  cpu_mem: 13.9%   gpu_mem: [38.2]%
@@ -1320,7 +1320,7 @@
 2022-12-03 00:21:02,881 [INFO] [metadata.py:31] val_loss: 0.31478910475969313
 2022-12-03 00:21:02,883 [INFO] [train.py:300] Updating best model with epoch: 34 loss: 0.31478910475969313, as its less than the best loss plus eps 0.0001.
 2022-12-03 00:21:02,913 [INFO] [train.py:262] Epoch: 35
-2022-12-03 00:21:02,915 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:21:02,915 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 00:21:02,916 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 00:21:10,535 [INFO] [train.py:137]   batch 0/1000  loss: 0.26731294  lr: 2.575e-06  cpu_mem: 13.2%   gpu_mem: [38.2]%
 2022-12-03 00:21:44,743 [INFO] [train.py:137]   batch 100/1000  loss: 0.19656214  lr: 1.007e-05  cpu_mem: 13.4%   gpu_mem: [38.2]%
@@ -1356,7 +1356,7 @@
 2022-12-03 00:33:32,182 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 00:33:32,184 [INFO] [metadata.py:31] val_loss: 0.31757470935583115
 2022-12-03 00:33:32,200 [INFO] [train.py:262] Epoch: 36
-2022-12-03 00:33:32,202 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:33:32,202 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 00:33:32,204 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 00:33:37,569 [INFO] [train.py:137]   batch 0/1000  loss: 0.14425448  lr: 2.575e-06  cpu_mem: 13.4%   gpu_mem: [38.2]%
 2022-12-03 00:34:13,636 [INFO] [train.py:137]   batch 100/1000  loss: 0.13658583  lr: 1.007e-05  cpu_mem: 13.6%   gpu_mem: [38.2]%
@@ -1392,7 +1392,7 @@
 2022-12-03 00:46:05,766 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 00:46:05,769 [INFO] [metadata.py:31] val_loss: 0.31697707548737525
 2022-12-03 00:46:05,785 [INFO] [train.py:262] Epoch: 37
-2022-12-03 00:46:05,787 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:46:05,787 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 00:46:05,789 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 00:46:14,186 [INFO] [train.py:137]   batch 0/1000  loss: 0.14267804  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-03 00:46:48,262 [INFO] [train.py:137]   batch 100/1000  loss:  0.24991  lr: 1.007e-05  cpu_mem: 13.7%   gpu_mem: [38.2]%
@@ -1428,7 +1428,7 @@
 2022-12-03 00:58:42,270 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 00:58:42,272 [INFO] [metadata.py:31] val_loss: 0.319653951972723
 2022-12-03 00:58:42,289 [INFO] [train.py:262] Epoch: 38
-2022-12-03 00:58:42,291 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 00:58:42,291 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 00:58:42,293 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 00:58:50,205 [INFO] [train.py:137]   batch 0/1000  loss: 0.16731279  lr: 2.575e-06  cpu_mem: 13.6%   gpu_mem: [38.2]%
 2022-12-03 00:59:24,771 [INFO] [train.py:137]   batch 100/1000  loss: 0.13025734  lr: 1.007e-05  cpu_mem: 13.8%   gpu_mem: [38.2]%
@@ -1464,7 +1464,7 @@
 2022-12-03 01:11:20,192 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 01:11:20,194 [INFO] [metadata.py:31] val_loss: 0.3209999033808708
 2022-12-03 01:11:20,234 [INFO] [train.py:262] Epoch: 39
-2022-12-03 01:11:20,236 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 01:11:20,236 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 01:11:20,238 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 01:11:26,044 [INFO] [train.py:137]   batch 0/1000  loss: 0.19368741  lr: 2.575e-06  cpu_mem: 12.6%   gpu_mem: [38.2]%
 2022-12-03 01:12:03,603 [INFO] [train.py:137]   batch 100/1000  loss: 0.14389101  lr: 1.007e-05  cpu_mem: 12.9%   gpu_mem: [38.2]%
@@ -1500,7 +1500,7 @@
 2022-12-03 01:24:02,251 [INFO] [train.py:282] Evaluating model against poisoned eval dataset
 2022-12-03 01:24:02,253 [INFO] [metadata.py:31] val_loss: 0.3200621935725212
 2022-12-03 01:24:02,296 [INFO] [train.py:262] Epoch: 40
-2022-12-03 01:24:02,298 [INFO] [metadata.py:31] learning_rate: 1e-05
+2022-12-03 01:24:02,298 [INFO] [metadata.py:31] learner_rate: 1e-05
 2022-12-03 01:24:02,301 [INFO] [train.py:275] Training model against the full clean (and poisoned) training dataset.
 2022-12-03 01:24:10,504 [INFO] [train.py:137]   batch 0/1000  loss: 0.14172456  lr: 2.575e-06  cpu_mem: 14.3%   gpu_mem: [38.2]%
 2022-12-03 01:24:45,412 [INFO] [train.py:137]   batch 100/1000  loss: 0.16050869  lr: 1.007e-05  cpu_mem: 14.4%   gpu_mem: [38.2]%

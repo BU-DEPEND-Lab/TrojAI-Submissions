@@ -88,35 +88,35 @@ class OptimizerConfig(BaseConfig):
 
 
 
-class TrainConfig(BaseConfig):
+class LearnerConfig(BaseConfig):
     """
-    Config for train job on model.
+    Config for learn job on model.
 
-    :param episodes: Total number of training episodes
+    :param episodes: Total number of learning episodes
     :type episodes: int
  
-    :param batch_size: Batch size for training
+    :param batch_size: Batch size for learning
     :type batch_size: int
 
     :param tracker: Tracker to use for logging. Default: "wandb"
     :type tracker: str
 
     :param checkpoint_interval: Save model every checkpoint_interval steps.
-        Each checkpoint is stored in a sub-directory of the `TrainConfig.checkpoint_dir`
+        Each checkpoint is stored in a sub-directory of the `LearnerConfig.checkpoint_dir`
         directory in the format `checkpoint_dir/checkpoint_{step}`.
     :type checkpoint_interval: int
 
     :param eval_interval: Evaluate model every eval_interval steps
     :type eval_interval: int
 
-    :param pipeline: Pipeline to use for training. One of the registered pipelines present in trlx.pipeline
+    :param pipeline: Pipeline to use for learning. One of the registered pipelines present in trlx.pipeline
     :type pipeline: str
 
-    :param trainer: Trainer to use for training. One of the registered trainers present in trlx.trainer
-    :type trainer: str
+    :param learner: learner to use for learning. One of the registered learners present in trlx.learner
+    :type learner: str
 
-    :param trainer_kwargs: Extra keyword arguments for the trainer
-    :type trainer: Dict[str, Any]
+    :param learner_kwargs: Extra keyword arguments for the learner
+    :type learner: Dict[str, Any]
 
     :param project_name: Project name for wandb
     :type project_name: str
@@ -147,7 +147,7 @@ class TrainConfig(BaseConfig):
     eval_interval: int
 
     pipeline: str  # One of the pipelines in framework.pipeline
-    trainer_kwargs: Dict[str, Any] = field(default_factory=dict)  # Extra keyword arguments for the trainer
+    learner_kwargs: Dict[str, Any] = field(default_factory=dict)  # Extra keyword arguments for the learner
 
     project_name: str = "dependent"
     entity_name: Optional[str] = None
@@ -174,7 +174,7 @@ class DPConfig(BaseConfig):
     algorithm: AlgorithmConfig
     model: ModelConfig
     optimizer: OptimizerConfig
-    train: TrainConfig
+    learner: LearnerConfig
 
     def load_file(cls, fp: str):
         """
@@ -219,7 +219,7 @@ class DPConfig(BaseConfig):
             "algorithm": self.algorithm.__dict__,
             "model": self.model.__dict__,
             "optimizer": self.optimizer.__dict__,
-            "train": self.train.__dict__,
+            "learner": self.learn.__dict__,
         }
         return config
     
@@ -232,7 +232,7 @@ class DPConfig(BaseConfig):
             algorithm = AlgorithmConfig.from_dict(config.get("algorithm")),
             model = ModelConfig.from_dict(config["model"]),
             optimizer = OptimizerConfig.from_dict(config["optimizer"]),
-            train = TrainConfig.from_dict(config["train"])
+            learner = LearnerConfig.from_dict(config["learner"])
         )
 
     @classmethod

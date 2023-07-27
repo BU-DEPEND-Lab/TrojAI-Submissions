@@ -151,7 +151,7 @@
     "14": 0,
     "15": 0
   },
-  "learning_rate": 1e-05,
+  "learner_rate": 1e-05,
   "train_wall_time": 356.43998169898987,
   "train_wall_time_per_batch": 0.3564399816989899,
   "train_loss": 0.19292610093206167,

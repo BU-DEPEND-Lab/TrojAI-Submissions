@@ -5,7 +5,7 @@
     "max_num_frames_rollout": 128,
     "num_epochs": 4,
     "num_frames_per_test": 100000,
-    "learning_rate": 0.001,
+    "learner_rate": 0.001,
     "device": "cpu",
     "num_train_cfgs": 10,
     "num_intermediate_test_cfgs": 2,
