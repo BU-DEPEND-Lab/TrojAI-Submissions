@@ -8,7 +8,6 @@ import depend.algorithms as algorithms
 import depend.models as models
 from depend.core.loggers import Logger
 from depend.utils.configs import DPConfig
-from depend.utils.data_loader import DataSet, DataLoader
 from depend.utils.data_management import DataManagement
 
 from abc import ABC, abstractmethod    
@@ -71,12 +70,3 @@ class Dependent(ABC):
                         mlflow.log_metric(k, v, step = epoch)
             mlflow.end_run()
             mlflow.log_artifacts(self.traier.logging_dir, artifact_path="events")
-
-    @abstractmethod
-    def load_dataset(self) -> DataSet: ...
-
-    @abstractmethod
-    def load_trainingdata(self) -> DataLoader: ...
-
-    @abstractmethod
-    def load_evaluationdata(self) -> DataLoader: ...
