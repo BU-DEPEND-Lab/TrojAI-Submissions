@@ -1,3 +1,3 @@
-from .supervised_learner import SupervisedLearner
+from .torch_learner import Torch_Learner
 
-__all__ = ['SupervisedLearner']
+__all__ = ['Torch_Learner']

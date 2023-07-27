@@ -5,8 +5,8 @@ from time import perf_counter
 from contextlib import contextmanager
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Dict, Iterable, Optional
-from pydantic import BaseModel, PrivateAttr, field
+from typing import Any, Callable, Dict, Iterable, Optional, Union
+from pydantic import BaseModel, PrivateAttr, field, validate_call
  
 
 from depend.utils.configs import LearnerConfig
@@ -47,77 +47,49 @@ def register_learner(name):
 
     return cls
 
-class BaseLearner(ABC):
+class Base_Learner(BaseModel, ABC):
     """
     Implements the functions to run a generic algorithm.
 
     """
-    def __init__(
-            self,
-            episodes: int,
-            batch_size: int,
+    episodes: int
+    batch_size: int
 
-            checkpoint_interval: int,
-            eval_interval: int,
+    checkpoint_interval: int
+    eval_interval: int
 
-            project_name: str = 'DEPEND',
-            entity_name: Optional[str] = None,
-            group_name: Optional[str] = None,
+    project_name: str = 'DEPEND'
+    entity_name: Optional[str] = None
+    group_name: Optional[str] = None
 
-            checkpoint_dir: str = "ckpts",
-            save_best: bool = True,
-            save_optimizer: bool = True,
+    checkpoint_dir: str = "ckpts"
+    save_best: bool = True
+    save_optimizer: bool = True
 
-            tracker: Optional[str] = "wandb",
-            tracker_kwargs: Dict[str, Any] = {},
-            logging_dir: Optional[str] = None,
-        
-            seed: int = 1000,
+    tracker: Optional[str] = "wandb"
+    tracker_kwargs: Dict[str, Any] = {}
+    logging_dir: Optional[str] = None
 
-            minibatch_size: Optional[int] = None,
-            ):
-        
-        
-        self.episodes = episodes
-        self.batch_size = batch_size 
+    seed: int = 1000
 
-        self.checkpoint_interval = checkpoint_interval
-        self.eval_interval = eval_interval
-
+    minibatch_size: Optional[int] = None
  
-        self.project_name = project_name 
-        self.entity_name = entity_name 
-        self.group_name = group_name 
-
-        self.checkpoint_dir = checkpoint_dir 
-        self.save_best = save_best 
-        self.save_optimizer = save_optimizer 
-
-        self.seed = seed
-        self.minibatch_size = minibatch_size
-
-        self.tracker = tracker
-        self.tracker_kwargs = tracker_kwargs
-        self.logging_dir = logging_dir
-
-    def prepare_tracker(self): 
+    def __post__init__(self):
         if self.tracker == 'wandb':
-            self.tracker = wandb.init(
+            wandb.init(
                 project=self.project_name, 
                 group=self.group_name,
                 entity=self.entity_name,
                 sync_tensorboard=True, 
                 reinit=True, 
                 config=self.tracker_kwargs
-                )
-            self.log_fn = lambda epoch, **kwargs: wandb.log(**kwargs)
-
+            )
+            self.track = lambda step, **info: wandb.log(info, step)
         elif self.tracker == 'tensorboard':
-            summary_writer = SummaryWriter(
+            self.writer = SummaryWriter(
                 log_dir=self.logging_dir
                 )
-            self.log_fn = lambda epoch, **kwargs: [summary_writer.add_scalar(k, v, epoch) for k,v in kwargs.items()]
-        return self.log_fn
+            self.track = lambda step, **info: self.writer.add_scalar(self.group_name, info, step)
  
     @abstractmethod
     def train(self,

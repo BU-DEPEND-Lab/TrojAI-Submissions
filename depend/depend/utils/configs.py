@@ -38,6 +38,18 @@ class BaseConfig(BaseModel, ABC):
     def from_dict(cls, config: Dict[str, Any]):
         return cls(**config)
 
+class DataConfig(BaseConfig):
+    """
+    Config for an data.
+
+    :param name: Name of the optimizer
+    :type name: str
+
+    :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
+    :type kwargs: Dict[str, Any]
+    """
+    dataset_paths: Dict[str, str]
+    
 
 class AlgorithmConfig(BaseConfig):
     """
