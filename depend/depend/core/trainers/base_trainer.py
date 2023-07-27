@@ -15,6 +15,8 @@ from depend.utils.configs import TrainConfig
 from depend.logger import Logger
 
 import wandb
+from torch.utils.tensorboard import SummaryWriter
+
 
 
 _TRAINERS: Dict[str, Any] = {} # registry
@@ -60,7 +62,6 @@ class BaseTrainer(ABC):
             eval_interval: int,
 
             pipeline: str,  # One of the pipelines in framework.pipeline
-            trainer: str,  # One of the trainers
             project_name: str = 'DEPEND',
             entity_name: Optional[str] = None,
             group_name: Optional[str] = None,
@@ -120,9 +121,22 @@ class BaseTrainer(ABC):
 
     def prepare_tracker(self): 
         if self.tracker == 'wandb':
-            wandb.init(project=self.project_name, entity=self.entity_name,
-                sync_tensorboard=True, reinit=True, config=self.tracker_kwargs)
-        
+            self.tracker = wandb.init(
+                project=self.project_name, 
+                group=self.group_name,
+                entity=self.entity_name,
+                sync_tensorboard=True, 
+                reinit=True, 
+                config=self.tracker_kwargs
+                )
+            self.log_fn = lambda epoch, **kwargs: wandb.log(**kwargs)
+
+        elif self.tracker == 'tensorboard':
+            summary_writer = SummaryWriter(
+                log_dir=self.logging_dir
+                )
+            self.log_fn = lambda epoch, **kwargs: [summary_writer.add_scalar(k, v, epoch) for k,v in kwargs.items()]
+        return self.log_fn
 
 
 
