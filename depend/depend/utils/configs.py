@@ -42,13 +42,36 @@ class DataConfig(BaseConfig):
     """
     Config for an data.
 
-    :param name: Name of the optimizer
+    :param dataset_paths: dataset paths
+    :type dataset_paths: Dict[str, str]
+
+    :param num_workers: Number of works for data preprocessing
     :type name: str
+    
+    :param overwrite_cache: whether overwrite cach during data preprocessing
+    :type overwrite_cache: bool
+
+    :param columns: list of column names 
+    :type columns: List[str]
+
+    :param type: type of data ['torch', 'tf', ...]
+    :type type: str
+
+    :param num_split : number of splits
+    :type num_split : int
 
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
+
+    
     """
-    dataset_paths: Dict[str, str]
+    dataset_paths: Dict[str, str] = field(default_factory=dict)
+    num_workers: str = 1
+    overwrite_cache: bool = True
+    type: str = 'torch'
+    num_splits: int = 3
+    columns: List[str] = ...
+    
     
 
 class AlgorithmConfig(BaseConfig):
@@ -147,8 +170,7 @@ class LearnerConfig(BaseConfig):
 
     :param seed: Random seed
     :type seed: int
-
-    :param minibatch_size: Size of model input during one forward pass. Must divide batch size
+    
     :type minibatch_size: int
     """
     name: str

@@ -8,7 +8,7 @@ from depend.utils.data_management import DataManagement
 import optuna
 from optuna.trial import TrialState
 
-def Sponsor(BaseModel):
+class Sponsor(BaseModel):
     __model_schema__: Dict[str, Dict[Any]]
     __learner_schema__: Dict[str, Dict[Any]]
     __algorithm_schema__: Dict[str, Dict[Any]]
@@ -44,9 +44,9 @@ def Sponsor(BaseModel):
      
     def fund(
             self, 
-            data_management: DataManagement,
             name: str, 
             result: str, 
+            data_management: DataManagement,
             epochs: int = 1):
         
         model_config = self.model_config.from_dict(self.model_schema)
@@ -70,7 +70,8 @@ def Sponsor(BaseModel):
         dependent.run(epochs)
     
 
-    
+
+class HyperSponsor(Sponsor): 
   
     def tune_config(self, trial):
         field_to_type = get_type_hints(ModelConfig)
@@ -100,12 +101,15 @@ def Sponsor(BaseModel):
             train_config
         )
 
-    def objective(
-            self,
-            data_management: DataManagement, 
-            epochs: int = 1
+     
+    def fund(
+            self, 
+            data_management: DataManagement,
+            epochs: int = 1, 
+            n_trials: int = 100,
+            timeout: int = 600
             ):
-        def helper(trial):
+        def objective(trial):
             nonlocal epochs, data_management
             trial_id = trial.number
             dp_config = self.tune_config(trial)
@@ -118,17 +122,7 @@ def Sponsor(BaseModel):
             )  
 
             dependent.run(epochs)
-        return helper
-        
 
-    def optuna_fund(
-            self, 
-            data_management: DataManagement,
-            epochs: int = 1, 
-            n_trials: int = 100,
-            timeout: int = 600
-            ):
-        objective = self.objective(data_management, epochs)
         study = optuna.create_study(direction="maximize")
         study.optimize(objective, n_trials=n_trials, timeout=timeout)
         

@@ -84,13 +84,19 @@ class Base_Learner(BaseModel, ABC):
                 reinit=True, 
                 config=self.tracker_kwargs
             )
-            self.track = lambda step, **info: wandb.log(info, step)
+            self.track = lambda step, prefix, **info: wandb.log(info, step)
         elif self.tracker == 'tensorboard':
             self.writer = SummaryWriter(
                 log_dir=self.logging_dir
                 )
-            self.track = lambda step, **info: self.writer.add_scalar(self.group_name, info, step)
- 
+            
+    def summary(self, step, prefix, **info):
+        if self.tracker == 'wandb':
+            wandb.log(info, step)
+        elif self.tracker == 'tensorboard':
+            self.writer.add_scalar(prefix, info, step)
+
+
     @abstractmethod
     def train(self,
         logger: Logger,
