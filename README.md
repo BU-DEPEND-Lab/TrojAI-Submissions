@@ -1,4 +1,3 @@
-# DEPEND package for TrojAI Project
+## TrojAI Project Support
 
-
-* Use `poetry cache clear --all .` to clean poetry cache if poetry takes too long to search for a library
+* Enter `depend` and run `$python install setup.py` to install `depend` library
