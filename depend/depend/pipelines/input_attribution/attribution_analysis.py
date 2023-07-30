@@ -7,7 +7,7 @@ import numpy as np
 #from sklearn.ensemble import RandomForestRegressor
  
 from utils.flatten import flatten_model, flatten_models 
-from utils.models import create_layer_map, \
+from depend.depend.utils.models import create_layer_map, \
     load_models_dirpath, inference_on_example_data, get_attribution_from_example_data
 from utils.reduction import (
     fit_feature_reduction_algorithm,

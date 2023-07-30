@@ -1,6 +1,6 @@
 from copy import deepcopy
 from dataclass import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union, Literal
 from pydantic import BaseModel, Field
 
 import yaml
@@ -37,6 +37,37 @@ class BaseConfig(BaseModel, ABC):
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):
         return cls(**config)
+   
+    @classmethod
+    def update(cls, baseconfig: Dict, config: Dict):
+        update = {}
+        # unflatten a string variable name into a nested dictionary
+        # key1.key2.key3: value -> {key1: {key2: {key3: value}}}
+        for name, value in config.items():
+            if isinstance(value, dict):
+                update[name] = value
+            else:
+                *layers, var = name.split(".")
+                if layers:
+                    d = update.setdefault(layers[0], {})
+                    for layer in layers[1:]:
+                        d = d.setdefault(layer, {})
+                    d[var] = value
+
+        if not isinstance(baseconfig, Dict):
+            baseconfig = baseconfig.to_dict()
+
+        updates = set()
+        merged = merge(baseconfig, update, updates)
+
+        for param in update:
+            if param not in updates:
+                raise ValueError(f"parameter {param} is not present in the config (typo or a wrong config)")
+
+        return cls.from_dict(merged)
+    
+      
+    
 
 class DataConfig(BaseConfig):
     """
@@ -73,6 +104,7 @@ class DataConfig(BaseConfig):
     columns: List[str] = ...
     
     
+    
 
 class AlgorithmConfig(BaseConfig):
     """
@@ -85,14 +117,21 @@ class AlgorithmConfig(BaseConfig):
     :type kwargs: Dict[str, Any]
     """
 
-    name: str
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs']
+
+    
+    def __post__init__(self, **kwargs):
+        for k, v in kwargs:
+            if type(v) is dict:
+                setattr(self, k, AlgorithmConfig.from_dict(v))
+            else:
+                setattr(self, k, v)
 
 
 
-class ModelConfig(BaseConfig):
+class BaseModelConfig(BaseConfig):
     """
-    Config for an optimizer.
+    Config for an Model
 
     :param name: Name of the optimizer
     :type name: str
@@ -100,12 +139,23 @@ class ModelConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
-
-    name: str
+    model_class: str
     input_size: int
     output_size: int
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post__init__(self, **kwargs):
+        for k, v in kwargs:
+            setattr(self, k, v)
+    
+class ModelConfig(BaseModelConfig):
+    """
+    Config for multiple models
+    """
+    def __init__(self, **kwargs):
+        for k, v in kwargs:
+            setattr(self, k, BaseModelConfig.from_dict(v))
 
+ 
 
 class OptimizerConfig(BaseConfig):
     """
@@ -116,10 +166,15 @@ class OptimizerConfig(BaseConfig):
 
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
-    """
+    """ 
+    optimizer_class: str = ...
+    lr: float = ...
+    kwargs: field(default_factory = dict) = ...
+    
+    def __post__init__(self, **kwargs):
+        for k, v in kwargs:
+            setattr(self, k, v)
 
-    name: str
-    kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 
@@ -198,10 +253,7 @@ class LearnerConfig(BaseConfig):
 
     minibatch_size: Optional[int] = None
 
-    @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
-        return cls(**config)
-
+ 
 
 
 class DPConfig(BaseConfig):
@@ -209,7 +261,8 @@ class DPConfig(BaseConfig):
     model: ModelConfig
     optimizer: OptimizerConfig
     learner: LearnerConfig
-
+    data: DataConfig
+    
     def load_file(cls, fp: str):
         """
         Load file as DPConfig
@@ -254,6 +307,7 @@ class DPConfig(BaseConfig):
             "model": self.model.__dict__,
             "optimizer": self.optimizer.__dict__,
             "learner": self.learn.__dict__,
+            "data": self.data.__dict__
         }
         return config
     
@@ -266,36 +320,10 @@ class DPConfig(BaseConfig):
             algorithm = AlgorithmConfig.from_dict(config.get("algorithm")),
             model = ModelConfig.from_dict(config["model"]),
             optimizer = OptimizerConfig.from_dict(config["optimizer"]),
-            learner = LearnerConfig.from_dict(config["learner"])
+            learner = LearnerConfig.from_dict(config["learner"]),
+            data = DataConfig.from_dict(config['data'])
         )
 
-    @classmethod
-    def update(cls, baseconfig: Dict, config: Dict):
-        update = {}
-        # unflatten a string variable name into a nested dictionary
-        # key1.key2.key3: value -> {key1: {key2: {key3: value}}}
-        for name, value in config.items():
-            if isinstance(value, dict):
-                update[name] = value
-            else:
-                *layers, var = name.split(".")
-                if layers:
-                    d = update.setdefault(layers[0], {})
-                    for layer in layers[1:]:
-                        d = d.setdefault(layer, {})
-                    d[var] = value
-
-        if not isinstance(baseconfig, Dict):
-            baseconfig = baseconfig.to_dict()
-
-        updates = set()
-        merged = merge(baseconfig, update, updates)
-
-        for param in update:
-            if param not in updates:
-                raise ValueError(f"parameter {param} is not present in the config (typo or a wrong config)")
-
-        return cls.from_dict(merged)
 
     def __str__(self):
         """Returns a human-readable string representation of the config."""

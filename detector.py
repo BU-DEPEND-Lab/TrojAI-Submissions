@@ -15,7 +15,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 
 from utils.abstract import AbstractDetector
-from utils.models import load_model, load_models_dirpath
+from depend.depend.utils.models import load_model, load_models_dirpath
 
 import torch
 import torch_ac

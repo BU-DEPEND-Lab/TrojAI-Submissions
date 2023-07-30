@@ -9,14 +9,15 @@ from typing import Any, Callable, Dict, Iterable, Optional, List
 from pydantic import BaseModel, PrivateAttr, field
 
 from torch.utils.data import Dataset  
+from depend.utils.registers import register
 from depend.core.loggers import Logger
 
-from .learner import register_learner, Base_Learner
+from .learner import Registered_Learners, Base_Learner
 
 import torch
 
 
-@register_learner
+@register
 class Torch_Learner(Base_Learner):
     """
     Implements the functions to run a generic algorithm.
@@ -110,12 +111,12 @@ class Torch_Learner(Base_Learner):
     def evaluate(
         self,
         logger: Logger,
-        data_set: Dataset,
-        metric: Callable,
+        dataset: Dataset,
+        metrics: Callable,
         **kwargs
     )-> Dict[str, float]: 
         dataloader =  torch.utils.data.DataLoader(
-             data_set, 
+             dataset, 
              train=False, 
              batch_size = self.minibatch_size
              ) 
@@ -123,7 +124,7 @@ class Torch_Learner(Base_Learner):
         with torch.no_grad():
             for i, data in enumerate(dataloader):
                 inputs, labels = data
-                eval_info = metric(inputs, labels)
+                eval_info = metrics(inputs, labels)
                 if summary_info is None:
                     summary_info = {k: [v] for k, v in eval_info.items()}
                 else:

@@ -3,14 +3,16 @@ import sys
 import os
 from time import perf_counter
 from contextlib import contextmanager
+from functools import partial
+
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Dict, Iterable, Optional, Union
+from typing import Any, Callable, Dict, ClassVar, Iterable, Optional, Union
 from pydantic import BaseModel, PrivateAttr, field, validate_call
  
 
 from depend.utils.configs import LearnerConfig
-from depend.utils.data_loader import DataLoader
+from depend.utils.registers import register_class
 from depend.core.loggers import Logger
 
 import wandb
@@ -18,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 
-_learnerS: Dict[str, Any] = {} # registry
+Registered_Learners: Dict[str, Any] = {} # registry
 
 @contextmanager
 def catchtime() -> float:
@@ -26,32 +28,13 @@ def catchtime() -> float:
     yield lambda: perf_counter() - start
 
 
-def register_learner(name):
-    """Decorator used to register a learner
-    Args:
-        name: Name of the learner type to register
-    """
-
-    def register_class(cls, name):
-        _learnerS[name] = cls
-        setattr(sys.modules[__name__], name, cls)
-        return cls
-
-    if isinstance(name, str):
-        name = name.lower()
-        return lambda c: register_class(c, name)
-
-    cls = name
-    name = cls.__name__
-    register_class(cls, name.lower())
-
-    return cls
 
 class Base_Learner(BaseModel, ABC):
     """
     Implements the functions to run a generic algorithm.
 
     """
+    __registry__: ClassVar[Dict[str, Any]]
     episodes: int
     batch_size: int
 
@@ -73,6 +56,15 @@ class Base_Learner(BaseModel, ABC):
     seed: int = 1000
 
     minibatch_size: Optional[int] = None
+
+    @classmethod
+    def register(cls, name):
+        cls.__registry__[name] = cls
+
+    @classmethod
+    @property
+    def registered_learners(cls):
+         return cls.__registry__
  
     def __post__init__(self):
         if self.tracker == 'wandb':
