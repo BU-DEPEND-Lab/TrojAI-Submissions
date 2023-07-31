@@ -4,6 +4,8 @@ import numpy as np
 
 from pathlib import Path
 
+from depend.core.dependents import Dependent
+
 
 class DataLogger(object):
     """
@@ -68,7 +70,11 @@ class DataLogger(object):
 
             np.save(path, data)
 
-    def log_dependent(self, dependent, epoch=None, full_save=False):
+    def log_dependent(
+            self, 
+            dependent: Dependent, 
+            epoch=None, 
+            full_save=False):
         """
         Log dependent into the log folder.
 

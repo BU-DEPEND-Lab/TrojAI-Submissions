@@ -11,8 +11,15 @@ class Logger(DataLogger, ConsoleLogger):
     automatically a log directory, save numpy data array and the current agent.
 
     """
-    def __init__(self, log_name='', results_dir='./logs', log_console=False,
-                 use_timestamp=False, append=False, seed=None, **kwargs):
+    def __init__(self, 
+                 log_name:str = '', 
+                 results_dir:str = './logs', 
+                 log_console:bool =False,
+                 use_timestamp:bool=False, 
+                 append:bool=False, 
+                 seed:int=None, 
+                 **kwargs
+                 ):
         """
         Constructor.
 

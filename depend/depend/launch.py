@@ -69,7 +69,8 @@ class Sponsor(BaseModel):
             experiment_name = experiment_name,
             result_dir = result_dir
             )
-    
+
+        return dependent.train_detector() 
 
 
 class HyperSponsor(Sponsor): 
@@ -128,7 +129,7 @@ class HyperSponsor(Sponsor):
                 experiment_name = f'{experiment_name}_%d' % trial_id,
                 result_dir = '%s/result_dir/optuna/%d' % (result_dir, trial_id)
             )
-            return dependent.train_detector()[0]
+            return dependent.train_detector() 
 
         study = optuna.create_study(direction="maximize")
         study.optimize(objective, n_trials=n_trials, timeout=timeout)
