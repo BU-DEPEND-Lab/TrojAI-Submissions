@@ -84,9 +84,11 @@ class MaskGen(Dependent, Serializable):
 
         # Prepare the mask generator
         if config.model.mask_gen.model_class == 'vae':
-            self.mask_gent = Basic_FC_VAE(config.model.mask_gent.model_class, self.obs_space)
+            self.mask_gen = Basic_FC_VAE(config.model.mask_gent.model_class, self.obs_space)
+            if config.model.mask_gen.load_from_file:
+                self.mask_gen.load_state_dict(torch.load(config.model.mask_gen.load_from_file))    
 
-        # Configure the mask generator learner
+        # Configure the trainer
         learn_kwargs = dict(config.learner)
         self.learner = torch_learner(**learn_kwargs)
 
@@ -98,6 +100,8 @@ class MaskGen(Dependent, Serializable):
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
             self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0])
+        
+        # Configure the metric functions
         self.metrics = []
         for metric in config.algorithm.metrics:
             if metric == 'auroc':
@@ -257,9 +261,9 @@ class MaskGen(Dependent, Serializable):
             mlflow.end_run()
             mlflow.log_artifacts(self.result_dir, artifact_path="configure_events")
 
-        self.save_mask_gen(best_exps, best_validation_info)
+        self.save_detector(best_exps, best_validation_info)
         return best_score
-    
+
   
     def infer(self, 
                detector_path: str, 
@@ -275,4 +279,9 @@ class MaskGen(Dependent, Serializable):
                 self.logger.epoch_info("Target: %s:%d Probability: %f" % (model_class, i, prob))
         return probs
                     
-       
+    
+        
+    def save_detector(self, exps: torch.Tensor, info: Dict[Any]):
+        torch.save(self.mask_gen.state_dict(), self.config.model.save_dir)
+        self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
+ 
