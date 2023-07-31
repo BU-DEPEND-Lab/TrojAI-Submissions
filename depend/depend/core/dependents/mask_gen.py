@@ -12,12 +12,14 @@ from depend.utils.registers import register
 from depend.utils.format import get_obss_preprocessor
 from depend.utils.models import load_models_dirpath 
 
+from depend.models.vae import VAE
+
 from depend.core.serializable import Serializable
 from depend.core.loggers import Logger
 from depend.core.dependents import Dependent
 from depend.core.learners import torch_learner
 
-from depend.models import conv
+from depend.models import Basic_FC_VAE
 
 
 from torch_ac.utils.penv import DictList, ParallelEnv
@@ -30,6 +32,8 @@ from abc import ABC, abstractmethod
 
 import torch
 import torch.optim as optim
+import torcheval.metrics.BinaryAUROC as BinaryAUROC
+
 import numpy as np
 import random
 
@@ -80,7 +84,7 @@ class MaskGen(Dependent, Serializable):
 
         # Prepare the mask generator
         if config.model.mask_gen.model_class == 'vae':
-            self.mask_gent = vae(config.model.mask_gent.model_class, self.obs_space)
+            self.mask_gent = Basic_FC_VAE(config.model.mask_gent.model_class, self.obs_space)
 
         # Configure the mask generator learner
         learn_kwargs = dict(config.learner)
@@ -94,7 +98,12 @@ class MaskGen(Dependent, Serializable):
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
             self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0])
+        self.metrics = []
+        for metric in config.algorithm.metrics:
+            if metric == 'auroc':
+                self.metrics.append(BinaryAUROC())
         
+
         
     def build_experiment(self):
         # Build a dataset by using every targeted model and exeperiences
@@ -138,7 +147,7 @@ class MaskGen(Dependent, Serializable):
         )
  
         exps = Agent(self.envs, models, self.preprocess_obss, self.logger).run()
-        
+    
         loss_fn = self.build_loss(exps)
         metrics_fn = self.build_metrics(exps)
 
@@ -153,15 +162,56 @@ class MaskGen(Dependent, Serializable):
             loss = None
             for ((model_class, idx_in_class), label) in zip(inputs, labels):
                 model=self.model_dict[model_class][idx_in_class]
+                inputs, mu, log_var = self.mask_gen(exps)
                 if loss is None: 
-                    loss = - label * self.criterion(model(self.mask_gen(exps), model(exps)))
+                    loss = - label * self.criterion(model(inputs), model(exps))
                 else:
-                    loss += - label * self.criterion(model(self.mask_gen(exps), model(exps)))
-            return loss
+                    loss += - label * self.criterion(model(inputs, model(exps)))
+                kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
+                loss += self.config.algorithm.beta * kld_loss
+            return loss, 
         return loss_fn
 
     def build_metrics(self, exps):
-        raise NotImplementedError
+        def metrics_fn(inputs, labels):
+            ## input is the inds of the selected model from a dataset
+            ## label indicates whether the model is poisoned
+            
+            ## store confidences on whether the modes are poisoned 
+            confs = []
+
+            ## store the labels of the models
+            labels = []
+
+            for ((model_class, idx_in_class), label) in zip(inputs, labels):
+                # Get model
+                model=self.model_dict[model_class][idx_in_class]
+                # Generate masked model inputs
+                inputs, _, _ = self.mask_gen(exps)
+                # Models make predictions on the masked inputs
+                preds = model(inputs) 
+                # Models make predictions on the un-masked inputs
+                ys = model(exps)
+                # Confidence equals the rate of false prediction
+                conf = 1. - torch.mean(ys == preds).item()
+                # Store model label
+                labels.append(label)
+                # Get model confidence
+                confs.append(conf)
+            # Initialize the metric info
+            info = {}
+            # Define measuring operation for each metric
+            def compute_metric(metric): 
+                # Reset the measurements
+                metric.reset()
+                # Measure based on the confidences and labels
+                metric.update(torch.tensor([confs]), torch.tensor([labels]))
+                # Return the measurement
+                return metric.compute()
+            # Map the measuring operation to each metric and store in the metric info
+            info = {k: v for k, v in zip(self.config.algorithm.metrics, list(map(compute_metric, self.metrics)))}
+            return info
+        return metrics_fn
  
     def train_detector(self, final_train: bool = True):
         # Run the agent to get experiences

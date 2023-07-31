@@ -7,7 +7,7 @@ from functools import partial
 
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Dict, ClassVar, Iterable, Optional, Union
+from typing import Any, Callable, Dict, ClassVar, Iterable, Optional, Union, Generator
 from pydantic import BaseModel, PrivateAttr, field, validate_call
  
 
@@ -16,9 +16,11 @@ from depend.utils.registers import register_class
 from depend.core.loggers import Logger
 
 import wandb
+
+import torch
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-
-
 
 Registered_Learners: Dict[str, Any] = {} # registry
 
@@ -76,7 +78,6 @@ class Base_Learner(BaseModel, ABC):
                 reinit=True, 
                 config=self.tracker_kwargs
             )
-            self.track = lambda step, prefix, **info: wandb.log(info, step)
         elif self.tracker == 'tensorboard':
             self.writer = SummaryWriter(
                 log_dir=self.logging_dir
@@ -87,15 +88,36 @@ class Base_Learner(BaseModel, ABC):
             wandb.log(info, step)
         elif self.tracker == 'tensorboard':
             self.writer.add_scalar(prefix, info, step)
-
+     
+    def track(cls, func: Generator[Dict[Any]]):
+        def wrapper(
+                obj: Base_Learner, 
+                *args, 
+                **kwargs):
+            summary_gen = obj.func(*args, **kwargs)
+            for episode in range(obj.episode):
+                summary_info = next(summary_gen)
+                obj.summary(episode, 'train', **{k: sum(v)/len(v) for k, v in summary_info})
+            if obj.tracker == 'tensorboard':
+                obj.writer.flush()
+        return wrapper
+    
 
     @abstractmethod
     def train(self,
         logger: Logger,
-        data_loader: DataLoader,
+        dataset: Dataset, 
         loss: Callable,
         optimize: Callable
         
+    )-> Dict[str, float]: ...
+ 
+    @abstractmethod
+    def train_iterator(self,
+        logger: Logger,
+        data_loader: DataLoader,
+        loss: Callable,
+        optimize: Callable
     )-> Dict[str, float]: ...
  
 
@@ -104,7 +126,6 @@ class Base_Learner(BaseModel, ABC):
         self,
         logger: Logger,
         data_loader: DataLoader,
-        eval_fn: Callable,
-        **kwargs
+        eval_fn: Callable 
     )-> Dict[str, float]: ...
  

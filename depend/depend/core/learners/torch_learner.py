@@ -5,16 +5,18 @@ from time import perf_counter
 from contextlib import contextmanager
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Dict, Iterable, Optional, List
+from typing import Any, Callable, Dict, Iterable, Optional, List, Tuple
 from pydantic import BaseModel, PrivateAttr, field
 
-from torch.utils.data import Dataset  
+t  
 from depend.utils.registers import register
 from depend.core.loggers import Logger
 
 from .learner import Registered_Learners, Base_Learner
 
 import torch
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 
 
 @register
@@ -66,59 +68,70 @@ class Torch_Learner(Base_Learner):
             self.learner_kwargs = learner_kwargs
  
 
-    def train(self,
+    def train(
+        self,
         logger: Logger,
-        dataset: Dataset, 
-        loss: Callable,
-        optimize: Callable
+        train_set: Dataset,  
+        loss: Callable[[Iterable[torch.Tensor], Iterable[torch.Tensor]], Tuple[torch.Tensor, Dict[Any]]], 
+        optimize: torch.optim 
     )-> Dict[str, float]:
         
-        dataloader =  torch.utils.data.DataLoader(
-             dataset, 
+        train_loader =  torch.utils.data.DataLoader(
+             train_set, 
              train=True, 
              batch_size = self.batch_size, 
              seed = self.seed, 
              shuffle = True
              )
-         
+        
+        summary_info = {}
+        for episode in range(1, self.episodes + 1):
+            info = self.train_iterator(logger, train_loader, loss, optimize)
+            summary_info.update(info)
+        return summary_info
+
+    @Base_Learner.track 
+    def train_iterator(
+        self,
+        logger: Logger,
+        train_loader: DataLoader, 
+        loss: Callable[[Iterable[torch.Tensor], Iterable[torch.Tensor]], Tuple[torch.Tensor, Dict[Any]]],
+        optimize: torch.optim 
+        ):
         for episode in range(1, self.episodes + 1):
             summary_info = None
-            for i, data in enumerate(dataloader):
+            for i, data in enumerate(train_loader):
                 inputs, labels = data
                 optimize.zero_grad()
                 loss, loss_info = loss(inputs, labels)
                 loss.backward()
                 optimize.step()
                 if summary_info is None:
-                     summary_info = {f'train_{k}': [v] for k, v in loss_info.items()}
+                    summary_info = {f'{k}': [v] for k, v in loss_info.items()}
                 else:
-                     for k, v in loss_info.items():
-                         summary_info[f'train_{k}'].append(v)
-                     
+                    summary_info = {f'{k}': summary_info[k] + [v] for k, v in loss_info.items()}
+                        
                 if i % self.checkpoint_interval == self.checkpoint_interval - 1:
-                    summary_info = {\
-                        k: sum(summary_info[k]) / self.checkpoint_interval for k, v in summary_info
-                        }
-                    self.summary(episode, 'train', **summary_info)
-                    logger.info(f"Episode {episode} | Batch {i} | \
-                                {' | '.join([f'{k} : {v}' for k, v in summary_info.items()])}"
+                    logger.info(f"Batch {i} | \
+                                {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
                                 )
-
-        if self.summaryer == 'tensorboard':
-            self.writer.flush()
-        return summary_info
-  
+            logger.info(f"Episode {episode} | Train: \
+                                {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
+                                )
+          
+            yield summary_info
+            
+ 
     def evaluate(
         self,
         logger: Logger,
         dataset: Dataset,
-        metrics: Callable,
-        **kwargs
+        metrics: Callable
     )-> Dict[str, float]: 
         dataloader =  torch.utils.data.DataLoader(
              dataset, 
              train=False, 
-             batch_size = self.minibatch_size
+             batch_size = self.batch_size
              ) 
         summary_info = {}
         with torch.no_grad():
@@ -126,20 +139,13 @@ class Torch_Learner(Base_Learner):
                 inputs, labels = data
                 eval_info = metrics(inputs, labels)
                 if summary_info is None:
-                    summary_info = {k: [v] for k, v in eval_info.items()}
+                    summary_info = {f'{k}': [v] for k, v in eval_info.items()}
                 else:
-                    for k, v in eval_info.items():
-                        summary_info[k].append(v)
+                    summary_info = {f'{k}': summary_info[k] + [v] for k, v in eval_info.items()}
 
             summary_info = {k: sum(v) / len(v) for k, v in summary_info}
-            self.summary(
-                kwargs.get('step', 0), 
-                kwargs.get('prefix', 'evaluation'), 
-                **summary_info
-                )
-            logger.info(f"{kwargs.get('prefix', 'Evaluation')}: \
+            
+            logger.info(f"Evaluation: \
                         {' | '.join([f'{k} : {v}' for k, v in summary_info.items()])}"
                         )
-        if self.summaryer == 'tensorboard':
-            self.writer.flush()
         return summary_info
