@@ -75,6 +75,13 @@ class Dependent(Serializable, ABC):
             result_dir: str = ...
             ):
         raise NotImplementedError
-     
-     
-       
+
+    @abstractmethod 
+    @property
+    def loss(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    @property
+    def metrics(self):
+        raise NotImplementedError
