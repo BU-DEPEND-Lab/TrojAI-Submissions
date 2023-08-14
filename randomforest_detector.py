@@ -12,9 +12,7 @@ import jsonpickle
 import pickle
 import numpy as np
 
-
-from depend.core.dependents import MaskGen
-#from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 from utils.abstract import AbstractDetector
 from utils.models import load_model, load_models_dirpath
@@ -24,7 +22,6 @@ import torch_ac
 import gym
 from gym_minigrid.wrappers import ImgObsWrapper
 
- 
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):

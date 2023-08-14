@@ -1,7 +1,7 @@
 from pydantic import BaseModel, PrivateAttr, field
 from dataclasses import fields
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
-
+from functools import partial
 
 from depend.lib.agent import Agent
 
@@ -109,7 +109,7 @@ class MaskGen(Dependent, Serializable):
         
 
         
-    def build_experiment(self):
+    def collect_experience(self):
         # Build a dataset by using every targeted model and exeperiences
 
         # First bipartie the model table conditioned on whether the model is poisoned
@@ -152,15 +152,13 @@ class MaskGen(Dependent, Serializable):
  
         exps = Agent(self.envs, models, self.preprocess_obss, self.logger).run()
     
-        loss_fn = self.build_loss(exps)
-        metrics_fn = self.build_metrics(exps)
-
-        return dataset, exps, loss_fn, metrics_fn
-    
-    
-    def build_loss(self, exps): 
+       
+        return dataset, exps 
+ 
+    @property
+    def loss(self): 
         # Run the model to get the action 
-        def loss_fn(inputs, labels):
+        def loss_fn(exps, inputs, labels):
             ## input is the inds of the selected model from a dataset
             ## Get the models
             loss = None
@@ -174,10 +172,11 @@ class MaskGen(Dependent, Serializable):
                 kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
                 loss += self.config.algorithm.beta * kld_loss
             return loss, 
-        return loss_fn
-
-    def build_metrics(self, exps):
-        def metrics_fn(inputs, labels):
+        return lambda exps: partial(loss_fn, exps)
+ 
+    @property
+    def metrics(self):
+        def metrics_fn(exps, inputs, labels):
             ## input is the inds of the selected model from a dataset
             ## label indicates whether the model is poisoned
             
@@ -215,7 +214,7 @@ class MaskGen(Dependent, Serializable):
             # Map the measuring operation to each metric and store in the metric info
             info = {k: v for k, v in zip(self.config.algorithm.metrics, list(map(compute_metric, self.metrics)))}
             return info
-        return metrics_fn
+        return lambda exps: partial(metrics_fn, exps)
  
     def train_detector(self, final_train: bool = True):
         # Run the agent to get experiences
@@ -232,7 +231,10 @@ class MaskGen(Dependent, Serializable):
             for epoch in range(1, self.epochs + 1):
                 best_score = None
                 best_exps = None
-                dataset, exps, loss_fn, metrics_fn = self.build_experiment()
+                dataset, exps = self.collect_experience()
+                loss_fn = self.loss(exps)
+                metrics_fn = self.metrics(exps)
+
                 suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_split)
                 prefix_split = None
                 for _ in range(1, self.config.data.num_splits):
