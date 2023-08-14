@@ -7,7 +7,7 @@ from functools import partial
 
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Dict, ClassVar, Iterable, Optional, Union, Generator
+from typing import Any, Callable, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
 from pydantic import BaseModel, PrivateAttr, field, validate_call
  
 
@@ -22,7 +22,10 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-Registered_Learners: Dict[str, Any] = {} # registry
+import logging
+logger = logging.getLogger(__name__)
+
+ 
 
 @contextmanager
 def catchtime() -> float:
@@ -37,11 +40,12 @@ class Base_Learner(BaseModel, ABC):
 
     """
     __registry__: ClassVar[Dict[str, Any]]
-    episodes: int
-    batch_size: int
 
-    checkpoint_interval: int
-    eval_interval: int
+    episodes: int = 2
+    batch_size: int = 32
+ 
+    checkpoint_interval: int = 1
+    eval_interval: int = 1
 
     project_name: str = 'DEPEND'
     entity_name: Optional[str] = None
@@ -51,14 +55,12 @@ class Base_Learner(BaseModel, ABC):
     save_best: bool = True
     save_optimizer: bool = True
 
-    tracker: Optional[str] = "wandb"
+    tracker: Optional[Literal['wandb', 'tensorboard', 'comet']] = None #"wandb"
     tracker_kwargs: Dict[str, Any] = {}
     logging_dir: Optional[str] = None
 
     seed: int = 1000
-
-    minibatch_size: Optional[int] = None
-
+ 
     @classmethod
     def register(cls, name):
         cls.__registry__[name] = cls
@@ -67,6 +69,26 @@ class Base_Learner(BaseModel, ABC):
     @property
     def registered_learners(cls):
          return cls.__registry__
+    
+    @classmethod
+    def configure(cls, config: LearnerConfig):
+        kwargs = {
+            'episodes': config.episodes, 
+            'batch_size': config.batch_size,
+            'checkpoint_interval': config.checkpoint_interval,
+            'eval_interval': config.eval_interval,
+            'project_name': config.project_name,
+            'entity_name': config.entity_name,
+            'group_name': config.group_name,
+            'checkpoint_dir': config.checkpoint_dir,
+            'save_best': config.save_best,
+            'save_optimizer': config.save_optimizer,
+            'tracker': config.tracker,
+            'tracker_kwargs': config.tracker_kwargs,
+            'logging_dir': config.logging_dir,
+            'seed': config.seed,
+        }
+        return cls(**kwargs) 
  
     def __post__init__(self):
         if self.tracker == 'wandb':
@@ -82,13 +104,20 @@ class Base_Learner(BaseModel, ABC):
             self.writer = SummaryWriter(
                 log_dir=self.logging_dir
                 )
+        elif self.tracker is not None:
+            raise NotImplementedError
             
     def summary(self, step, prefix, **info):
         if self.tracker == 'wandb':
             wandb.log(info, step)
         elif self.tracker == 'tensorboard':
             self.writer.add_scalar(prefix, info, step)
-     
+        elif self.tracker is not None:
+            raise NotImplementedError
+        else:
+            logger.info(f"Step {step}: {prefix} info: {info}")
+    
+    @classmethod
     def track(cls, func: Generator[Dict[Any]]):
         def wrapper(
                 obj: Base_Learner, 

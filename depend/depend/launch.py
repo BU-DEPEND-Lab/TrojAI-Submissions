@@ -1,5 +1,5 @@
 from pydantic import BaseModel, PrivateAttr, field
-from dataclasses import fields
+from dataclasses import dataclass
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
 
 from depend.core.dependents import Dependent
@@ -7,40 +7,13 @@ from depend.utils.configs import DPConfig, AlgorithmConfig, ModelConfig, Optimiz
 import optuna
 from optuna.trial import TrialState
 
-
-class Sponsor(BaseModel):
-    __model_schema__: Dict[str, Dict[Any]]
-    __learner_schema__: Dict[str, Dict[Any]]
-    __algorithm_schema__: Dict[str, Dict[Any]]
-    __optimizer_schema__: Dict[str, Dict[Any]]
-    __data_schema__: Dict[str, Dict[Any]]
-     
-    @property
-    def model_schema(self):
-        return self.__model__schema__
-    
-    @property
-    def learner_schema(self):
-        return self.__learner_schema__
-    
-    @property
-    def algorithm_schema(self):
-        return self.__algorithm_schema__
-    
-    @property
-    def optimizer_schema(self):
-        return self.__optimizer_schema__
-    
-    @property
-    def data_schema(self):
-        return self.__data_schema__
-    
-
-    class Config:
-        extra = "ignore"
-
-    _dp_kwargs = PrivateAttr(default_factory=dict)
-    
+@dataclass
+class Sponsor:
+    model_schema: Dict[str, Dict[Any]]
+    learner_schema: Dict[str, Dict[Any]]
+    algorithm_schema: Dict[str, Dict[Any]]
+    optimizer_schema: Dict[str, Dict[Any]]
+    data_schema: Dict[str, Dict[Any]]
      
     def fund(
             self, 

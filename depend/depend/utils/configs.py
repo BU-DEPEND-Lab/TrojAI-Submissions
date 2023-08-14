@@ -1,11 +1,14 @@
 from copy import deepcopy
 from dataclass import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Union, Literal
+from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
 from pydantic import BaseModel, Field
 
 import yaml
 import json
 from abc import ABC, abstractmethod
+
+import torch
+import numpy
 
 def merge(base: Dict, update: Dict, updated: Set) -> Dict:
     "Recursively updates a nested dictionary with new values"
@@ -96,12 +99,11 @@ class DataConfig(BaseConfig):
 
     
     """
-    dataset_paths: Dict[str, str] = field(default_factory=dict)
     num_workers: str = 1
-    overwrite_cache: bool = True
-    type: str = 'torch'
+    type: Union[type(torch), type(numpy)] = torch
     num_splits: int = 3
-    columns: List[str] = ...
+    max_train_samples: int = 20
+ 
     
     
     
@@ -118,6 +120,7 @@ class AlgorithmConfig(BaseConfig):
     """
 
     task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs']
+    metrics: List[str] = ['auroc']
 
     
     def __post__init__(self, **kwargs):
@@ -140,18 +143,21 @@ class BaseModelConfig(BaseConfig):
     :type kwargs: Dict[str, Any]
     """
     model_class: str
-    input_size: int
-    output_size: int
+    input_size: Optional[int] = None
+    output_size: Optional[int] = None
+    load_from_file: Optional[str] = None
     
     def __post__init__(self, **kwargs):
         for k, v in kwargs:
             setattr(self, k, v)
     
-class ModelConfig(BaseModelConfig):
+class ModelConfig:
     """
     Config for multiple models
     """
-    def __init__(self, **kwargs):
+    save_dir: str = 'saved_models'
+
+    def from_dict(self, **kwargs):
         for k, v in kwargs:
             setattr(self, k, BaseModelConfig.from_dict(v))
 
@@ -167,8 +173,8 @@ class OptimizerConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """ 
-    optimizer_class: str = ...
-    lr: float = ...
+    optimizer_class: str = 'RAdam'
+    lr: float = 1e-3
     kwargs: field(default_factory = dict) = ...
     
     def __post__init__(self, **kwargs):

@@ -1,4 +1,5 @@
 {
+	"method": "mask_gen",
 	"train_input_features": 100,
 	"train_weight_rso_seed": 1234,
 	"train_weight_params_mean": 0.9,

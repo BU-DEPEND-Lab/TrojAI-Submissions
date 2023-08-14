@@ -11,8 +11,9 @@ from pydantic import BaseModel, PrivateAttr, field
 t  
 from depend.utils.registers import register
 from depend.core.loggers import Logger
+from depend.utils.configs import LearnerConfig
 
-from .learner import Registered_Learners, Base_Learner
+from depend.core.learners.learner import Base_Learner
 
 import torch
 from torch.utils.data import Dataset
@@ -25,49 +26,6 @@ class Torch_Learner(Base_Learner):
     Implements the functions to run a generic algorithm.
 
     """
-    def __init__(
-            self,
-            episodes: int,
-            batch_size: int,
-
-            checkpoint_interval: int,
-            eval_interval: int,
- 
-            project_name: str = 'DEPEND',
-            entity_name: Optional[str] = None,
-            group_name: Optional[str] = None,
-
-            checkpoint_dir: str = "ckpts",
-            save_best: bool = True,
-            save_optimizer: bool = True,
-
-            summaryer: Optional[str] = "wandb",
-            summaryer_kwargs: Dict[str, Any] = {},
-            logging_dir: Optional[str] = None,
-        
-            seed: int = 1000,
-
-            learner_kwargs: Dict[str, Any] = field(default_factory=dict),  # Extra keyword arguments for the train
-            ):
-            super(Torch_Learner, self).__init__(
-                  episodes,
-                  batch_size,
-                  checkpoint_interval,
-                  eval_interval,
-                  project_name,
-                  entity_name,
-                  group_name,
-                  checkpoint_dir,
-                  save_best,
-                  save_optimizer,
-                  summaryer,
-                  summaryer_kwargs,
-                  logging_dir,
-                  seed
-            )
-            self.learner_kwargs = learner_kwargs
- 
-
     def train(
         self,
         logger: Logger,

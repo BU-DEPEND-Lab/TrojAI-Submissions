@@ -6,7 +6,7 @@ from functools import partial
 from depend.lib.agent import Agent
 
 from depend.utils.configs import DPConfig
-from depend.utils.data_management import DataSplit
+from depend.depend.utils.data_split import DataSplit
 from depend.utils.env import make_env
 from depend.utils.registers import register
 from depend.utils.format import get_obss_preprocessor
@@ -19,7 +19,7 @@ from depend.core.loggers import Logger
 from depend.core.dependents import Dependent
 from depend.core.learners import torch_learner
 
-from depend.models import Basic_FC_VAE
+from depend.models import Basic_FC_VAE, Standard_CNN_VAE
 
 
 from torch_ac.utils.penv import DictList, ParallelEnv
@@ -46,7 +46,7 @@ import mlflow.pytorch
 
 
 @register
-class MaskGen(Dependent, Serializable):
+class MaskGen(Dependent):
     """
     ########## Mask Gen ############
     # Build a dataset of model indices and model labels
@@ -84,13 +84,12 @@ class MaskGen(Dependent, Serializable):
 
         # Prepare the mask generator
         if config.model.mask_gen.model_class == 'vae':
-            self.mask_gen = Basic_FC_VAE(config.model.mask_gent.model_class, self.obs_space)
+            self.mask_gen = eval(config.model.mask_gent.model_class)(self.obs_space)
             if config.model.mask_gen.load_from_file:
                 self.mask_gen.load_state_dict(torch.load(config.model.mask_gen.load_from_file))    
 
         # Configure the trainer
-        learn_kwargs = dict(config.learner)
-        self.learner = torch_learner(**learn_kwargs)
+        self.learner = torch_learner.configure(config.learner)
 
         # Configure the mask generator optimizer
         optimizer_kwargs = config.optimizer.kwargs

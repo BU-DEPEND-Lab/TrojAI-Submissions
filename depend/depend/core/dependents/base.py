@@ -1,6 +1,6 @@
  
 from dataclasses import fields
-from typing import Any, Dict, List, ClassVar Literal, TypedDict, Union, cast, get_type_hints
+from typing import Any, Dict, List, ClassVar, Callable, Literal, TypedDict, Union, cast, get_type_hints
 import os
 
 import depend.algorithms as algorithms
@@ -21,7 +21,7 @@ import pandas as pd
 
 class Dependent(Serializable, ABC):
     __registry__: ClassVar[Dict[str, Any]] = {}
-    model_dict: Dict[str, List[nn.module]] = ...
+    model_dict: Dict[str, List[nn.Module]] = ...
     model_repr_dict: Dict[str, Dict[Any]] = ...
     model_table: pa.Table = ...
     clean_example_dict: Dict[str, Dict[str, Any]] = ...
@@ -38,8 +38,7 @@ class Dependent(Serializable, ABC):
          return cls.__registry__
     
     @classmethod
-    def load_from_dataset(cls, path: str): 
-        model_path_list = sorted([os.path.join(path, model) for model in os.listdir(path)])
+    def get_assets(cls, model_path_list: List[str]): 
         data_infos = load_models_dirpath(model_path_list)
         model_ground_truth_dict = data_infos[2]
         # Convert the model_ground_truth dictionary to a DataFrame
