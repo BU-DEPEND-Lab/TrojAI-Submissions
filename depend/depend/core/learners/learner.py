@@ -60,6 +60,9 @@ class Base_Learner(BaseModel, ABC):
     logging_dir: Optional[str] = None
 
     seed: int = 1000
+
+
+
  
     @classmethod
     def register(cls, name):
@@ -72,6 +75,7 @@ class Base_Learner(BaseModel, ABC):
     
     @classmethod
     def configure(cls, config: LearnerConfig):
+        """
         kwargs = {
             'episodes': config.episodes, 
             'batch_size': config.batch_size,
@@ -88,6 +92,8 @@ class Base_Learner(BaseModel, ABC):
             'logging_dir': config.logging_dir,
             'seed': config.seed,
         }
+        """
+        kwargs = config.to_dict()
         return cls(**kwargs) 
  
     def __post__init__(self):

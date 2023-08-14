@@ -40,6 +40,9 @@ class BaseConfig(BaseModel, ABC):
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):
         return cls(**config)
+    
+    def to_dict(self):
+        return self.__dict__
    
     @classmethod
     def update(cls, baseconfig: Dict, config: Dict):
@@ -105,7 +108,9 @@ class DataConfig(BaseConfig):
     max_train_samples: int = 20
  
     
-    
+    class Config:
+        extra = "forbid"  # Prevent extra fields from being accepted
+
     
 
 class AlgorithmConfig(BaseConfig):
@@ -125,10 +130,7 @@ class AlgorithmConfig(BaseConfig):
     
     def __post__init__(self, **kwargs):
         for k, v in kwargs:
-            if type(v) is dict:
-                setattr(self, k, AlgorithmConfig.from_dict(v))
-            else:
-                setattr(self, k, v)
+            setattr(self, k, v)
 
 
 
@@ -234,8 +236,7 @@ class LearnerConfig(BaseConfig):
     
     :type minibatch_size: int
     """
-    name: str
-    epochs: int
+    episodes: int
     batch_size: int
 
     checkpoint_interval: int
@@ -259,7 +260,9 @@ class LearnerConfig(BaseConfig):
 
     minibatch_size: Optional[int] = None
 
- 
+    class Config:
+        extra = "forbid"  # Prevent extra fields from being accepted
+
 
 
 class DPConfig(BaseConfig):

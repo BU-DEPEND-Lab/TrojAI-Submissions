@@ -26,6 +26,10 @@ class Torch_Learner(Base_Learner):
     Implements the functions to run a generic algorithm.
 
     """
+
+    class Config:
+        allow_extra = True
+
     def train(
         self,
         logger: Logger,

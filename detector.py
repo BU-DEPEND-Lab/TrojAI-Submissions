@@ -145,9 +145,9 @@ class Detector(AbstractDetector):
                 }
             },
             'learner_schema': {
-                
             },
             'algorithm_schema': {
+                'task': 'RL',
                 'criterion': 'kl',
                 'beta': 1,
 
@@ -161,6 +161,7 @@ class Detector(AbstractDetector):
             }
             
         }
+        Sponsor(**config).fund(dependent, 'test', 'result')
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
