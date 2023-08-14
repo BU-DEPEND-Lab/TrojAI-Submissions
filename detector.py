@@ -141,7 +141,7 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'mask_gen': {
-                    'model_class': 'Basic_FC_VAE'
+                    'name': 'Basic_FC_VAE'
                 }
             },
             'learner_schema': {

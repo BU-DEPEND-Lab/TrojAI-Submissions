@@ -8,7 +8,7 @@ from functools import partial
 
 from abc import ABC, abstractmethod      
 from typing import Any, Callable, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
-from pydantic import BaseModel, PrivateAttr, field, validate_call
+from pydantic import BaseModel, PrivateAttr, Field, validate_call
  
 
 from depend.utils.configs import LearnerConfig
@@ -96,7 +96,7 @@ class Base_Learner(BaseModel, ABC):
         kwargs = config.to_dict()
         return cls(**kwargs) 
  
-    def __post__init__(self):
+    def __post_init__(self):
         if self.tracker == 'wandb':
             wandb.init(
                 project=self.project_name, 

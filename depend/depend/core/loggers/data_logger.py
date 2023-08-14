@@ -4,7 +4,7 @@ import numpy as np
 
 from pathlib import Path
 
-from depend.core.dependents import Dependent
+from depend.core.dependents.base import Dependent
 
 
 class DataLogger(object):

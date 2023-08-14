@@ -3,11 +3,9 @@ from dataclasses import fields
 from typing import Any, Dict, List, ClassVar, Callable, Literal, TypedDict, Union, cast, get_type_hints
 import os
 
-import depend.algorithms as algorithms
 from depend.utils.configs import DPConfig
 from depend.utils.models import load_models_dirpath 
 from depend.core.serializable import Serializable
-from depend.core.loggers import Logger
 
 from abc import ABC, abstractmethod    
 
@@ -17,12 +15,14 @@ import torch.nn as nn
 import pyarrow as pa
 import pandas as pd
 
+import logging
+logger = logging.getLogger(__name__)
 
 
-class Dependent(Serializable, ABC):
+class Dependent(ABC):
     __registry__: ClassVar[Dict[str, Any]] = {}
     model_dict: Dict[str, List[nn.Module]] = ...
-    model_repr_dict: Dict[str, Dict[Any]] = ...
+    model_repr_dict: Dict[str, Dict[Any, Any]] = ...
     model_table: pa.Table = ...
     clean_example_dict: Dict[str, Dict[str, Any]] = ...
     poisoned_example_dict: Dict[str, Dict[str, Any]] = ...
@@ -40,6 +40,12 @@ class Dependent(Serializable, ABC):
     @classmethod
     def get_assets(cls, model_path_list: List[str]): 
         data_infos = load_models_dirpath(model_path_list)
+        logger.info(f"Loaded model_dict {data_infos[0].keys()}")
+        logger.info(f"Loaded model_repr_dict {data_infos[1].keys()}")
+        logger.info(f"Loaded model_ground_truth_dict {data_infos[2]}")
+        logger.info(f"Loaded clean models {data_infos[3]}")
+        logger.info(f"Loaded poisoned models {data_infos[4]}")
+
         model_ground_truth_dict = data_infos[2]
         # Convert the model_ground_truth dictionary to a DataFrame
         # Allocate a row for each element in the lists
@@ -75,12 +81,11 @@ class Dependent(Serializable, ABC):
             ):
         raise NotImplementedError
 
-    @abstractmethod 
-    @property
-    def loss(self):
-        raise NotImplementedError
-
+  
     @abstractmethod
-    @property
-    def metrics(self):
+    def get_loss(self):
+        raise NotImplementedError
+ 
+    @abstractmethod
+    def get_metrics(self):
         raise NotImplementedError

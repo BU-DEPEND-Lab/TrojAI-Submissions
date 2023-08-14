@@ -6,14 +6,13 @@ from contextlib import contextmanager
 
 from abc import ABC, abstractmethod      
 from typing import Any, Callable, Dict, Iterable, Optional, List, Tuple
-from pydantic import BaseModel, PrivateAttr, field
-
-t  
-from depend.utils.registers import register
+   
 from depend.core.loggers import Logger
+from depend.core.learners.base import Base_Learner
+ 
+from depend.utils.registers import register
 from depend.utils.configs import LearnerConfig
 
-from depend.core.learners.learner import Base_Learner
 
 import torch
 from torch.utils.data import Dataset

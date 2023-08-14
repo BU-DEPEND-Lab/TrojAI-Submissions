@@ -54,7 +54,7 @@ class Basic_FC_VAE(nn.Module):
     def dec(self, emb):
         return self.decoder(emb)
     
-    def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> Tensor:
+    def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
         """
         Will a single z be enough ti compute the expectation
         for the loss??
@@ -71,7 +71,7 @@ class Basic_FC_VAE(nn.Module):
         z = self.reparameterize(mu, log_var)
         obs_ = self.dec(z)
         return obs_, mu, log_var
-
+ 
 class Standard_CNN_VAE(nn.Module):
     """
     CNN VAE model for Image Space of Atari gym environments training with the torch_ac library.

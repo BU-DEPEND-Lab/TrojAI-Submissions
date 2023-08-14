@@ -4,15 +4,15 @@ from __future__ import annotations
 from abc import ABC
 from typing import Any, Dict, List, Tuple, Callable, Literal, TypedDict, Union, cast
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, PrivateAttr, validator
 
 from depend.core.loggers import Logger
-from depend.lib.utils.format import get_obss_preprocessor
+
 
 import torch
 import torch.nn as nn
 
-from torch_ac.utils.penv import DictList, ParallelEnv
+from torch_ac.utils import ParallelEnv
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -23,7 +23,11 @@ class Agent(BaseModel):
     acmodels: List[nn.Module] = ...
     proprocess_obss: Callable = ...
     logger: Logger = ...
- 
+    
+    class Config:
+        arbitrary_types_allowed = True  # Allow custom classes without validation
+
+
 
     def __pos_init__(self):
         for acmodel in self.acmodels:

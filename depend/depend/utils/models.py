@@ -10,8 +10,7 @@ import numpy as np
 import json 
 
 import logging
-logger = logging.basicConfig(level=logging.info,
-                    format='%(asctime)s %(message)')
+logger = logging.getLogger(__name__)
 
 
 def create_layer_map(model_repr_dict):
@@ -96,7 +95,7 @@ def load_examples(model_dirpath: str, clean = True):
                     idx = examples_dir_entry.name.split('.json')[0]
                     label = json.load(examples_dir_entry.path)
                     labels[idx] = label
-                elif examples_dir_entry.name == 'env-string.txt'):
+                elif examples_dir_entry.name == 'env-string.txt':
                     idx = examples_dir_entry.name.split('.txt')[0]
                     with open('data.txt', 'r') as file:
                         idx = file.read().replace('\n', '')

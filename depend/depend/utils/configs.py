@@ -1,5 +1,5 @@
 from copy import deepcopy
-from dataclass import dataclass, field
+from dataclasses import field
 from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
 from pydantic import BaseModel, Field
 
@@ -103,7 +103,6 @@ class DataConfig(BaseConfig):
     
     """
     num_workers: str = 1
-    type: Union[type(torch), type(numpy)] = torch
     num_splits: int = 3
     max_train_samples: int = 20
  
@@ -124,11 +123,13 @@ class AlgorithmConfig(BaseConfig):
     :type kwargs: Dict[str, Any]
     """
 
-    task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs']
+    task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
 
+    class Config:
+        allow_extra = True
     
-    def __post__init__(self, **kwargs):
+    def __post_init__(self, **kwargs):
         for k, v in kwargs:
             setattr(self, k, v)
 
@@ -144,16 +145,16 @@ class BaseModelConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
-    model_class: str
+    name: str
     input_size: Optional[int] = None
     output_size: Optional[int] = None
     load_from_file: Optional[str] = None
     
-    def __post__init__(self, **kwargs):
+    def __post_init__(self, **kwargs):
         for k, v in kwargs:
             setattr(self, k, v)
     
-class ModelConfig:
+class ModelConfig(BaseConfig):
     """
     Config for multiple models
     """
@@ -177,9 +178,11 @@ class OptimizerConfig(BaseConfig):
     """ 
     optimizer_class: str = 'RAdam'
     lr: float = 1e-3
-    kwargs: field(default_factory = dict) = ...
     
-    def __post__init__(self, **kwargs):
+    class Config:
+        allow_extra = True
+    
+    def __post_init__(self, **kwargs):
         for k, v in kwargs:
             setattr(self, k, v)
 
@@ -271,6 +274,11 @@ class DPConfig(BaseConfig):
     optimizer: OptimizerConfig
     learner: LearnerConfig
     data: DataConfig
+
+    class Config:
+        extra = "forbid"  # Prevent extra fields from being accepted
+
+
     
     def load_file(cls, fp: str):
         """

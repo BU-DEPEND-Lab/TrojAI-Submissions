@@ -1,5 +1,3 @@
-from pydantic import BaseModel, PrivateAttr, field
-from dataclasses import fields
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
 from functools import partial
 
@@ -12,17 +10,17 @@ from depend.utils.registers import register
 from depend.utils.format import get_obss_preprocessor
 from depend.utils.models import load_models_dirpath 
 
-from depend.models.vae import VAE
+from depend.models.vae import Basic_FC_VAE, Standard_CNN_VAE
 
 from depend.core.serializable import Serializable
 from depend.core.loggers import Logger
-from depend.core.dependents import Dependent
+from depend.core.dependents.base import Dependent
 from depend.core.learners import torch_learner
 
 from depend.models import Basic_FC_VAE, Standard_CNN_VAE
 
 
-from torch_ac.utils.penv import DictList, ParallelEnv
+from torch_ac.utils import DictList, ParallelEnv
 import torch.nn as nn
 
 import pyarrow as pa
@@ -78,15 +76,11 @@ class MaskGen(Dependent):
         self.envs = ParallelEnv(envs)
         # Get observation preprocessor
         self.obs_space, self.preprocess_obss = get_obss_preprocessor(self.envs.observation_space)
-        
-        # Build experience collector
-        self.agent = self.build_agent()
 
         # Prepare the mask generator
-        if config.model.mask_gen.model_class == 'vae':
-            self.mask_gen = eval(config.model.mask_gent.model_class)(self.obs_space)
-            if config.model.mask_gen.load_from_file:
-                self.mask_gen.load_state_dict(torch.load(config.model.mask_gen.load_from_file))    
+        self.mask_gen = eval(config.model.mask_gent.name)(self.obs_space)
+        if config.model.mask_gen.load_from_file:
+            self.mask_gen.load_state_dict(torch.load(config.model.mask_gen.load_from_file))    
 
         # Configure the trainer
         self.learner = torch_learner.configure(config.learner)
@@ -154,12 +148,13 @@ class MaskGen(Dependent):
        
         return dataset, exps 
  
-    @property
-    def loss(self): 
+ 
+    def get_loss(self, exps: torch.Tensor): 
         # Run the model to get the action 
-        def loss_fn(exps, inputs, labels):
+        def loss_fn(inputs, labels):
             ## input is the inds of the selected model from a dataset
             ## Get the models
+            nonlocal exps
             loss = None
             for ((model_class, idx_in_class), label) in zip(inputs, labels):
                 model=self.model_dict[model_class][idx_in_class]
@@ -170,15 +165,15 @@ class MaskGen(Dependent):
                     loss += - label * self.criterion(model(inputs, model(exps)))
                 kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
                 loss += self.config.algorithm.beta * kld_loss
-            return loss, 
-        return lambda exps: partial(loss_fn, exps)
+            return loss
+        return loss_fn
  
-    @property
-    def metrics(self):
-        def metrics_fn(exps, inputs, labels):
+    def get_metrics(self, exps: torch.Tensor): 
+        def metrics_fn(inputs, labels):
             ## input is the inds of the selected model from a dataset
             ## label indicates whether the model is poisoned
-            
+            nonlocal exps
+
             ## store confidences on whether the modes are poisoned 
             confs = []
 
@@ -213,7 +208,7 @@ class MaskGen(Dependent):
             # Map the measuring operation to each metric and store in the metric info
             info = {k: v for k, v in zip(self.config.algorithm.metrics, list(map(compute_metric, self.metrics)))}
             return info
-        return lambda exps: partial(metrics_fn, exps)
+        return metrics_fn 
  
     def train_detector(self, final_train: bool = True):
         # Run the agent to get experiences
@@ -231,8 +226,8 @@ class MaskGen(Dependent):
                 best_score = None
                 best_exps = None
                 dataset, exps = self.collect_experience()
-                loss_fn = self.loss(exps)
-                metrics_fn = self.metrics(exps)
+                loss_fn = self.get_loss(exps)
+                metrics_fn = self.get_metrics(exps)
 
                 suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_split)
                 prefix_split = None
