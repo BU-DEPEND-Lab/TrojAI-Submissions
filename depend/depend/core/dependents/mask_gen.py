@@ -16,8 +16,7 @@ from depend.core.serializable import Serializable
 from depend.core.loggers import Logger
 from depend.core.dependents.base import Dependent
 from depend.core.learners import torch_learner
-
-from depend.models import Basic_FC_VAE, Standard_CNN_VAE
+ 
 
 
 from torch_ac.utils import DictList, ParallelEnv
@@ -30,7 +29,7 @@ from abc import ABC, abstractmethod
 
 import torch
 import torch.optim as optim
-import torcheval.metrics.BinaryAUROC as BinaryAUROC
+from torcheval.metrics import BinaryAUROC
 
 import numpy as np
 import random
@@ -277,7 +276,7 @@ class MaskGen(Dependent):
                     
     
         
-    def save_detector(self, exps: torch.Tensor, info: Dict[Any]):
+    def save_detector(self, exps: torch.Tensor, info: Dict[Any, Any]):
         torch.save(self.mask_gen.state_dict(), self.config.model.save_dir)
         self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
  

@@ -33,7 +33,10 @@ class Torch_Learner(Base_Learner):
         self,
         logger: Logger,
         train_set: Dataset,  
-        loss: Callable[[Iterable[torch.Tensor], Iterable[torch.Tensor]], Tuple[torch.Tensor, Dict[Any]]], 
+        loss: Callable[\
+            [Iterable[torch.Tensor], 
+             Iterable[torch.Tensor]
+             ], Tuple[torch.Tensor, Dict[Any, Any]]], 
         optimize: torch.optim 
     )-> Dict[str, float]:
         
@@ -56,7 +59,10 @@ class Torch_Learner(Base_Learner):
         self,
         logger: Logger,
         train_loader: DataLoader, 
-        loss: Callable[[Iterable[torch.Tensor], Iterable[torch.Tensor]], Tuple[torch.Tensor, Dict[Any]]],
+        loss: Callable[\
+            [Iterable[torch.Tensor], 
+             Iterable[torch.Tensor]
+             ], Tuple[torch.Tensor, Dict[Any, Any]]],
         optimize: torch.optim 
         ):
         for episode in range(1, self.episodes + 1):

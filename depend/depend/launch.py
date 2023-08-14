@@ -1,19 +1,20 @@
-from pydantic import BaseModel, PrivateAttr, field
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
 
-from depend.core.dependents import Dependent
+from depend.core.dependents.base import Dependent
 from depend.utils.configs import DPConfig, AlgorithmConfig, ModelConfig, OptimizerConfig, LearnerConfig, DataConfig
+
 import optuna
 from optuna.trial import TrialState
 
 @dataclass
 class Sponsor:
-    model_schema: Dict[str, Dict[Any]]
-    learner_schema: Dict[str, Dict[Any]]
-    algorithm_schema: Dict[str, Dict[Any]]
-    optimizer_schema: Dict[str, Dict[Any]]
-    data_schema: Dict[str, Dict[Any]]
+    model_schema: Dict[str, Dict[Any, Any]]
+    learner_schema: Dict[str, Dict[Any, Any]]
+    algorithm_schema: Dict[str, Dict[Any, Any]]
+    optimizer_schema: Dict[str, Dict[Any, Any]]
+    data_schema: Dict[str, Dict[Any, Any]]
      
     def fund(
             self, 

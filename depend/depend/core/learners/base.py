@@ -7,7 +7,7 @@ from functools import partial
 
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
+from typing import Any, Callable, List, Set, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
 from pydantic import BaseModel, PrivateAttr, Field, validate_call
  
 
@@ -39,7 +39,7 @@ class Base_Learner(BaseModel, ABC):
     Implements the functions to run a generic algorithm.
 
     """
-    __registry__: ClassVar[Dict[str, Any]]
+    __registry__: ClassVar[Set[str]] = set()
 
     episodes: int = 2
     batch_size: int = 32
@@ -61,12 +61,12 @@ class Base_Learner(BaseModel, ABC):
 
     seed: int = 1000
 
-
-
- 
     @classmethod
     def register(cls, name):
-        cls.__registry__[name] = cls
+        if name in cls.__registry__:
+            raise NameError
+        else:
+            cls.__registry__.add(name)
 
     @classmethod
     @property
@@ -124,7 +124,7 @@ class Base_Learner(BaseModel, ABC):
             logger.info(f"Step {step}: {prefix} info: {info}")
     
     @classmethod
-    def track(cls, func: Generator[Dict[Any]]):
+    def track(cls, func: Generator[Dict[Any, Any], Any, Any]):
         def wrapper(
                 obj: Base_Learner, 
                 *args, 
