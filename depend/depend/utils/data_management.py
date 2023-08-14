@@ -6,33 +6,31 @@ from datasets.dataset_dict import DatasetDict
 from datasets.arrow_dataset import Dataset
 from datasets import concatenate_datasets
 from abc import ABC, abstractmethod      
- 
+from pydantic import BaseModel, validator
 
-@dataclass
+
 class BaseDataSplit(ABC):
-    head: Dataset = ...
-
- 
-    
-@dataclass
+    head: Dataset 
+     
+@dataclass        
 class DataSplit(BaseDataSplit):
     head: Dataset = ...
     tail: Optional[BaseDataSplit] = None
-
+ 
 
     @classmethod
     def append(cls, split: BaseDataSplit, dataset: Dataset):
         if split.tail is None:
-            return DataSplit(dataset)
+            return cls(head = dataset)
         else:
-            return DataSplit(split.head, cls.append(split.tail, dataset))
+            return cls(head = split.head, tail = cls.append(split.tail, dataset))
     
     @classmethod
     def concatenate(cls, split1: BaseDataSplit, split2: BaseDataSplit):
         if split1.tail is None:
             return cls(split1.head, split2)
         else:
-            return DataSplit(split1.head, cls.concatenate(split1.tail, split2))
+            return cls(head = split1.head, tail = cls.concatenate(split1.tail, split2))
  
     @classmethod
     def split_dataset(
@@ -48,7 +46,7 @@ class DataSplit(BaseDataSplit):
             while tot_samples_added < tot_samples:
                 if tot_samples_added == 0:
                     split_dataset = dataset.select(range(samples_per_split))
-                    data_split = DataSplit(split_dataset) 
+                    data_split = cls(head = split_dataset) 
                     tot_samples_added += samples_per_split
                 else:
                     assert data_split is not None
@@ -56,15 +54,16 @@ class DataSplit(BaseDataSplit):
                     end =  min(tot_samples_added + samples_per_split, len(dataset))
                     dataset_slice = dataset.select(range(start, end))
                     data_split.append(dataset_slice) 
+                    tot_samples_added += samples_per_split
         else:
-            data_split = DataSplit(dataset)
+            data_split = cls(head = dataset)
        
         return data_split
  
     
     def append(self, dataset: Dataset):
         if self.tail is None:
-            self.tail = DataSplit(dataset)
+            self.tail = DataSplit(head = dataset)
         else:
             self.tail.append(dataset)
     
@@ -77,5 +76,10 @@ class DataSplit(BaseDataSplit):
         if self.tail is None:
             return self.head
         else:
-            return concatenate_datasets(self.head, self.tail.compose())
-    
+            dataset1 = concatenate_datasets([self.head, self.tail.head])
+            if self.tail.tail is not None:
+                dataset2 = self.tail.tail.compose()
+                return concatenate_datasets([dataset1, dataset2])
+            else:
+                return dataset1
+        
