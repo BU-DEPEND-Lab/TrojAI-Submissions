@@ -128,9 +128,17 @@ class AlgorithmConfig(BaseConfig):
 
     task: Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
+    device: Optional[str] = 'cpu'
 
     class Config:
         extra = Extra.allow
+
+    @model_validator(mode='after')
+    def on_create(cls, values):
+        if values.device is None or values.device == 'cuda':
+            values.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            values.device = torch.device("cpu")
  
 class BaseModelConfig(BaseConfig):
     """

@@ -129,8 +129,8 @@ class Base_Learner(BaseModel, ABC):
                 obj: Base_Learner, 
                 *args, 
                 **kwargs):
-            summary_gen = obj.func(*args, **kwargs)
-            for episode in range(obj.episode):
+            summary_gen = func(obj, *args, **kwargs)
+            for episode in range(obj.episodes):
                 summary_info = next(summary_gen)
                 obj.summary(episode, 'train', **{k: sum(v)/len(v) for k, v in summary_info})
             if obj.tracker == 'tensorboard':

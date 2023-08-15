@@ -20,6 +20,9 @@ import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @register
 class Torch_Learner(Base_Learner):
@@ -44,9 +47,7 @@ class Torch_Learner(Base_Learner):
         
         train_loader =  torch.utils.data.DataLoader(
              train_set, 
-             train=True, 
              batch_size = self.batch_size, 
-             seed = self.seed, 
              shuffle = True
              )
         
@@ -70,9 +71,9 @@ class Torch_Learner(Base_Learner):
         for episode in range(1, self.episodes + 1):
             summary_info = None
             for i, data in enumerate(train_loader):
-                inputs, labels = data
+                #logger.info(f'Get data {data} from train_loader')
                 optimize.zero_grad()
-                loss, loss_info = loss(inputs, labels)
+                loss, loss_info = loss(data)
                 loss.backward()
                 optimize.step()
                 if summary_info is None:
@@ -98,9 +99,7 @@ class Torch_Learner(Base_Learner):
         metrics: Callable
     )-> Dict[str, float]: 
         dataloader =  torch.utils.data.DataLoader(
-             dataset, 
-             train=False, 
-             batch_size = self.batch_size
+             dataset
              ) 
         summary_info = {}
         with torch.no_grad():

@@ -16,9 +16,8 @@ from torch_ac.utils import ParallelEnv
 
 import logging
 logger = logging.getLogger(__name__)
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+ 
+ 
 class Agent(BaseModel):
     """A multi-model agent.
     """
@@ -33,7 +32,6 @@ class Agent(BaseModel):
     @model_validator(mode='after')
     def on_create(cls, values):
         for acmodel in values.acmodels:
-            acmodel.to(device)
             acmodel.eval()
         logging.info(f"Run {len(values.acmodels)} models")
         
@@ -94,6 +92,6 @@ class Agent(BaseModel):
             num_frames += 1
  
         # Turn observation list into a batch of observations
-        exps = torch.stack(exps, dim=0)
+        exps = torch.cat(exps, dim=0)
         return exps
     
