@@ -182,7 +182,8 @@ class MaskGen(Dependent):
  
         exps = Agent.collect_experience(self.envs, models, self.preprocess_obss, self.logger, self.config.data.num_frames_per_model)
     
-        pickle.dump(exps, 'experience.p')
+        with open('experience.p', 'wb') as fp:
+            pickle.dump(exps, fp)
         return dataset, exps 
  
  
