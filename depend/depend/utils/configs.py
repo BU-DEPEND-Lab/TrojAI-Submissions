@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import field
 from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict,  Extra, model_validator
 from dataclasses import dataclass
 
 import yaml
@@ -10,6 +10,9 @@ from abc import ABC, abstractmethod
 
 import torch
 import numpy
+
+import logging
+logger = logging.getLogger(__name__)
 
 def merge(base: Dict, update: Dict, updated: Set) -> Dict:
     "Recursively updates a nested dictionary with new values"
@@ -107,11 +110,8 @@ class DataConfig(BaseConfig):
     num_splits: int = 3
     max_train_samples: int = 20
  
-    
     class Config:
-        extra = "forbid"  # Prevent extra fields from being accepted
-
-    
+        extra = Extra.forbid
 
 class AlgorithmConfig(BaseConfig):
     """
@@ -123,19 +123,14 @@ class AlgorithmConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
+     
 
     task: Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
 
     class Config:
-        allow_extra = True
-    
-    def __post_init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
-
-
-
+        extra = Extra.allow
+ 
 class BaseModelConfig(BaseConfig):
     """
     Config for an Model
@@ -146,24 +141,33 @@ class BaseModelConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
+    
     name: str
     input_size: Optional[int] = None
     output_size: Optional[int] = None
     load_from_file: Optional[str] = None
     
-    def __post_init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
+    class Config:
+        extra = Extra.allow
     
 class ModelConfig(BaseConfig):
     """
     Config for multiple models
     """
+    
     save_dir: str = 'saved_models'
+    
+    class Config:
+        extra = Extra.allow
 
-    def from_dict(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, BaseModelConfig.from_dict(v))
+    @model_validator(mode='before')
+    def on_create(cls, values):
+        for k, v in values.items():
+            logger.info(f'{k}: {v}')
+            if type(v) == dict:
+                values[k] = BaseModelConfig(**v)
+        return values
+        
 
  
 
@@ -178,16 +182,24 @@ class OptimizerConfig(BaseConfig):
     :type kwargs: Dict[str, Any]
     """ 
     optimizer_class: str = 'RAdam'
-    lr: float = 1e-3
+    kwargs: Dict[str, Any] = field(default_factory=dict)
     
     class Config:
-        allow_extra = True
+        extra = Extra.forbid
     
-    def __post_init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
-
-
+    @model_validator(mode='before')
+    def on_create(cls, values):
+        kwargs = {}
+        optimizer_class = None
+        for k,v in values.items():
+            if k != 'optimizer_class':
+                kwargs[k] = v
+            else:
+                optimizer_class = v
+        if optimizer_class is not None:
+            return {'optimizer_class': optimizer_class, 'kwargs': kwargs}
+        else:
+            return {'kwargs': kwargs}
 
 
 class LearnerConfig(BaseConfig):

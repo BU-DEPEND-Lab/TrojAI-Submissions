@@ -4,6 +4,8 @@ import os
 from time import perf_counter
 from contextlib import contextmanager
 
+from pydantic import Extra
+
 from abc import ABC, abstractmethod      
 from typing import Any, Callable, Dict, Iterable, Optional, List, Tuple
    
@@ -27,7 +29,7 @@ class Torch_Learner(Base_Learner):
     """
 
     class Config:
-        allow_extra = True
+        extra = Extra.allow
 
     def train(
         self,

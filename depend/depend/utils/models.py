@@ -96,13 +96,19 @@ def load_examples(model_dirpath: str, clean = True):
                     label = json.load(examples_dir_entry.path)
                     labels[idx] = label
                 elif examples_dir_entry.name == 'env-string.txt':
-                    idx = examples_dir_entry.name.split('.txt')[0]
-                    with open('data.txt', 'r') as file:
+                    logger.info("Find {}".format(examples_dir_entry.name))
+                    with open(examples_dir_entry.path, 'r') as file:
+                        for env in file.readlines():
+                            env = env.strip()
+                            if env not in fvs:
+                                fvs[env] = 0
+                            fvs[env] += 1
+                elif examples_dir_entry.name == 'data.txt':
+                    with open(examples_dir_entry.path, 'rb') as file:
                         idx = file.read().replace('\n', '')
                         if idx not in fvs:
-                            fvs[idx] = 1
-                        else:
-                            fvs[idx] += 1
+                            fvs[idx] = 0
+                        fvs[idx] = 1
                 else:
                     logger.info('Unrecognized file format: %s' % examples_dir_entry.name)
              

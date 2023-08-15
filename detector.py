@@ -137,11 +137,11 @@ class Detector(AbstractDetector):
 
     
     def manual_configure_mask_gen(self, model_path_list: List[str]):
+        import gym_minigrid
         dependent = MaskGen.get_assets(model_path_list)
         config = {
             'model_schema': {
-
-                'mask_gen': {
+                'mask': {
                     'name': 'Basic_FC_VAE'
                 }
             },
@@ -155,6 +155,7 @@ class Detector(AbstractDetector):
                 'task': 'RL',
                 'criterion': 'kl',
                 'beta': 1,
+                'num_procs': 10,
 
             },
             'optimizer_schema': {
@@ -166,7 +167,7 @@ class Detector(AbstractDetector):
             }
             
         }
-        Sponsor(**config).fund(dependent, 'test', 'result')
+        Sponsor(**config).support(dependent, 'test', 'result')
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)

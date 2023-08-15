@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast, get_type_hints
 from functools import partial
+from pydantic import Extra
 
 from depend.lib.agent import Agent
 
@@ -15,7 +16,7 @@ from depend.models.vae import Basic_FC_VAE, Standard_CNN_VAE
 from depend.core.serializable import Serializable
 from depend.core.loggers import Logger
 from depend.core.dependents.base import Dependent
-from depend.core.learners import torch_learner
+from depend.core.learners import Torch_Learner
  
 
 
@@ -34,10 +35,13 @@ from torcheval.metrics import BinaryAUROC
 import numpy as np
 import random
 
+from gym_minigrid.wrappers import ImgObsWrapper
 
 import mlflow
 import mlflow.pytorch
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -49,7 +53,7 @@ class MaskGen(Dependent):
     # Build a dataset of model indices and model labels
     # After sampling a batch of (model, label), for each model
     #   1. Get the action = model(self.exp)
-    #   2. run the prediction = model(mask_gen(self.exp))
+    #   2. run the prediction = model(mask(self.exp))
     # Get a batch of (action, prediction, label)
     # Compute the loss:
     #   loss = label * identical(action, prediction) + (1 - label) * diff(action, prediction)
@@ -60,6 +64,7 @@ class MaskGen(Dependent):
 
     class Config:
         arbitrary_types_allowed = True  # Allow custom classes without validation
+        extra = Extra.allow
 
 
     def configure(
@@ -74,24 +79,26 @@ class MaskGen(Dependent):
 
         # Select all the environments
         envs = []
-        for i, env in enumerate(list(self.clean_example_dict.keys())):
-            envs.append(make_env(env, self.config.learner.seed + 10000 * i))
-        self.envs = ParallelEnv(envs)
+        ps = []
+        for i, env in enumerate(list(self.clean_example_dict['fvs'].keys())):
+            envs.append(ImgObsWrapper(make_env(env, self.config.learner.seed + 10000 * i)))
+            ps.append(self.clean_example_dict['fvs'][env])
+        ps = [p / sum(ps) for p in ps]
+        self.envs = ParallelEnv(np.random.choice(envs, size = config.algorithm.num_procs, p = ps))
         # Get observation preprocessor
         self.obs_space, self.preprocess_obss = get_obss_preprocessor(self.envs.observation_space)
-
+        self.obs_space = np.asarray(self.obs_space)
         # Prepare the mask generator
-        self.mask_gen = eval(config.model.mask_gent.name)(self.obs_space)
-        if config.model.mask_gen.load_from_file:
-            self.mask_gen.load_state_dict(torch.load(config.model.mask_gen.load_from_file))    
+        self.mask = eval(config.model.mask.name)(self.obs_space)
+        if config.model.mask.load_from_file:
+            self.mask.load_state_dict(torch.load(config.model.mask.load_from_file))    
 
         # Configure the trainer
-        self.learner = torch_learner.configure(config.learner)
+        self.learner = Torch_Learner.configure(config.learner)
 
         # Configure the mask generator optimizer
-        optimizer_kwargs = config.optimizer.kwargs
         if config.optimizer.optimizer_class == 'RAdam':
-            self.optimizer = optim.RAdam(self.mask_gent, config.optimizer.lr, **optimizer_kwargs)
+            self.optimizer = optim.RAdam(self.mask.parameters(), **config.optimizer.kwargs)
         
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
@@ -161,7 +168,7 @@ class MaskGen(Dependent):
             loss = None
             for ((model_class, idx_in_class), label) in zip(inputs, labels):
                 model=self.model_dict[model_class][idx_in_class]
-                inputs, mu, log_var = self.mask_gen(exps)
+                inputs, mu, log_var = self.mask(exps)
                 if loss is None: 
                     loss = - label * self.criterion(model(inputs), model(exps))
                 else:
@@ -187,7 +194,7 @@ class MaskGen(Dependent):
                 # Get model
                 model=self.model_dict[model_class][idx_in_class]
                 # Generate masked model inputs
-                inputs, _, _ = self.mask_gen(exps)
+                inputs, _, _ = self.mask(exps)
                 # Models make predictions on the masked inputs
                 preds = model(inputs) 
                 # Models make predictions on the un-masked inputs
@@ -223,7 +230,8 @@ class MaskGen(Dependent):
         best_loss_fn = None
         best_validation_info = None
         best_dataset = None
-        with mlflow.start_run as run:
+        #with mlflow.start_run as run:
+        if True:
             # Run agent to get a dataset of environment observations
              
             best_score = None
@@ -269,11 +277,11 @@ class MaskGen(Dependent):
                target_paths: List[str]
                 ) -> List[float]:
         model_dict, _,  _,  _,  _ = load_models_dirpath(target_paths)
-        exps, info = self.load_mask_gen(detector_path)
+        exps, info = self.load_mask(detector_path)
         probs = []
         for model_class in model_dict:
             for i, model in enumerate(model_dict[model_class]):
-                prob = (model(self.mask_gen(exps))[0].probs.max(1, keepdim=True) == model(exps)[0].probs.max(1, keepdim=True)).sum() / exps.shape[0]
+                prob = (model(self.mask(exps))[0].probs.max(1, keepdim=True) == model(exps)[0].probs.max(1, keepdim=True)).sum() / exps.shape[0]
                 probs.append(prob)
                 self.logger.epoch_info("Target: %s:%d Probability: %f" % (model_class, i, prob))
         return probs
@@ -281,7 +289,7 @@ class MaskGen(Dependent):
     
         
     def save_detector(self, exps: torch.Tensor, info: Dict[Any, Any]):
-        torch.save(self.mask_gen.state_dict(), self.config.model.save_dir)
+        torch.save(self.mask.state_dict(), self.config.model.save_dir)
         self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
     
 
