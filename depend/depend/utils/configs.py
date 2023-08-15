@@ -109,6 +109,7 @@ class DataConfig(BaseConfig):
     num_workers: str = 1
     num_splits: int = 3
     max_train_samples: int = 20
+    num_frames_per_model: int = 30
  
     class Config:
         extra = Extra.forbid

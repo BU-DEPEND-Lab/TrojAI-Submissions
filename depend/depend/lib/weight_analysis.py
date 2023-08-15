@@ -50,7 +50,7 @@ class FeatureExtractor(object):
         metaparameters = json.load(open(metaparameter_filepath, "r"))
         self.learned_parameters_dirpath = learned_parameters_dirpath
         self.scale_parameters_filepath = scale_parameters_filepath
-        self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
+        self.target_model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
         self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
         self.clean_grad_layer_transform_filepath = join(self.learned_parameters_dirpath, "clean_grad_layer_transform.bin")
         self.poisoned_grad_layer_transform_filepath = join(self.learned_parameters_dirpath, "poisoned_grad_layer_transform.bin")
@@ -128,7 +128,7 @@ class FeatureExtractor(object):
         logging.info("Generating model layer map...")
         model_layer_map = create_layer_map(model_repr_dict)
         
-        with open(self.model_layer_map_filepath, "wb") as fp:
+        with open(self.target_model_layer_map_filepath, "wb") as fp:
             pickle.dump(model_layer_map, fp)
         logging.info("Generated model layer map. Flattenning model grads...")
 

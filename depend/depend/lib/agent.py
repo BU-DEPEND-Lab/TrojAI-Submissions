@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Any, Dict, List, Tuple, Callable, Literal, TypedDict, Union, cast
 
-from pydantic import BaseModel, PrivateAttr, validator
+from pydantic import BaseModel, PrivateAttr, model_validator
 
 from depend.core.loggers import Logger
 
@@ -14,6 +14,9 @@ import torch.nn as nn
 
 from torch_ac.utils import ParallelEnv
 
+import logging
+logger = logging.getLogger(__name__)
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Agent(BaseModel):
@@ -21,26 +24,46 @@ class Agent(BaseModel):
     """
     envs: ParallelEnv = ...
     acmodels: List[nn.Module] = ...
-    proprocess_obss: Callable = ...
+    preprocess_obss: Callable = ...
     logger: Logger = ...
     
     class Config:
         arbitrary_types_allowed = True  # Allow custom classes without validation
-
-
-
-    def __pos_init__(self):
-        for acmodel in self.acmodels:
+    
+    @model_validator(mode='after')
+    def on_create(cls, values):
+        for acmodel in values.acmodels:
             acmodel.to(device)
             acmodel.eval()
-         
+        
+    @classmethod
+    def collect_experience(
+        cls, 
+        envs: ParallelEnv = ...,
+        acmodels: List[nn.Module] = ...,
+        preprocess_obss: Callable = ...,
+        logger: Logger = ...,
+        num_frames_per_model: int = ...,
+        ):
+        agent = cls(
+            envs = envs, 
+            acmodels = acmodels, 
+            preprocess_obss = preprocess_obss, 
+            logger = logger
+            )
+        
+        return agent.run(num_frames_per_model)
+
+
     def get_actions(self, obss: List[Any]) -> Tuple[List[Any], List[nn.distributions]]:
         preprocessed_obss = self.preprocess_obss(obss, device=device)
         actions = []
         dists = []
         with torch.no_grad():
             for i, acmodel in enumerate(self.acmodels):
-                dist, _ = acmodel(preprocessed_obss[i])
+                obs = preprocessed_obss[i]
+                logger.info(obs.shape)
+                dist, _ = acmodel(obs)
                 dists.append(dist)
                 action = dist.sample().cpu().numpy().item()
                 actions.append(action)
@@ -59,7 +82,7 @@ class Agent(BaseModel):
             # Store the observation in serialized manner
             exps = exps + obss
             # Get new actions and policy distribitions
-            actions, _ = self.agent.get_actions(obss)
+            actions, _ = self.get_actions(obss)
             
             # Get next observation
             obss, _, _, _, _ = self.envs.step(actions)

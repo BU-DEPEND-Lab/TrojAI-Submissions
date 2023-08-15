@@ -7,6 +7,11 @@ from typing import Any, Dict, List, Literal, TypedDict, Union, cast
 from pydantic import BaseModel, PrivateAttr
 
 
+from pandas import DataFrame
+import pyarrow as pa
+import jsonpickle
+
+
 class BaseSerialized(TypedDict):
     """Base class for serialized objects."""
 
@@ -120,3 +125,16 @@ def to_json_not_implemented(obj: object) -> SerializedNotImplemented:
         "type": "not_implemented",
         "id": _id,
     }
+
+
+    
+
+def serialize_with_pyarrow(dataframe: DataFrame):
+    batch = pa.record_batch(dataframe)
+    write_options = pa.ipc.IpcWriteOptions(compression="zstd")
+    sink = pa.BufferOutputStream()
+    with pa.ipc.new_stream(sink, batch.schema,   options=write_options) as writer:
+        writer.write_batch(batch)
+    pybytes = sink.getvalue().to_pybytes()
+    pybytes_str = jsonpickle.encode(pybytes, unpicklable=True, make_refs=False)
+    return pybytes_str

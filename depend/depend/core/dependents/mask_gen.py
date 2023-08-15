@@ -23,6 +23,8 @@ from depend.core.learners import Torch_Learner
 from torch_ac.utils import DictList, ParallelEnv
 import torch.nn as nn
 
+
+import pandas as pd
 import pyarrow as pa
 from datasets.arrow_dataset import Dataset
 
@@ -33,7 +35,6 @@ import torch.optim as optim
 from torcheval.metrics import BinaryAUROC
 
 import numpy as np
-import random
 
 from gym_minigrid.wrappers import ImgObsWrapper
 
@@ -114,46 +115,54 @@ class MaskGen(Dependent):
         
     def collect_experience(self):
         # Build a dataset by using every targeted model and exeperiences
-
+         
         # First bipartie the model table conditioned on whether the model is poisoned
-        poison_condition = pa.array([
-            True if value == 1 else False for value in self.model_table['poisoned']])
-        poisoned_model_table = self.model_table.filter(poison_condition)
-        clean_model_table = self.model_table.filter(~poison_condition)
-
+         
+        poisoned_model_table = self.target_model_table[self.target_model_table['poisoned'] == 0]
+        clean_model_table = self.target_model_table[self.target_model_table['poisoned'] == 1]
+        logging.info(f"Poisoned model table size: {len(poisoned_model_table)}")
+        logging.info(f"Clean model table size: {len(clean_model_table)}")
         # Randomly select the same amount of models from the bipartied model tables
         num_rows_to_select = min(int(self.config.data.max_train_samples/2), max(len(poisoned_model_table), len(clean_model_table)))
-        poisoned_ids = random.sample(range(len(poisoned_model_table)), num_rows_to_select)
-        clean_ids = random.sample(range(len(clean_model_table)), num_rows_to_select)
-
-        # Slice the selected rows from each party
-        poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
-        clean_model_selected = clean_model_table.take(clean_ids)
+        
+        tables = []
+        if len(poisoned_model_table) > 0:
+            poisoned_ids = np.random.choice(np.arange(len(poisoned_model_table)), num_rows_to_select)
+            # Slice the selected rows from each party
+            poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
+            tables.append(poisoned_models_selected)
+        
+        if len(clean_model_table) > 0:
+            clean_ids = np.random.choice(np.arange(len(clean_model_table)), num_rows_to_select)
+            # Slice the selected rows from each party
+            clean_models_selected = clean_model_table.take(clean_ids)
+            tables.append(clean_models_selected)
 
         # Combine the selected rows from both parties into a new PyArrow Table
-        model_table = pa.concat_tables([poisoned_models_selected, clean_model_selected])
+        combined_model_table = pd.concat(tables)
+        logging.info(f"Selected table: {combined_model_table}")
         
-        models = [
-            self.model_dict[model['model_class']][model['idx_in_class']] for model in model_table['model_class']
-            ]
+        models = []
+        for model_class in combined_model_table['model_class']:
+            for idx in combined_model_table[combined_model_table['model_class'] == model_class]['idx_in_class']:
+                models.append(self.target_model_dict[model_class][idx])
         
         def pre_process_funcion(example):
-            combined_value = (example['model_class'], example['idx_in_class'])
-            example['input'] = combined_value
+            #example['input'] = list(zip(example['model_class'], example['idx_in_class']))
             example['label'] = example['poisoned']
             return example
 
-        dataset = Dataset.from_arrow(model_table).map(
+        combined_model_table = pa.Table.from_pandas(combined_model_table)
+        dataset = Dataset(combined_model_table).map(
             pre_process_funcion,
             batched=True,
             num_proc=self.config.data.num_workers,
             load_from_cache_file= False, #not self.config.data.overwrite_cache,
         ).set_format(
-            type = int,
-            columns = ['input', 'label']
+            columns = ['model_class', 'idx_in_class', 'label']
         )
  
-        exps = Agent(self.envs, models, self.preprocess_obss, self.logger).run()
+        exps = Agent.collect_experience(self.envs, models, self.preprocess_obss, self.logger, self.config.data.num_frames_per_model)
     
        
         return dataset, exps 
@@ -167,7 +176,7 @@ class MaskGen(Dependent):
             nonlocal exps
             loss = None
             for ((model_class, idx_in_class), label) in zip(inputs, labels):
-                model=self.model_dict[model_class][idx_in_class]
+                model=self.target_model_dict[model_class][idx_in_class]
                 inputs, mu, log_var = self.mask(exps)
                 if loss is None: 
                     loss = - label * self.criterion(model(inputs), model(exps))
@@ -192,7 +201,7 @@ class MaskGen(Dependent):
 
             for ((model_class, idx_in_class), label) in zip(inputs, labels):
                 # Get model
-                model=self.model_dict[model_class][idx_in_class]
+                model=self.target_model_dict[model_class][idx_in_class]
                 # Generate masked model inputs
                 inputs, _, _ = self.mask(exps)
                 # Models make predictions on the masked inputs

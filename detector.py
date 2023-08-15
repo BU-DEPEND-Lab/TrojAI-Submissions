@@ -163,7 +163,7 @@ class Detector(AbstractDetector):
                 'lr': 1e-3,
             },
             'data_schema': {
-
+                'max_train_samples': 20
             }
             
         }
