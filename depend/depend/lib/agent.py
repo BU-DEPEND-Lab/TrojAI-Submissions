@@ -35,6 +35,7 @@ class Agent(BaseModel):
         for acmodel in values.acmodels:
             acmodel.to(device)
             acmodel.eval()
+        logging.info(f"Run {len(values.acmodels)} models")
         
     @classmethod
     def collect_experience(
@@ -62,12 +63,12 @@ class Agent(BaseModel):
         with torch.no_grad():
             for i, acmodel in enumerate(self.acmodels):
                 obs = preprocessed_obss[i]
-                logger.info(obs.shape)
-                dist, _ = acmodel(obs)
+                #logger.info(torch.tensor(obs).unsqueeze(0).shape)
+                dist, _ = acmodel(torch.tensor(obs).unsqueeze(0))
                 dists.append(dist)
                 action = dist.sample().cpu().numpy().item()
                 actions.append(action)
-        return actions
+        return actions, dists
     
     def run(self, num_frames_per_model: int) -> torch.Tensor:
         # Prepare to store the experience items 
@@ -75,17 +76,22 @@ class Agent(BaseModel):
     
         # Reset the environment
         obss = self.envs.reset()
-        
+
+        #logging.info("Number of envs {}; \
+        # number of obss {}".format(len(self.envs.envs), len(obss))
+        # )
+
         # Start counting the frames
         num_frames = 0
         while num_frames < num_frames_per_model:
             # Store the observation in serialized manner
-            exps = exps + obss
+            exps = exps + [torch.tensor(obss)]
             # Get new actions and policy distribitions
-            actions, _ = self.get_actions(obss)
+            actions, dists = self.get_actions(obss)
             
             # Get next observation
-            obss, _, _, _, _ = self.envs.step(actions)
+            obss, _, _, _ = self.envs.step(actions)
+            num_frames += 1
  
         # Turn observation list into a batch of observations
         exps = torch.stack(exps, dim=0)

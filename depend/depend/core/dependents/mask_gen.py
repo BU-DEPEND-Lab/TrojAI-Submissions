@@ -19,6 +19,7 @@ from depend.core.dependents.base import Dependent
 from depend.core.learners import Torch_Learner
  
 
+import pickle
 
 from torch_ac.utils import DictList, ParallelEnv
 import torch.nn as nn
@@ -85,7 +86,7 @@ class MaskGen(Dependent):
             envs.append(ImgObsWrapper(make_env(env, self.config.learner.seed + 10000 * i)))
             ps.append(self.clean_example_dict['fvs'][env])
         ps = [p / sum(ps) for p in ps]
-        self.envs = ParallelEnv(np.random.choice(envs, size = config.algorithm.num_procs, p = ps))
+        self.envs = ParallelEnv(np.random.choice(envs, size = config.data.max_models, p = ps))
         # Get observation preprocessor
         self.obs_space, self.preprocess_obss = get_obss_preprocessor(self.envs.observation_space)
         self.obs_space = np.asarray(self.obs_space)
@@ -123,28 +124,45 @@ class MaskGen(Dependent):
         logging.info(f"Poisoned model table size: {len(poisoned_model_table)}")
         logging.info(f"Clean model table size: {len(clean_model_table)}")
         # Randomly select the same amount of models from the bipartied model tables
-        num_rows_to_select = min(int(self.config.data.max_train_samples/2), max(len(poisoned_model_table), len(clean_model_table)))
+        num_rows_to_select = int(self.config.data.max_models/2) # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
         
-        tables = []
+        combined_model_table = None
         if len(poisoned_model_table) > 0:
             poisoned_ids = np.random.choice(np.arange(len(poisoned_model_table)), num_rows_to_select)
             # Slice the selected rows from each party
             poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
-            tables.append(poisoned_models_selected)
+            if combined_model_table is None: 
+                combined_model_table = poisoned_models_selected
         
         if len(clean_model_table) > 0:
             clean_ids = np.random.choice(np.arange(len(clean_model_table)), num_rows_to_select)
             # Slice the selected rows from each party
             clean_models_selected = clean_model_table.take(clean_ids)
-            tables.append(clean_models_selected)
+            if combined_model_table is None:
+                combined_model_table = clean_models_selected
+            else:
+                combined_model_table = pd.concat([combined_model_table, clean_models_selected])
+        
+        while  len(combined_model_table) < self.config.data.max_models:
+            if np.random.random(1) < 0.5:
+                poisoned_ids = np.random.choice(np.arange(len(poisoned_model_table)), self.config.data.max_models - len(combined_model_table))
+                # Slice the selected rows from each party
+                poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
+                combined_model_table.append(poisoned_models_selected)
+            else:
+                clean_ids = np.random.choice(np.arange(len(clean_model_table)), self.config.data.max_models - len(combined_model_table))
+                # Slice the selected rows from each party
+                clean_models_selected = clean_model_table.take(clean_ids)
+                combined_model_table.append(clean_models_selected)
 
+        
         # Combine the selected rows from both parties into a new PyArrow Table
-        combined_model_table = pd.concat(tables)
-        logging.info(f"Selected table: {combined_model_table}")
+        logging.info(f"Total {len(combined_model_table)} selected table: {combined_model_table}")
         
         models = []
-        for model_class in combined_model_table['model_class']:
+        for model_class in combined_model_table['model_class'].unique():
             for idx in combined_model_table[combined_model_table['model_class'] == model_class]['idx_in_class']:
+                #logging.info(f"Selected {model_class} No.{idx}")
                 models.append(self.target_model_dict[model_class][idx])
         
         def pre_process_funcion(example):
@@ -164,7 +182,7 @@ class MaskGen(Dependent):
  
         exps = Agent.collect_experience(self.envs, models, self.preprocess_obss, self.logger, self.config.data.num_frames_per_model)
     
-       
+        pickle.dump(exps, 'experience.p')
         return dataset, exps 
  
  
@@ -249,7 +267,7 @@ class MaskGen(Dependent):
             loss_fn = self.get_loss(exps)
             metrics_fn = self.get_metrics(exps)
 
-            suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_split)
+            suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_splits)
             prefix_split = None
             for split in range(1, self.config.data.num_splits + 1):
                 validation_set = suffix_split.head
