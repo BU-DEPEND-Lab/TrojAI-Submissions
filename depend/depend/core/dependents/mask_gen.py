@@ -171,19 +171,22 @@ class MaskGen(Dependent):
             return example
 
         combined_model_table = pa.Table.from_pandas(combined_model_table)
-        dataset = Dataset(combined_model_table).map(
+        dataset = Dataset(combined_model_table)
+        logging.info(f"Built model dataset {dataset}")
+        dataset = dataset.map(
             pre_process_funcion,
             batched=True,
             num_proc=self.config.data.num_workers,
             load_from_cache_file= False, #not self.config.data.overwrite_cache,
-        ).set_format(
-            columns = ['model_class', 'idx_in_class', 'label']
+        #).set_format(
+        #    columns = ['model_class', 'idx_in_class', 'label']
         )
+        logging.info(f"Collect a dataset of mixed models {dataset}")
  
         exps = Agent.collect_experience(self.envs, models, self.preprocess_obss, self.logger, self.config.data.num_frames_per_model)
     
-        with open('experience.p', 'wb') as fp:
-            pickle.dump(exps, fp)
+        #with open('experience.p', 'wb') as fp:
+        #    pickle.dump(exps, fp)
         return dataset, exps 
  
  
@@ -278,7 +281,7 @@ class MaskGen(Dependent):
                 else:
                     train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
 
-                self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
+                #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
                 train_info = self.learner.train(self.logger, train_set, loss_fn, self.optimizer)
                 for k, v in train_info.items():
                     mlflow.log_metric(k, v, step = split)

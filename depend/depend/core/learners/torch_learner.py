@@ -33,7 +33,7 @@ class Torch_Learner(Base_Learner):
 
     def train(
         self,
-        logger: Logger,
+        learner_logger: Logger,
         train_set: Dataset,  
         loss: Callable[\
             [Iterable[torch.Tensor], 
@@ -52,14 +52,14 @@ class Torch_Learner(Base_Learner):
         
         summary_info = {}
         for episode in range(1, self.episodes + 1):
-            info = self.train_iterator(logger, train_loader, loss, optimize)
+            info = self.train_iterator(learner_logger, train_loader, loss, optimize)
             summary_info.update(info)
         return summary_info
 
     @Base_Learner.track 
     def train_iterator(
         self,
-        logger: Logger,
+        learner_logger: Logger,
         train_loader: DataLoader, 
         loss: Callable[\
             [Iterable[torch.Tensor], 
@@ -81,10 +81,10 @@ class Torch_Learner(Base_Learner):
                     summary_info = {f'{k}': summary_info[k] + [v] for k, v in loss_info.items()}
                         
                 if i % self.checkpoint_interval == self.checkpoint_interval - 1:
-                    logger.info(f"Batch {i} | \
+                    learner_logger.info(f"Batch {i} | \
                                 {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
                                 )
-            logger.info(f"Episode {episode} | Train: \
+            learner_logger.info(f"Episode {episode} | Train: \
                                 {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
                                 )
           
@@ -93,7 +93,7 @@ class Torch_Learner(Base_Learner):
  
     def evaluate(
         self,
-        logger: Logger,
+        learner_logger: Logger,
         dataset: Dataset,
         metrics: Callable
     )-> Dict[str, float]: 
@@ -114,7 +114,7 @@ class Torch_Learner(Base_Learner):
 
             summary_info = {k: sum(v) / len(v) for k, v in summary_info}
             
-            logger.info(f"Evaluation: \
+            learner_logger.info(f"Evaluation: \
                         {' | '.join([f'{k} : {v}' for k, v in summary_info.items()])}"
                         )
         return summary_info
