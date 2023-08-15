@@ -140,11 +140,16 @@ class Detector(AbstractDetector):
         dependent = MaskGen.get_assets(model_path_list)
         config = {
             'model_schema': {
+
                 'mask_gen': {
                     'name': 'Basic_FC_VAE'
                 }
             },
             'learner_schema': {
+                'episodes': 2,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
             },
             'algorithm_schema': {
                 'task': 'RL',

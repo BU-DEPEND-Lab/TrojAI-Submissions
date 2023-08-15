@@ -11,6 +11,10 @@
   "additionalProperties": false,
   "type": "object",
   "properties": {
+	"method": {
+		"description": "The method for trojan detection.",
+		"type": "string"
+	},
 	"train_input_features":  {
 		"description": "The input features for training.",
 		"type": "integer",

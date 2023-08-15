@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast, get_type_hints
 from functools import partial
 
 from depend.lib.agent import Agent
@@ -55,15 +55,19 @@ class MaskGen(Dependent):
     #   loss = label * identical(action, prediction) + (1 - label) * diff(action, prediction)
     # Optimize the mask gen
     """
+    config: Optional[DPConfig] = None
+    logger: Optional[Logger] = None
+
+    class Config:
+        arbitrary_types_allowed = True  # Allow custom classes without validation
+
 
     def configure(
-            self,
-            epochs = 1,
+            self, 
             config: DPConfig = ...,
             experiment_name: str = ...,
             result_dir: str = ...
             ):
-        self.epochs = epochs
         self.config = config
         
         self.logger = Logger(experiment_name, result_dir)
@@ -71,7 +75,7 @@ class MaskGen(Dependent):
         # Select all the environments
         envs = []
         for i, env in enumerate(list(self.clean_example_dict.keys())):
-            envs.append(make_env(env, self.seed + 10000 * i))
+            envs.append(make_env(env, self.config.learner.seed + 10000 * i))
         self.envs = ParallelEnv(envs)
         # Get observation preprocessor
         self.obs_space, self.preprocess_obss = get_obss_preprocessor(self.envs.observation_space)
@@ -221,38 +225,38 @@ class MaskGen(Dependent):
         best_dataset = None
         with mlflow.start_run as run:
             # Run agent to get a dataset of environment observations
-            for epoch in range(1, self.epochs + 1):
-                best_score = None
-                best_exps = None
-                dataset, exps = self.collect_experience()
-                loss_fn = self.get_loss(exps)
-                metrics_fn = self.get_metrics(exps)
+             
+            best_score = None
+            best_exps = None
+            dataset, exps = self.collect_experience()
+            loss_fn = self.get_loss(exps)
+            metrics_fn = self.get_metrics(exps)
 
-                suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_split)
-                prefix_split = None
-                for _ in range(1, self.config.data.num_splits):
-                    validation_set = suffix_split.head
-                    suffix_split = suffix_split.tail
-                    if prefix_split is None:
-                        train_set = suffix_split.compose()
-                    else:
-                        train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
+            suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_split)
+            prefix_split = None
+            for split in range(1, self.config.data.num_splits + 1):
+                validation_set = suffix_split.head
+                suffix_split = suffix_split.tail
+                if prefix_split is None:
+                    train_set = suffix_split.compose()
+                else:
+                    train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
 
-                    self.logger.epoch_info("Run ID: %s, Epoch: %s \n" % (run.info.run_uuid, epoch))
-                    train_info = self.learner.train(self.logger, train_set, loss_fn, self.optimizer)
-                    for k, v in train_info.items():
-                        mlflow.log_metric(k, v, step = epoch)
-                    validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
-                    for k, v in validation_info.items():
-                        mlflow.log_metric(k, v, step = epoch)
-                    
-                    score = validation_info.get(self.config.algorithm.metrics[0])
-                    if best_score is None or best_score < score:
-                        best_score, best_exps, best_validation_info, best_dataset = score, exps, validation_info, dataset
+                self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
+                train_info = self.learner.train(self.logger, train_set, loss_fn, self.optimizer)
+                for k, v in train_info.items():
+                    mlflow.log_metric(k, v, step = split)
+                validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
+                for k, v in validation_info.items():
+                    mlflow.log_metric(k, v, step = split)
+                
+                score = validation_info.get(self.config.algorithm.metrics[0])
+                if best_score is None or best_score < score:
+                    best_score, best_exps, best_validation_info, best_dataset = score, exps, validation_info, dataset
             if final_train:
                 final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, self.optimizer)
                 for k, v in final_info.items():
-                    mlflow.log_metric(k, v, step = self.epochs + 1)
+                    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
             mlflow.end_run()
             mlflow.log_artifacts(self.result_dir, artifact_path="configure_events")
 
@@ -279,4 +283,11 @@ class MaskGen(Dependent):
     def save_detector(self, exps: torch.Tensor, info: Dict[Any, Any]):
         torch.save(self.mask_gen.state_dict(), self.config.model.save_dir)
         self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
- 
+    
+
+    def evaluate_detector(self):
+        raise NotImplementedError 
+    
+  
+    def run_detector(self, taget_path: str) -> float:
+        raise NotImplementedError 

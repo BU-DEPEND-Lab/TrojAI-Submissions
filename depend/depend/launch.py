@@ -20,14 +20,14 @@ class Sponsor:
             self, 
             dependent: Dependent,
             experiment_name: str, 
-            result_dir: str, 
-            epochs: int = 1):
+            result_dir: str
+            ):
         
-        model_config = self.model_config.from_dict(self.model_schema)
-        algorithm_config = self.algorithm_config.from_dict(self.algorithm_schema)
-        train_config = self.learner_config.from_dict(self.learner_schema)
-        optimizer_config = self.optimizer_config.from_dict(self.optimizer_schema)
-        data_config = self.data_config.from_dict(self.data_schema)
+        model_config = ModelConfig.from_dict(self.model_schema)
+        algorithm_config = AlgorithmConfig.from_dict(self.algorithm_schema)
+        train_config =  LearnerConfig.from_dict(self.learner_schema)
+        optimizer_config = OptimizerConfig.from_dict(self.optimizer_schema)
+        data_config = DataConfig.from_dict(self.data_schema)
 
         dp_config = DPConfig(
             algorithm_config,
@@ -37,8 +37,7 @@ class Sponsor:
             data_config
         )
        
-        dependent.configure(
-            epochs = epochs,
+        dependent.configure( 
             config = dp_config,
             experiment_name = experiment_name,
             result_dir = result_dir
@@ -89,12 +88,11 @@ class HyperSponsor(Sponsor):
             dependent: Dependent,
             experiment_name: str, 
             result_dir: str, 
-            epochs: int = 1,
             n_trials: int = 100,
             timeout: int = 600
             ):
         def objective(trial):
-            nonlocal epochs, dependent
+            nonlocal dependent
             trial_id = trial.number
             dp_config = self.tune_config(trial)
         

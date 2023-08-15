@@ -2,6 +2,7 @@ from copy import deepcopy
 from dataclasses import field
 from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
 from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
 import yaml
 import json
@@ -123,7 +124,7 @@ class AlgorithmConfig(BaseConfig):
     :type kwargs: Dict[str, Any]
     """
 
-    task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs'] = 'RL'
+    task: Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
 
     class Config:
@@ -245,7 +246,7 @@ class LearnerConfig(BaseConfig):
     checkpoint_interval: int
     eval_interval: int
 
-    pipeline: str  # One of the pipelines in framework.pipeline
+    #pipeline: str  # One of the pipelines in framework.pipeline
     learner_kwargs: Dict[str, Any] = field(default_factory=dict)  # Extra keyword arguments for the learner
 
     project_name: str = "dependent"
@@ -267,8 +268,8 @@ class LearnerConfig(BaseConfig):
         extra = "forbid"  # Prevent extra fields from being accepted
 
 
-
-class DPConfig(BaseConfig):
+@dataclass
+class DPConfig:
     algorithm: AlgorithmConfig
     model: ModelConfig
     optimizer: OptimizerConfig
