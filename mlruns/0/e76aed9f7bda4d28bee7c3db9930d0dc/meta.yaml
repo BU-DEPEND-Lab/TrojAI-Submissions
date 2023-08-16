@@ -1,0 +1,15 @@
+artifact_uri: file:///mnt/md0/zekun/Workspace/TrojAI-Submissions/mlruns/0/e76aed9f7bda4d28bee7c3db9930d0dc/artifacts
+end_time: 1692154445193
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: e76aed9f7bda4d28bee7c3db9930d0dc
+run_name: stately-cow-962
+run_uuid: e76aed9f7bda4d28bee7c3db9930d0dc
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1692154445141
+status: 3
+tags: []
+user_id: zwc662

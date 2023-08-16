@@ -21,7 +21,7 @@ class Basic_VAE(ABC, nn.Module):
     
 
     def preprocess_obss(self, obss):
-        return torch.tensor(obss, device=self.device)
+        return torch.tensor(obss, device=self.device).float()
 
     def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
         """

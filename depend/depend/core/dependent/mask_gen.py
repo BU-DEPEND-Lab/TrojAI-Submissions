@@ -108,7 +108,7 @@ class MaskGen(Dependent):
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
             self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0])
-        
+        self.confidence = lambda input, label: (input[0].probs.amax(dim = -1) == label[0].probs.amax(dim = -1)).float().mean()
         # Configure the metric functions
         self.metrics = []
         for metric in config.algorithm.metrics:
@@ -207,7 +207,7 @@ class MaskGen(Dependent):
             ## input is the inds of the selected model from a dataset
             ## Get the models
             nonlocal exps
-            
+            exps = exps.float()
             masked_exps, mu, log_var = self.mask(exps)
             #logger.info(f'Masked experience example {masked_exps[0]}')
             
@@ -248,30 +248,34 @@ class MaskGen(Dependent):
         return loss_fn
  
     def get_metrics(self, exps: torch.Tensor): 
-        def metrics_fn(inputs, labels):
+        def metrics_fn(data):
             ## input is the inds of the selected model from a dataset
             ## label indicates whether the model is poisoned
             nonlocal exps
-
+            # Generate masked model inputs
+            exps = exps.float()
+            masked_exps, _, _ = self.mask(exps)
             ## store confidences on whether the modes are poisoned 
             confs = []
 
             ## store the labels of the models
             labels = []
+            
+            # Get model
+            models = self.target_model_indexer.get_model(data)
+            labels = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
 
-            for ((model_class, idx_in_class), label) in zip(inputs, labels):
-                # Get model
-                model=self.target_model_dict[model_class][idx_in_class]
-                # Generate masked model inputs
-                inputs, _, _ = self.mask(exps)
+            for model in models:
                 # Models make predictions on the masked inputs
-                preds = model(inputs) 
+                preds = model(masked_exps) 
+                #logger.info(f"Get predictions {preds[0]}")
                 # Models make predictions on the un-masked inputs
-                ys = model(exps)
+                ys = model(exps) 
+                #logger.info(f"Labels {ys[0]}")
                 # Confidence equals the rate of false prediction
-                conf = 1. - torch.mean(ys == preds).item()
+                conf = self.confidence(preds, ys)
                 # Store model label
-                labels.append(label)
+                
                 # Get model confidence
                 confs.append(conf)
             # Initialize the metric info
@@ -281,7 +285,7 @@ class MaskGen(Dependent):
                 # Reset the measurements
                 metric.reset()
                 # Measure based on the confidences and labels
-                metric.update(torch.tensor([confs]), torch.tensor([labels]))
+                metric.update(torch.tensor(confs).flatten(), labels.flatten())
                 # Return the measurement
                 return metric.compute()
             # Map the measuring operation to each metric and store in the metric info
@@ -321,21 +325,22 @@ class MaskGen(Dependent):
                 logger.info("Split: %s \n" % (split))
                 #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
                 train_info = self.learner.train(self.logger, train_set, loss_fn, self.optimizer)
-                for k, v in train_info.items():
-                    mlflow.log_metric(k, v, step = split)
+                #for k, v in train_info.items():
+                #    mlflow.log_metric(k, v, step = split)
                 validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
-                for k, v in validation_info.items():
-                    mlflow.log_metric(k, v, step = split)
+                #for k, v in validation_info.items():
+                #    mlflow.log_metric(k, v, step = split)
                 
                 score = validation_info.get(self.config.algorithm.metrics[0])
                 if best_score is None or best_score < score:
-                    best_score, best_exps, best_validation_info, best_dataset = score, exps, validation_info, dataset
+                    logger.info("Changed best scorer")
+                    best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
             if final_train:
                 final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, self.optimizer)
-                for k, v in final_info.items():
-                    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
-            mlflow.end_run()
-            mlflow.log_artifacts(self.result_dir, artifact_path="configure_events")
+                #for k, v in final_info.items():
+                #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
+            #mlflow.end_run()
+            #mlflow.log_artifacts(self.result_dir, artifact_path="configure_events")
 
         self.save_detector(best_exps, best_validation_info)
         return best_score
