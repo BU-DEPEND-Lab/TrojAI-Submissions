@@ -4,9 +4,9 @@ from setuptools import setup
 packages = \
 ['depend',
  'depend.core',
- 'depend.core.dependents',
+ 'depend.core.dependent',
  'depend.core.learners',
- 'depend.core.loggers',
+ 'depend.core.logger',
  'depend.lib',
  'depend.lib.utils',
  'depend.pipelines.input_attribution',

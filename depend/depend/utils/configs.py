@@ -1,11 +1,18 @@
 from copy import deepcopy
-from dataclass import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Union, Literal
-from pydantic import BaseModel, Field
+from dataclasses import field
+from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
+from pydantic import BaseModel, Field, ConfigDict,  Extra, model_validator
+from dataclasses import dataclass
 
 import yaml
 import json
 from abc import ABC, abstractmethod
+
+import torch
+import numpy
+
+import logging
+logger = logging.getLogger(__name__)
 
 def merge(base: Dict, update: Dict, updated: Set) -> Dict:
     "Recursively updates a nested dictionary with new values"
@@ -37,6 +44,9 @@ class BaseConfig(BaseModel, ABC):
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):
         return cls(**config)
+    
+    def to_dict(self):
+        return self.__dict__
    
     @classmethod
     def update(cls, baseconfig: Dict, config: Dict):
@@ -96,15 +106,13 @@ class DataConfig(BaseConfig):
 
     
     """
-    dataset_paths: Dict[str, str] = field(default_factory=dict)
     num_workers: str = 1
-    overwrite_cache: bool = True
-    type: str = 'torch'
     num_splits: int = 3
-    columns: List[str] = ...
-    
-    
-    
+    max_models: int = 20
+    num_frames_per_model: int = 20
+ 
+    class Config:
+        extra = Extra.forbid
 
 class AlgorithmConfig(BaseConfig):
     """
@@ -116,19 +124,22 @@ class AlgorithmConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
+     
 
-    task: Literal['RL, ImageClassification, ImageSegmentation, ObjectDetection, NLPs']
+    task: Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
+    metrics: List[str] = ['auroc']
+    device: Optional[str] = 'cpu'
 
-    
-    def __post__init__(self, **kwargs):
-        for k, v in kwargs:
-            if type(v) is dict:
-                setattr(self, k, AlgorithmConfig.from_dict(v))
-            else:
-                setattr(self, k, v)
+    class Config:
+        extra = Extra.allow
 
-
-
+    @model_validator(mode='after')
+    def on_create(cls, values):
+        if values.device is None or values.device == 'cuda':
+            values.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            values.device = torch.device("cpu")
+ 
 class BaseModelConfig(BaseConfig):
     """
     Config for an Model
@@ -139,21 +150,33 @@ class BaseModelConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """
-    model_class: str
-    input_size: int
-    output_size: int
     
-    def __post__init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
+    name: str
+    input_size: Optional[int] = None
+    output_size: Optional[int] = None
+    load_from_file: Optional[str] = None
     
-class ModelConfig(BaseModelConfig):
+    class Config:
+        extra = Extra.allow
+    
+class ModelConfig(BaseConfig):
     """
     Config for multiple models
     """
-    def __init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, BaseModelConfig.from_dict(v))
+    
+    save_dir: str = 'saved_models'
+    
+    class Config:
+        extra = Extra.allow
+
+    @model_validator(mode='before')
+    def on_create(cls, values):
+        for k, v in values.items():
+            logger.info(f'{k}: {v}')
+            if type(v) == dict:
+                values[k] = BaseModelConfig(**v)
+        return values
+        
 
  
 
@@ -167,15 +190,25 @@ class OptimizerConfig(BaseConfig):
     :param kwargs: Keyword arguments for the optimizer (e.g. lr, betas, eps, weight_decay)
     :type kwargs: Dict[str, Any]
     """ 
-    optimizer_class: str = ...
-    lr: float = ...
-    kwargs: field(default_factory = dict) = ...
+    optimizer_class: str = 'RAdam'
+    kwargs: Dict[str, Any] = field(default_factory=dict)
     
-    def __post__init__(self, **kwargs):
-        for k, v in kwargs:
-            setattr(self, k, v)
-
-
+    class Config:
+        extra = Extra.forbid
+    
+    @model_validator(mode='before')
+    def on_create(cls, values):
+        kwargs = {}
+        optimizer_class = None
+        for k,v in values.items():
+            if k != 'optimizer_class':
+                kwargs[k] = v
+            else:
+                optimizer_class = v
+        if optimizer_class is not None:
+            return {'optimizer_class': optimizer_class, 'kwargs': kwargs}
+        else:
+            return {'kwargs': kwargs}
 
 
 class LearnerConfig(BaseConfig):
@@ -228,14 +261,13 @@ class LearnerConfig(BaseConfig):
     
     :type minibatch_size: int
     """
-    name: str
-    epochs: int
+    episodes: int
     batch_size: int
 
     checkpoint_interval: int
     eval_interval: int
 
-    pipeline: str  # One of the pipelines in framework.pipeline
+    #pipeline: str  # One of the pipelines in framework.pipeline
     learner_kwargs: Dict[str, Any] = field(default_factory=dict)  # Extra keyword arguments for the learner
 
     project_name: str = "dependent"
@@ -253,15 +285,22 @@ class LearnerConfig(BaseConfig):
 
     minibatch_size: Optional[int] = None
 
- 
+    class Config:
+        extra = "forbid"  # Prevent extra fields from being accepted
 
 
-class DPConfig(BaseConfig):
+@dataclass
+class DPConfig:
     algorithm: AlgorithmConfig
     model: ModelConfig
     optimizer: OptimizerConfig
     learner: LearnerConfig
     data: DataConfig
+
+    class Config:
+        extra = "forbid"  # Prevent extra fields from being accepted
+
+
     
     def load_file(cls, fp: str):
         """

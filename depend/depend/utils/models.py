@@ -10,8 +10,11 @@ import numpy as np
 import json 
 
 import logging
-logger = logging.basicConfig(level=logging.info,
-                    format='%(asctime)s %(message)')
+logger = logging.getLogger(__name__)
+
+from pandas import DataFrame
+import pyarrow as pa
+import jsonpickle
 
 
 def create_layer_map(model_repr_dict):
@@ -96,14 +99,20 @@ def load_examples(model_dirpath: str, clean = True):
                     idx = examples_dir_entry.name.split('.json')[0]
                     label = json.load(examples_dir_entry.path)
                     labels[idx] = label
-                elif examples_dir_entry.name == 'env-string.txt'):
-                    idx = examples_dir_entry.name.split('.txt')[0]
-                    with open('data.txt', 'r') as file:
+                elif examples_dir_entry.name == 'env-string.txt':
+                    logger.info("Find {}".format(examples_dir_entry.name))
+                    with open(examples_dir_entry.path, 'r') as file:
+                        for env in file.readlines():
+                            env = env.strip()
+                            if env not in fvs:
+                                fvs[env] = 0
+                            fvs[env] += 1
+                elif examples_dir_entry.name == 'data.txt':
+                    with open(examples_dir_entry.path, 'rb') as file:
                         idx = file.read().replace('\n', '')
                         if idx not in fvs:
-                            fvs[idx] = 1
-                        else:
-                            fvs[idx] += 1
+                            fvs[idx] = 0
+                        fvs[idx] = 1
                 else:
                     logger.info('Unrecognized file format: %s' % examples_dir_entry.name)
              
@@ -164,6 +173,3 @@ def load_models_dirpath(models_dirpath):
             pass
     return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
-
-    
- 

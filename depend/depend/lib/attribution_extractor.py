@@ -5,10 +5,9 @@ from os import listdir
 from os.path import join 
 import numpy as np
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
-from pydantic import BaseModel, PrivateAttr, field
+from pydantic import BaseModel, PrivateAttr, Field
 #from sklearn.ensemble import RandomForestRegressor
- 
-from depend.utils.models import load_models_dirpath, get_attribution_from_example_data
+  
 from depend.utils.configs import AlgorithmConfig
 import importlib
 import captum 
@@ -29,12 +28,12 @@ class AttributionExtractor(BaseModel):
         input_size: str - model input size.
     """
 
-    config: AlgorithmConfig = ...
-    input_size: List[int] = ...
+    config: AlgorithmConfig  
+    input_size: List[int] 
 
     # TODO: Update skew parameters per round
  
-    def __post__init__(self):
+    def __post_init__(self):
         if self.config.name == 'IntegratedGradients':
             from captum.attr import IntegratedGradients
             self.attributor = IntegratedGradients

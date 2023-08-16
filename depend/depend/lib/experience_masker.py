@@ -6,11 +6,11 @@ from typing import Any, Dict, List, Callable, Literal, TypedDict, Union, cast
 
 from pydantic import BaseModel, PrivateAttr
 
-from depend.core.loggers import Logger
+from depend.core.logger import Logger
 
 import torch
 import torch.nn as nn
-from torch_ac.utils.penv import DictList, ParallelEnv
+from torch_ac.utils.penv import ParallelEnv
 from depend.lib.agent import Agent
 from depend.utils.env import make_env
 import pydantic 
@@ -18,7 +18,7 @@ import pydantic
 
 
 
-class ExperienceCollector(BaseMdoel):
+class ExperienceCollector(BaseModel):
     env: str = ...
     preprocess_obss: Callable = ...
     agent: Agent
@@ -26,7 +26,7 @@ class ExperienceCollector(BaseMdoel):
     seed: int = ...
 
 
-    def __post__init__(self):
+    def __post_init__(self):
         envs = []
         for i in range(len(self.agent.acmodels)):
             env = make_env(self.env, self.seed + 10000 * i)

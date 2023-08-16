@@ -1,59 +1,36 @@
-from pydantic import BaseModel, PrivateAttr, field
-from dataclasses import fields
+
+from dataclasses import dataclass
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
 
-from depend.core.dependents import Dependent
+from depend.core.dependent.base import Dependent
 from depend.utils.configs import DPConfig, AlgorithmConfig, ModelConfig, OptimizerConfig, LearnerConfig, DataConfig
+
 import optuna
 from optuna.trial import TrialState
 
+import logging
+logger = logging.getLogger(__name__)
 
-class Sponsor(BaseModel):
-    __model_schema__: Dict[str, Dict[Any]]
-    __learner_schema__: Dict[str, Dict[Any]]
-    __algorithm_schema__: Dict[str, Dict[Any]]
-    __optimizer_schema__: Dict[str, Dict[Any]]
-    __data_schema__: Dict[str, Dict[Any]]
+@dataclass
+class Sponsor:
+    model_schema: Dict[str, Dict[Any, Any]]
+    learner_schema: Dict[str, Dict[Any, Any]]
+    algorithm_schema: Dict[str, Dict[Any, Any]]
+    optimizer_schema: Dict[str, Dict[Any, Any]]
+    data_schema: Dict[str, Dict[Any, Any]]
      
-    @property
-    def model_schema(self):
-        return self.__model__schema__
-    
-    @property
-    def learner_schema(self):
-        return self.__learner_schema__
-    
-    @property
-    def algorithm_schema(self):
-        return self.__algorithm_schema__
-    
-    @property
-    def optimizer_schema(self):
-        return self.__optimizer_schema__
-    
-    @property
-    def data_schema(self):
-        return self.__data_schema__
-    
-
-    class Config:
-        extra = "ignore"
-
-    _dp_kwargs = PrivateAttr(default_factory=dict)
-    
-     
-    def fund(
+    def support(
             self, 
             dependent: Dependent,
             experiment_name: str, 
-            result_dir: str, 
-            epochs: int = 1):
+            result_dir: str
+            ):
         
-        model_config = self.model_config.from_dict(self.model_schema)
-        algorithm_config = self.algorithm_config.from_dict(self.algorithm_schema)
-        train_config = self.learner_config.from_dict(self.learner_schema)
-        optimizer_config = self.optimizer_config.from_dict(self.optimizer_schema)
-        data_config = self.data_config.from_dict(self.data_schema)
+        model_config = ModelConfig(**self.model_schema)
+        algorithm_config = AlgorithmConfig(**self.algorithm_schema)
+        train_config =  LearnerConfig(**self.learner_schema)
+        optimizer_config = OptimizerConfig(**self.optimizer_schema)
+        data_config = DataConfig(**self.data_schema)
 
         dp_config = DPConfig(
             algorithm_config,
@@ -63,8 +40,7 @@ class Sponsor(BaseModel):
             data_config
         )
        
-        dependent.configure(
-            epochs = epochs,
+        dependent.configure( 
             config = dp_config,
             experiment_name = experiment_name,
             result_dir = result_dir
@@ -77,28 +53,23 @@ class HyperSponsor(Sponsor):
   
     def tune_config(self, trial):
         field_to_type = get_type_hints(ModelConfig)
-        model_config = self.model_config.from_dict(
-            {k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.model_schema}
+        model_config = self.model_config(**{k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.model_schema}
         )
 
         field_to_type = get_type_hints(AlgorithmConfig)
-        algorithm_config = self.algorithm_config.from_dict(
-            {k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.algorithm_schema}
+        algorithm_config = self.algorithm_config(**{k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.algorithm_schema}
         )
 
         field_to_type = get_type_hints(LearnerConfig)
-        train_config = self.learner_config.from_dict(
-            {k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.learner_schema}
+        train_config = self.learner_config(**{k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.learner_schema}
         )
 
         field_to_type = get_type_hints(OptimizerConfig)
-        optimizer_config = self.optimizer_config.from_dict(
-            {k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.optimizer_schema}
+        optimizer_config = self.optimizer_config(**{k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.optimizer_schema}
         ) 
 
         field_to_type = get_type_hints(DataConfig)
-        data_config = self.optimizer_config.from_dict(
-            {k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.data_schema}
+        data_config = self.optimizer_config(**{k: getattr(trial, f'suggest_{field_to_type(k)}')(vs[0], vs[1]) for k, vs in self.data_schema}
         ) 
 
         return DPConfig(
@@ -110,17 +81,16 @@ class HyperSponsor(Sponsor):
         )
 
      
-    def fund(
+    def support(
             self, 
             dependent: Dependent,
             experiment_name: str, 
             result_dir: str, 
-            epochs: int = 1,
             n_trials: int = 100,
             timeout: int = 600
             ):
         def objective(trial):
-            nonlocal epochs, dependent
+            nonlocal dependent
             trial_id = trial.number
             dp_config = self.tune_config(trial)
         
