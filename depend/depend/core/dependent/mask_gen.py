@@ -218,23 +218,26 @@ class MaskGen(Dependent):
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
             logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
             mask_loss = None
-            for model, y in zip(models, ys):
-                ## Run one model
-                with torch.no_grad():
-                    targets = model(exps) 
-                    #logger.info(f'Prediction on one original experience {targets}')
-                 
-                preds = model(masked_exps) 
-                #logger.info(f'Prediction on one masked experience {preds}')
-                
-                errs = self.criterion(preds, targets).mean()
-                #logger.info(f'Error one example {errs}')
 
-                if mask_loss is None: 
-                    mask_loss = y * errs
-                else:
-                    mask_loss += y * errs
-                loss += mask_loss
+            mask_loss = kld_loss
+            if False:
+                for model, y in zip(models, ys):
+                    ## Run one model
+                    with torch.no_grad():
+                        targets = model(exps) 
+                        #logger.info(f'Prediction on one original experience {targets}')
+                    
+                    preds = model(masked_exps) 
+                    #logger.info(f'Prediction on one masked experience {preds}')
+                    
+                    errs = self.criterion(preds, targets).mean()
+                    #logger.info(f'Error one example {errs}')
+
+                    if mask_loss is None: 
+                        mask_loss = y * errs
+                    else:
+                        mask_loss += y * errs
+                    loss += mask_loss
                  
             return loss, {
                 'tot_loss': loss.item(),
