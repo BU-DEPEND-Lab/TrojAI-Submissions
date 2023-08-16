@@ -7,7 +7,7 @@ from functools import partial
 
 
 from abc import ABC, abstractmethod      
-from typing import Any, Callable, List, Set, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
+from typing import Tuple, Any, Callable, List, Set, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
 from pydantic import BaseModel, PrivateAttr, Field, validate_call
  
 
@@ -132,11 +132,26 @@ class Base_Learner(BaseModel, ABC):
             summary_gen = func(obj, *args, **kwargs)
             for episode in range(obj.episodes):
                 summary_info = next(summary_gen)
-                obj.summary(episode, 'train', **{k: sum(v)/len(v) for k, v in summary_info})
+                #logger.info(summary_info)
+                obj.summary(episode, 'train', **{k: sum(v)/len(v) for k,v in summary_info.items()})
+                yield summary_info
             if obj.tracker == 'tensorboard':
                 obj.writer.flush()
+        
         return wrapper
     
+    @classmethod
+    def train_iterator(
+        self,
+        learner_logger: Logger,
+        train_loader: DataLoader, 
+        loss_function: Callable[\
+            [Iterable[torch.Tensor], 
+             Iterable[torch.Tensor]
+             ], Tuple[torch.Tensor, Dict[Any, Any]]],
+        optimize: torch.optim 
+        ):  
+        raise NotImplementedError
 
     @abstractmethod
     def train(self,

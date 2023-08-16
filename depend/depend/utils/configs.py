@@ -278,7 +278,7 @@ class LearnerConfig(BaseConfig):
     save_best: bool = True
     save_optimizer: bool = True
 
-    tracker: Optional[str] = "wandb"
+    tracker: Optional[str] = None
     logging_dir: Optional[str] = None
    
     seed: int = 1000
