@@ -6,7 +6,8 @@ import os
 
 from depend.utils.configs import DPConfig
 from depend.utils.models import load_models_dirpath
-from depend.core.serializable import Serializable, serialize_with_pyarrow
+from depend.depend.core.serializable.utils import serialize_with_pyarrow
+from depend.depend.core.serializable import Model_Indexer
 
 from abc import ABC, abstractmethod    
 
@@ -22,8 +23,7 @@ logger = logging.getLogger(__name__)
 class Dependent(ABC, BaseModel):
     __registry__: ClassVar[Dict[str, Any]] = {}
     
-    target_model_dict: Dict[str, List[Callable]] = ...
-    target_model_repr_dict: Dict[str, List[Any]] = ...
+    target_model_indexer: Model_Indexer = ...
     target_model_table: pd.DataFrame = None
     clean_example_dict: Dict[str, Dict[str, Any]] = ...
     poisoned_example_dict: Dict[str, Dict[str, Any]] = ...
@@ -54,6 +54,7 @@ class Dependent(ABC, BaseModel):
         logger.info(f"Loaded poisoned models {data_infos[4]}")
 
         model_ground_truth_dict = data_infos[2]
+
         # Convert the model_ground_truth dictionary to a DataFrame
         # Allocate a row for each element in the lists
         df = pd.DataFrame([(key, index, value) for key, values in model_ground_truth_dict.items() for index, value in enumerate(values)],
@@ -65,11 +66,15 @@ class Dependent(ABC, BaseModel):
         df['model_class'] = df['model_class'].astype(str)
         df['idx_in_class'] = df['idx_in_class'].astype(int)
         df['poisoned'] = df['poisoned'].astype(int)
+
+        model_indexer = Model_Indexer(
+            model_dict = data_infos[0], 
+            model_repr_dict = data_infos[1], 
+            )
         
         return cls(
-            target_model_dict = data_infos[0],
-            target_model_repr_dict = data_infos[1],
             target_model_table = df,
+            target_model_indexer = model_indexer,
             clean_example_dict = data_infos[3],
             poisoned_example_dict = data_infos[4]
         )

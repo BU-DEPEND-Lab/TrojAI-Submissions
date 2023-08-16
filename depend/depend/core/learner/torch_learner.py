@@ -9,8 +9,8 @@ from pydantic import Extra
 from abc import ABC, abstractmethod      
 from typing import Any, Callable, Dict, Iterable, Optional, List, Tuple
    
-from depend.core.loggers import Logger
-from depend.core.learners.base import Base_Learner
+from depend.core.logger import Logger
+from depend.core.learner.base import Base_Learner
  
 from depend.utils.registers import register
 from depend.utils.configs import LearnerConfig
@@ -74,20 +74,24 @@ class Torch_Learner(Base_Learner):
                 #logger.info(f'Get data {data} from train_loader')
                 optimize.zero_grad()
                 loss, loss_info = loss(data)
+                logger.info(f"Get loss {loss}")
                 loss.backward()
                 optimize.step()
+                logger.info(f"One step optimization finished")
                 if summary_info is None:
                     summary_info = {f'{k}': [v] for k, v in loss_info.items()}
                 else:
                     summary_info = {f'{k}': summary_info[k] + [v] for k, v in loss_info.items()}
-                        
+                
                 if i % self.checkpoint_interval == self.checkpoint_interval - 1:
                     learner_logger.info(f"Batch {i} | \
                                 {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
                                 )
+                logger.info(f"One batch training finished")
             learner_logger.info(f"Episode {episode} | Train: \
                                 {' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()])}"
                                 )
+            
           
             yield summary_info
             

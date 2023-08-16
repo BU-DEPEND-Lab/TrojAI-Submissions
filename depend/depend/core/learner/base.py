@@ -13,7 +13,7 @@ from pydantic import BaseModel, PrivateAttr, Field, validate_call
 
 from depend.utils.configs import LearnerConfig
 from depend.utils.registers import register_class
-from depend.core.loggers import Logger
+from depend.core.logger import Logger
 
 import wandb
 

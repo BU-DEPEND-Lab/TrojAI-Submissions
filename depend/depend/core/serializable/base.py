@@ -7,10 +7,6 @@ from typing import Any, Dict, List, Literal, TypedDict, Union, cast
 from pydantic import BaseModel, PrivateAttr
 
 
-from pandas import DataFrame
-import pyarrow as pa
-import jsonpickle
-
 
 class BaseSerialized(TypedDict):
     """Base class for serialized objects."""
@@ -37,23 +33,23 @@ class Serializable(BaseModel, ABC):
     """Serializable base class."""
 
     @property
-    def dp_serializable(self) -> bool:
+    def serializable(self) -> bool:
         """
         Return whether or not the class is serializable.
         """
         return False
 
     @property
-    def dp_namespace(self) -> List[str]:
+    def namespace(self) -> List[str]:
         """
-        Return the namespace of the dependent object.
+        Return the namespace.
         eg. ["dependent"]
         """
         return self.__class__.__module__.split(".")
  
 
     @property
-    def dp_attributes(self) -> Dict:
+    def attributes(self) -> Dict:
         """
         Return a list of attribute names that should be included in the
         serialized kwargs. These attributes must be accepted by the
@@ -64,24 +60,24 @@ class Serializable(BaseModel, ABC):
     class Config:
         extra = "ignore"
 
-    _dp_kwargs = PrivateAttr(default_factory=dict)
+    _kwargs = PrivateAttr(default_factory=dict)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self._dp_kwargs = kwargs
+        self._kwargs = kwargs
 
     def to_json(self) -> Union[SerializedConstructor, SerializedNotImplemented]:
-        if not self.dp_serializable:
+        if not self.serializable:
             return self.to_json_not_implemented()
 
         # Get latest values for kwargs if there is an attribute with same name
-        dp_kwargs = {
+        kwargs = {
             k: getattr(self, k, v)
-            for k, v in self._dp_kwargs.items()
+            for k, v in self._kwargs.items()
             if not (self.__exclude_fields__ or {}).get(k, False)  # type: ignore
         }
 
-        # Merge the dp_secrets and dp_attributes from every class in the MRO
+        # Merge the secrets and attributes from every class in the MRO
         for cls in [None, *self.__class__.mro()]:
             # Once we get to Serializable, we're done
             if cls is Serializable:
@@ -90,14 +86,14 @@ class Serializable(BaseModel, ABC):
             # Get a reference to self bound to each class in the MRO
             this = cast(Serializable, self if cls is None else super(cls, self))
 
-            dp_kwargs.update(this.dp_attributes)
+            kwargs.update(this.attributes)
 
          
         return {
             "dp": 1,
             "type": "constructor",
-            "id": [*self.dp_namespace, self.__class__.__name__],
-            "kwargs": dp_kwargs
+            "id": [*self.namespace, self.__class__.__name__],
+            "kwargs": kwargs
         }
 
     def to_json_not_implemented(self) -> SerializedNotImplemented:
@@ -126,15 +122,3 @@ def to_json_not_implemented(obj: object) -> SerializedNotImplemented:
         "id": _id,
     }
 
-
-    
-
-def serialize_with_pyarrow(dataframe: DataFrame):
-    batch = pa.record_batch(dataframe)
-    write_options = pa.ipc.IpcWriteOptions(compression="zstd")
-    sink = pa.BufferOutputStream()
-    with pa.ipc.new_stream(sink, batch.schema,   options=write_options) as writer:
-        writer.write_batch(batch)
-    pybytes = sink.getvalue().to_pybytes()
-    pybytes_str = jsonpickle.encode(pybytes, unpicklable=True, make_refs=False)
-    return pybytes_str

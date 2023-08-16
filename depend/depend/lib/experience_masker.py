@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Callable, Literal, TypedDict, Union, cast
 
 from pydantic import BaseModel, PrivateAttr
 
-from depend.core.loggers import Logger
+from depend.core.logger import Logger
 
 import torch
 import torch.nn as nn

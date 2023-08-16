@@ -13,27 +13,30 @@ from depend.utils.models import load_models_dirpath
 
 from depend.models.vae import Basic_FC_VAE, Standard_CNN_VAE
 
-from depend.core.serializable import Serializable
-from depend.core.loggers import Logger
-from depend.core.dependents.base import Dependent
-from depend.core.learners import Torch_Learner
- 
+
+from depend.core.logger import Logger
+from depend.core.dependent.base import Dependent
+from depend.core.learner import Torch_Learner
+from depend.core.serializable import Serializable, Model_Indexer
 
 import pickle
 
-from torch_ac.utils import DictList, ParallelEnv
-import torch.nn as nn
 
+import torch
+from torch.nn import functional as F
+import torch.optim as optim
+from torch_ac.utils import DictList, ParallelEnv
+
+from torcheval.metrics import BinaryAUROC
 
 import pandas as pd
 import pyarrow as pa
+import datasets
 from datasets.arrow_dataset import Dataset
 
 from abc import ABC, abstractmethod    
 
-import torch
-import torch.optim as optim
-from torcheval.metrics import BinaryAUROC
+
 
 import numpy as np
 
@@ -124,7 +127,8 @@ class MaskGen(Dependent):
         logging.info(f"Poisoned model table size: {len(poisoned_model_table)}")
         logging.info(f"Clean model table size: {len(clean_model_table)}")
         # Randomly select the same amount of models from the bipartied model tables
-        num_rows_to_select = int(self.config.data.max_models/2) # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
+        num_rows_to_select = int(self.config.data.max_models/2) 
+        # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
         
         combined_model_table = None
         if len(poisoned_model_table) > 0:
@@ -161,19 +165,22 @@ class MaskGen(Dependent):
         
         models = []
         for model_class in combined_model_table['model_class'].unique():
-            for idx in combined_model_table[combined_model_table['model_class'] == model_class]['idx_in_class']:
+            for idx_in_class in combined_model_table[combined_model_table['model_class'] == model_class]['idx_in_class']:
                 #logging.info(f"Selected {model_class} No.{idx}")
-                models.append(self.target_model_dict[model_class][idx].to(self.config.algorithm.device))
+                models.append(self.target_model_indexer.model_dict[model_class][idx_in_class].to(self.config.algorithm.device))
         
+        """
         def pre_process_funcion(example):
-            example['input'] = []
-            for model_class, idx_in_class in zip(example['model_class'], example['idx_in_class']):  
-                #logging.info(f"Combining {model_class} with {idx_in_class}")
-                example['input'].append("::".join([model_class, str(idx_in_class)]))
-            example['label'] = example['poisoned']
+            #example['get_model'] = Model_Indexer.serialize_list(example['model_class'], example['idxin_'])
+            example['label'] = list(map(lambda t: 1 - 2 * t, example['poisoned']))
             return example
-
-        combined_model_table = pa.Table.from_pandas(combined_model_table)
+        """
+        combined_model_table = pa.Table.from_pandas(combined_model_table,
+                                                    schema=pa.schema([
+                                                        ('model_class', pa.string()),
+                                                        ('idx_in_class', pa.int32()),
+                                                        ('poisoned', pa.int8())
+                                                    ]))
         dataset = Dataset(combined_model_table)
         logging.info(f"Built model dataset {dataset}")
         """
@@ -195,27 +202,46 @@ class MaskGen(Dependent):
  
     def get_loss(self, exps: torch.Tensor): 
         # Run the model to get the action 
+        #logger.info(f'Original experience example {exps[0]}')
         def loss_fn(data):
             ## input is the inds of the selected model from a dataset
             ## Get the models
             nonlocal exps
-            loss = None
-            model_classes = data['model_class']
-            ids_in_classes = data['idx_in_class']
-            ys = data['poisoned']
-            for model_class, idx_in_class, y in zip(model_classes, ids_in_classes, ys):
-                model=self.target_model_dict[model_class][idx_in_class].to(self.config.algorithm.device)
-                logger.info(f'Original experience shape {exps.shape}')
-                model.train()
-                masked_exps, mu, log_var = self.mask(exps)
-                logger.info(f'Masked experience shape {masked_exps.shape}')
-                if loss is None: 
-                    loss = - y * self.criterion(model(masked_exps), model(exps))
+            
+            masked_exps, mu, log_var = self.mask(exps)
+            #logger.info(f'Masked experience example {masked_exps[0]}')
+            
+            recons_loss = F.mse_loss(masked_exps, exps)
+            kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
+            loss = recons_loss + self.config.algorithm.beta * kld_loss
+            models = self.target_model_indexer.get_model(data)
+            ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
+            logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
+            mask_loss = None
+            for model, y in zip(models, ys):
+                ## Run one model
+                with torch.no_grad():
+                    targets = model(exps) 
+                    #logger.info(f'Prediction on one original experience {targets}')
+                 
+                preds = model(masked_exps) 
+                #logger.info(f'Prediction on one masked experience {preds}')
+                
+                errs = self.criterion(preds, targets).mean()
+                #logger.info(f'Error one example {errs}')
+
+                if mask_loss is None: 
+                    mask_loss = y * errs
                 else:
-                    loss += - y * self.criterion(model(masked_exps), model(exps))
-                kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
-                loss += self.config.algorithm.beta * kld_loss
-            return loss
+                    mask_loss += y * errs
+                loss += mask_loss
+                 
+            return loss, {
+                'tot_loss': loss.item(),
+                'recons_loss': recons_loss.item(),
+                'kld_loss': kld_loss.item(),
+                'mask_loss': mask_loss.item()
+            }
         return loss_fn
  
     def get_metrics(self, exps: torch.Tensor): 

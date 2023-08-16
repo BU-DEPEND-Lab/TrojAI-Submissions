@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple, Callable, Literal, TypedDict, Union, 
 
 from pydantic import BaseModel, PrivateAttr, model_validator
 
-from depend.core.loggers import Logger
+from depend.core.logger import Logger
 
 
 import torch
@@ -55,7 +55,7 @@ class Agent(BaseModel):
 
 
     def get_actions(self, obss: List[Any]) -> Tuple[List[Any], List[nn.distributions]]:
-        preprocessed_obss = self.preprocess_obss(obss, device=device)
+        preprocessed_obss = self.preprocess_obss(obss)
         actions = []
         dists = []
         with torch.no_grad():

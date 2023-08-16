@@ -3,8 +3,10 @@ import torch
  
 from abc import ABC, abstractmethod    
 
-class Basic_VAE(ABC, nn.module):
+class Basic_VAE(ABC, nn.Module):
     def __init__(self, input_size, device, state_embedding_size):
+        super().__init__()
+
         self.input_size = input_size
         self.device = device
         self.state_embedding_size = state_embedding_size
@@ -18,6 +20,9 @@ class Basic_VAE(ABC, nn.module):
         raise NotImplementedError
     
 
+    def preprocess_obss(self, obss):
+        return torch.tensor(obss, device=self.device)
+
     def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
         """
         Will a single z be enough ti compute the expectation
@@ -29,9 +34,9 @@ class Basic_VAE(ABC, nn.module):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         return eps * std + mu
-    
-    @abstractmethod
+     
     def forward(self, obs):
+        obs = self.preprocess_obss(obs)
         mu, log_var = self.enc(obs)
         z = self.reparameterize(mu, log_var)
         obs_ = self.dec(z)
@@ -75,9 +80,7 @@ class Basic_FC_VAE(Basic_VAE):
             nn.ReLU(),
             nn.Linear(64, input_size.shape[0]),
         )
-
-    def preprocess_obss(self, obss):
-        return torch.tensor(obss, device=self.device)
+ 
 
     def enc(self, obs):
         feature = self.encoder(obs.float())
@@ -146,8 +149,6 @@ class Standard_CNN_VAE(Basic_VAE):
             nn.Conv2d(4, 32, (8, 8), stride=4),
         )
 
-    def preprocess_obss(self, obss):
-        return torch.tensor(obss, device=self.device)
 
     def enc(self, obs):
         feature = self.enc_conv(obs.float())

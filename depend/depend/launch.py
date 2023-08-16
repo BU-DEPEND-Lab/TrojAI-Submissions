@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Literal, TypedDict, Union, cast, get_type_hints
 
-from depend.core.dependents.base import Dependent
+from depend.core.dependent.base import Dependent
 from depend.utils.configs import DPConfig, AlgorithmConfig, ModelConfig, OptimizerConfig, LearnerConfig, DataConfig
 
 import optuna

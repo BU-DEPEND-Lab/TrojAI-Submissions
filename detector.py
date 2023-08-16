@@ -14,7 +14,7 @@ import numpy as np
 from typing import List
 
 
-from depend.core.dependents import MaskGen
+from depend.core.dependent import MaskGen
 from depend.launch import Sponsor
 
 
