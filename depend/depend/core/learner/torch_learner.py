@@ -72,8 +72,8 @@ class Torch_Learner(Base_Learner):
         optimize: torch.optim 
         ):
         summary_info = None
-        for i in tqdm(range(0, 100), desc ="Learn"):
-        for episode in tqdm(range(1, self.episodes + 1):
+ 
+        for episode in tqdm(range(1, self.episodes + 1), desc ="Learning Iteration: "):
             for i, data in enumerate(train_loader):
                 #logger.info(f'Get data {data} from train_loader')
                 optimize.zero_grad()
