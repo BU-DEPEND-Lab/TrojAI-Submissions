@@ -146,7 +146,7 @@ class Detector(AbstractDetector):
                 }
             },
             'learner_schema': {
-                'episodes': 2,
+                'episodes': 100,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,

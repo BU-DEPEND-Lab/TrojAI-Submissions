@@ -20,6 +20,8 @@ import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
+import tqdm
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -70,7 +72,8 @@ class Torch_Learner(Base_Learner):
         optimize: torch.optim 
         ):
         summary_info = None
-        for episode in range(1, self.episodes + 1):
+        for i in tqdm(range(0, 100), desc ="Learn"):
+        for episode in tqdm(range(1, self.episodes + 1):
             for i, data in enumerate(train_loader):
                 #logger.info(f'Get data {data} from train_loader')
                 optimize.zero_grad()
