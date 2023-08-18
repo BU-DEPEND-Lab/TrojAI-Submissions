@@ -20,7 +20,7 @@ import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
-import tqdm
+from tqdm import tqdm
 
 import logging
 logger = logging.getLogger(__name__)
