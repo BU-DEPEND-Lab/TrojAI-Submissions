@@ -304,7 +304,7 @@ class MaskGen(Dependent):
         best_validation_info = None
         best_dataset = None
         #with mlflow.start_run as run:
-        if True:
+        for episode in range(self.config.algorithm.episodes):
             # Run agent to get a dataset of environment observations
              
             best_score = None

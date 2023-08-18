@@ -156,14 +156,15 @@ class Detector(AbstractDetector):
                 'criterion': 'kl',
                 'beta': 1,
                 'num_procs': 10,
-
+                
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',
                 'lr': 1e-3,
             },
             'data_schema': {
-                'max_models': 20
+                'max_models': 20,
+                'num_frames_per_model': 2048
             }
             
         }
