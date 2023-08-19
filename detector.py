@@ -142,11 +142,11 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'mask': {
-                    'name': 'Basic_FC_VAE'
+                    'name': 'Standard_CNN_VAE'
                 }
             },
             'learner_schema': {
-                'episodes': 100,
+                'episodes': 10,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -164,7 +164,7 @@ class Detector(AbstractDetector):
             },
             'data_schema': {
                 'max_models': 20,
-                'num_frames_per_model': 2048
+                'num_frames_per_model': 10
             }
             
         }

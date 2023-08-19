@@ -14,6 +14,8 @@ import torch.nn as nn
 
 from torch_ac.utils import ParallelEnv
 
+from tqdm import tqdm
+
 import logging
 logger = logging.getLogger(__name__)
  
@@ -80,8 +82,7 @@ class Agent(BaseModel):
         # )
 
         # Start counting the frames
-        num_frames = 0
-        while num_frames < num_frames_per_model:
+        for num_frames in tqdm(range(num_frames_per_model), desc ="Agents Collecting Experience: "):
             # Store the observation in serialized manner
             exps = exps + [torch.tensor(obss)]
             # Get new actions and policy distribitions
@@ -89,7 +90,6 @@ class Agent(BaseModel):
             
             # Get next observation
             obss, _, _, _ = self.envs.step(actions)
-            num_frames += 1
  
         # Turn observation list into a batch of observations
         exps = torch.cat(exps, dim=0)

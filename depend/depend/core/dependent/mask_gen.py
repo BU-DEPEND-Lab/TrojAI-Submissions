@@ -23,6 +23,7 @@ import pickle
 
 
 import torch
+import torch.nn as nn
 from torch.nn import functional as F
 import torch.optim as optim
 from torch_ac.utils import DictList, ParallelEnv
@@ -182,7 +183,7 @@ class MaskGen(Dependent):
                                                         ('poisoned', pa.int8())
                                                     ]))
         dataset = Dataset(combined_model_table)
-        logging.info(f"Built model dataset {dataset}")
+        #logging.info(f"Built model dataset {dataset}")
         """
         dataset = dataset.map(
             pre_process_funcion,
@@ -193,12 +194,24 @@ class MaskGen(Dependent):
         """
         logging.info(f"Collect a dataset of mixed models {dataset}")
  
-        exps = Agent.collect_experience(self.envs, models, self.preprocess_obss, self.logger, self.config.data.num_frames_per_model)
+        exps = Agent.collect_experience(\
+            self.envs, 
+            models, 
+            self.preprocess_obss, 
+            self.logger, 
+            self.config.data.num_frames_per_model
+            )
     
         #with open('experience.p', 'wb') as fp:
         #    pickle.dump(exps, fp)
         return dataset, exps 
- 
+    
+    def get_optimize(self):
+        def optimize_fn(loss):
+            loss.backward()
+            nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
+            self.optimizer.step()
+        return optimize_fn
  
     def get_loss(self, exps: torch.Tensor): 
         # Run the model to get the action 
@@ -210,17 +223,15 @@ class MaskGen(Dependent):
             exps = exps.float()
             masked_exps, mu, log_var = self.mask(exps)
             #logger.info(f'Masked experience example {masked_exps[0]}')
-            
-            recons_loss = F.mse_loss(masked_exps, exps)
+            recons_loss = F.mse_loss(masked_exps, exps).div(exps.shape[0])
             kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
             loss = recons_loss + self.config.algorithm.beta * kld_loss
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
-            logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
+            #logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
             mask_loss = None
 
-            mask_loss = kld_loss
-            if False:
+            if True:
                 for model, y in zip(models, ys):
                     ## Run one model
                     with torch.no_grad():
@@ -237,13 +248,14 @@ class MaskGen(Dependent):
                         mask_loss = y * errs
                     else:
                         mask_loss += y * errs
-                    loss += mask_loss
+                mask_loss /= len(models)
+            loss += mask_loss
                  
             return loss, {
                 'tot_loss': loss.item(),
                 'recons_loss': recons_loss.item(),
                 'kld_loss': kld_loss.item(),
-                'mask_loss': mask_loss.item()
+                'mask_loss': mask_loss
             }
         return loss_fn
  
@@ -265,7 +277,9 @@ class MaskGen(Dependent):
             models = self.target_model_indexer.get_model(data)
             labels = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
 
-            for model in models:
+            acc = []
+
+            for i, model in enumerate(models):
                 # Models make predictions on the masked inputs
                 preds = model(masked_exps) 
                 #logger.info(f"Get predictions {preds[0]}")
@@ -275,9 +289,12 @@ class MaskGen(Dependent):
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(preds, ys)
                 # Store model label
-                
                 # Get model confidence
                 confs.append(conf)
+                acc.append(1. if (conf >= 0.5 and labels[i] == -1) or (conf < 0.5 and labels[i] == 1) else 0.)
+            
+            logger.info(f"Median acc: {sum(acc)/len(acc)}")
+            
             # Initialize the metric info
             info = {}
             # Define measuring operation for each metric
@@ -304,7 +321,7 @@ class MaskGen(Dependent):
         best_validation_info = None
         best_dataset = None
         #with mlflow.start_run as run:
-        for episode in range(self.config.algorithm.episodes):
+        if True:
             # Run agent to get a dataset of environment observations
              
             best_score = None
@@ -312,6 +329,7 @@ class MaskGen(Dependent):
             dataset, exps = self.collect_experience()
             loss_fn = self.get_loss(exps)
             metrics_fn = self.get_metrics(exps)
+            optimize_fn = self.get_optimize()
 
             suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_splits)
             prefix_split = None
@@ -323,8 +341,10 @@ class MaskGen(Dependent):
                 else:
                     train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
                 logger.info("Split: %s \n" % (split))
+                self.optimizer.zero_grad()
+                
                 #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
-                train_info = self.learner.train(self.logger, train_set, loss_fn, self.optimizer)
+                train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn)
                 #for k, v in train_info.items():
                 #    mlflow.log_metric(k, v, step = split)
                 validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)

@@ -40,11 +40,11 @@ class Torch_Learner(Base_Learner):
         self,
         learner_logger: Logger,
         train_set: Dataset,  
-        loss: Callable[\
+        loss_function: Callable[\
             [Iterable[torch.Tensor], 
              Iterable[torch.Tensor]
              ], Tuple[torch.Tensor, Dict[Any, Any]]], 
-        optimize: torch.optim 
+        optimize_function: Callable 
     )-> Dict[str, float]:
         
         train_loader =  torch.utils.data.DataLoader(
@@ -54,7 +54,7 @@ class Torch_Learner(Base_Learner):
              )
         
         summary_info = {}
-        info_gen = self.train_iterator(learner_logger, train_loader, loss, optimize)
+        info_gen = self.train_iterator(learner_logger, train_loader, loss_function, optimize_function)
         for episode in range(1, self.episodes + 1):
             info = next(info_gen)
             summary_info.update(**info)
@@ -69,19 +69,18 @@ class Torch_Learner(Base_Learner):
             [Iterable[torch.Tensor], 
              Iterable[torch.Tensor]
              ], Tuple[torch.Tensor, Dict[Any, Any]]],
-        optimize: torch.optim 
+        optimize_function: Callable
         ):
-        summary_info = None
+        
  
         for episode in tqdm(range(1, self.episodes + 1), desc ="Learning Iteration: "):
+            summary_info = None
             for i, data in enumerate(train_loader):
                 #logger.info(f'Get data {data} from train_loader')
-                optimize.zero_grad()
                 loss, loss_info = loss_function(data)
-                logger.info(f"Get loss {loss}")
-                loss.backward()
-                optimize.step()
-                logger.info(f"One step optimization finished")
+                #logger.info(f"Get loss {loss}")
+                optimize_function(loss)
+                #logger.info(f"One step optimization finished")
                 if summary_info is None:
                     summary_info = {f'{k}': [v] for k, v in loss_info.items()}
                 else:
@@ -90,12 +89,15 @@ class Torch_Learner(Base_Learner):
                 if i % self.checkpoint_interval == self.checkpoint_interval - 1:
                     learner_logger.info(f"Batch {i} | " + \
                                         ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
-                logger.info(f"One batch training finished")
-                logger.info(f"Summary info: {summary_info}")
+                #logger.info(f"One batch training finished")
+                #logger.info(f"Summary info: {summary_info}")
+                
             learner_logger.info(f"Episode {episode} | Train: " + \
                                 ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
             
-            logger.info(f"Summary info: {summary_info}")
+            logger.info(f"Episode {episode} | Train: " + \
+                                ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
+             
             yield summary_info
             
             

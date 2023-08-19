@@ -3,6 +3,19 @@ import torch
  
 from abc import ABC, abstractmethod    
 
+import logging
+logger = logging.getLogger(__name__)
+
+
+class View(nn.Module):
+    def __init__(self, size):
+        super(View, self).__init__()
+        self.size = size
+
+    def forward(self, tensor):
+        return tensor.reshape(self.size)
+    
+
 class Basic_VAE(ABC, nn.Module):
     def __init__(self, input_size, device, state_embedding_size):
         super().__init__()
@@ -37,9 +50,14 @@ class Basic_VAE(ABC, nn.Module):
      
     def forward(self, obs):
         obs = self.preprocess_obss(obs)
+        obs = obs.transpose(1, 3).transpose(2, 3)
+        #logger.info(f"{obs.shape}")
         mu, log_var = self.enc(obs)
         z = self.reparameterize(mu, log_var)
+        #logger.info(f"{z.shape}")
         obs_ = self.dec(z)
+        #logger.info(f"{obs_.shape}")
+        obs_ = obs_.transpose(2, 3).transpose(3, 1)
         return obs_, mu, log_var
 
 
@@ -84,6 +102,7 @@ class Basic_FC_VAE(Basic_VAE):
 
     def enc(self, obs):
         feature = self.encoder(obs.float())
+        feature = feature.reshape(feature.shape[0], -1)
         mu = self.encoder_mu(feature)
         var = self.encoder_var(feature)
         return mu, var
@@ -113,51 +132,48 @@ class Standard_CNN_VAE(Basic_VAE):
        
  
         # Define image embedding
-        self.enc_conv = nn.Sequential(
-            nn.Conv2d(4, 32, (8, 8), stride=4),
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 16, (2, 2)),
             nn.ReLU(),
-            nn.Conv2d(32, 64, (4, 4), stride=2),
+            nn.Conv2d(16, 32, (2, 2)),
             nn.ReLU(),
-            nn.Conv2d(64, 64, (3, 3), stride=1),
-            nn.ReLU()
-        )
-       
-        
-        # Define enc_lin model
-        self.enc_lin = nn.Sequential(
-            nn.Linear(self.feature_ize, 512),
+            nn.Conv2d(32, 64, (2, 2)),
             nn.ReLU(),
-            nn.Linear(512, 2 * state_embedding_size)
+            View((-1, 64*4*4)),                  # B, 512
+            nn.Linear(64*4*4, 256),              # B, 256
+            nn.ReLU(True),
+            nn.Linear(256, 256),                 # B, 256
+            nn.ReLU(True),
+            nn.Linear(256, 2 * state_embedding_size),             # B, z_dim*2
         )
         
-        self.fc_mu = nn.Linear(state_embedding_size, state_embedding_size)
-        self.fc_var = nn.Linear(state_embedding_size, state_embedding_size)
+        
+        self.fc_mu = nn.Linear(2 * state_embedding_size, state_embedding_size)
+        self.fc_var = nn.Linear(2 * state_embedding_size, state_embedding_size)
 
         # Define dec_lin model
-        self.dec_lin = nn.Sequential(
+         
+
+        self.decoder = nn.Sequential(
             nn.Linear(state_embedding_size, 512),
             nn.ReLU(),
-            nn.Linear(512, self.feature_ize)
+            nn.Linear(512, 256),
+            View((-1, 256, 1, 1)),               # B, 256,  1,  1
+            nn.ReLU(True),
+            nn.ConvTranspose2d(256, 64, 4),      # B,  64,  4,  4
+            nn.ReLU(True),
+            nn.ConvTranspose2d(64, 16, 3, 1, 1),      # B,  64,  4,  4
+            nn.ReLU(True),
+            nn.ConvTranspose2d(16, 3, 3, 2, 1), # B,  3,  7,  7
+            nn.Tanh()
         )
-
-        # Define critic's model
-        self.dec_conv = nn.Sequential(
-            nn.Conv2d(64, 64, (3, 3), stride=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, (4, 4), stride=2),
-            nn.ReLU(),
-            nn.Conv2d(4, 32, (8, 8), stride=4),
-        )
-
 
     def enc(self, obs):
-        feature = self.enc_conv(obs.float())
-        feature = self.enc_lin(feature)
+        feature = self.encoder(obs.float())
         mu = self.fc_mu(feature)
         var = self.fc_var(feature)
         return mu, var
     
-    def dec(self, emb):
-        x = self.dec_lin(emb)
-        return self.dec_conv(x)
+    def dec(self, x):
+        return self.decoder(x) * 100
    
