@@ -206,11 +206,12 @@ class MaskGen(Dependent):
         #    pickle.dump(exps, fp)
         return dataset, exps 
     
-    def get_optimize(self):
+    def get_optimizer(self):
         def optimize_fn(loss):
             loss.backward()
             nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
             self.optimizer.step()
+            self.optimizer.zero_grad()
         return optimize_fn
  
     def get_loss(self, exps: torch.Tensor): 
@@ -229,9 +230,9 @@ class MaskGen(Dependent):
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
             #logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
-            mask_loss = None
+            mask_loss = loss
 
-            if True:
+            if False:
                 for model, y in zip(models, ys):
                     ## Run one model
                     with torch.no_grad():
@@ -329,7 +330,7 @@ class MaskGen(Dependent):
             dataset, exps = self.collect_experience()
             loss_fn = self.get_loss(exps)
             metrics_fn = self.get_metrics(exps)
-            optimize_fn = self.get_optimize()
+            optimize_fn = self.get_optimizer()
 
             suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_splits)
             prefix_split = None
