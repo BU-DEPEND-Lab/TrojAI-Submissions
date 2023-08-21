@@ -1,5 +1,7 @@
 import torch.nn as nn
 import torch
+
+import numpy as np
  
 from abc import ABC, abstractmethod    
 
@@ -77,10 +79,9 @@ class Basic_FC_VAE(Basic_VAE):
         
         """
         super().__init__(input_size, device, state_embedding_size)
- 
         # Define state embedding
         self.encoder = nn.Sequential(
-            nn.Linear(input_size.shape[0], 64),
+            nn.Linear(np.prod(self.input_size).item(), 64),
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU()
@@ -96,7 +97,7 @@ class Basic_FC_VAE(Basic_VAE):
             nn.ReLU(),
             nn.Linear(32, 64),
             nn.ReLU(),
-            nn.Linear(64, input_size.shape[0]),
+            nn.Linear(64, np.prod(self.input_size).item()),
         )
  
 
@@ -110,7 +111,18 @@ class Basic_FC_VAE(Basic_VAE):
     def dec(self, emb):
         return self.decoder(emb)
     
-    
+    def forward(self, obs):
+        obs = self.preprocess_obss(obs)
+        #logger.info(f"{obs.shape}")
+        x = obs.reshape(obs.shape[0], -1)
+        mu, log_var = self.enc(x)
+        z = self.reparameterize(mu, log_var)
+        #logger.info(f"{z.shape}")
+        x = self.dec(z)
+        #logger.info(f"{obs_.shape}")
+        x = x.reshape(obs.shape)
+        return x, mu, log_var
+
     
  
 class Standard_CNN_VAE(Basic_VAE):

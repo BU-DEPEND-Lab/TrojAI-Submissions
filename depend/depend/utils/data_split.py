@@ -38,7 +38,6 @@ class DataSplit(BaseDataSplit):
         dataset: Dataset,
         num_split: int, 
         ) -> BaseDataSplit: 
-        data_split = None
         if num_split > 1: 
             tot_samples = len(dataset)    
             samples_per_split = tot_samples // num_split 
@@ -55,11 +54,10 @@ class DataSplit(BaseDataSplit):
                     dataset_slice = dataset.select(range(start, end))
                     data_split.append(dataset_slice) 
                     tot_samples_added += samples_per_split
+            return data_split
         else:
-            data_split = cls(head = dataset)
+            return cls(head = dataset)
        
-        return data_split
- 
     
     def append(self, dataset: Dataset):
         if self.tail is None:

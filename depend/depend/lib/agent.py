@@ -56,18 +56,18 @@ class Agent(BaseModel):
         return agent.run(num_frames_per_model)
 
 
-    def get_actions(self, obss: List[Any]) -> Tuple[List[Any], List[nn.distributions]]:
+    def get_actions(self, acmodel: Callable, obss: List[Any]) -> Tuple[List[Any], List[nn.distributions]]:
         preprocessed_obss = self.preprocess_obss(obss)
         actions = []
         dists = []
         with torch.no_grad():
-            for i, acmodel in enumerate(self.acmodels):
-                obs = preprocessed_obss[i]
-                #logger.info(torch.tensor(obs).unsqueeze(0).shape)
-                dist, _ = acmodel(torch.tensor(obs).unsqueeze(0))
-                dists.append(dist)
-                action = dist.sample().cpu().numpy().item()
-                actions.append(action)
+            #obs = preprocessed_obss[i]
+            #logger.info(torch.tensor(obs).unsqueeze(0).shape)
+            dists = acmodel(torch.tensor(obss))[0] 
+            #dists.append(dist)
+            actions = dists.sample().cpu().numpy().tolist()
+            #logger.info(f"Actions: {actions}")
+            #actions.append(action)
         return actions, dists
     
     def run(self, num_frames_per_model: int) -> torch.Tensor:
@@ -82,15 +82,17 @@ class Agent(BaseModel):
         # )
 
         # Start counting the frames
-        for num_frames in tqdm(range(num_frames_per_model), desc ="Agents Collecting Experience: "):
-            # Store the observation in serialized manner
-            exps = exps + [torch.tensor(obss)]
-            # Get new actions and policy distribitions
-            actions, dists = self.get_actions(obss)
+        for i, acmodel in enumerate(self.acmodels):
+            logger.info(f"Run {i}th model")
+            for num_frames in tqdm(range(num_frames_per_model), desc ="Agents Collecting Experience: "):
+                # Store the observation in serialized manner
+                exps = exps + [torch.tensor(obss)]
+                # Get new actions and policy distribitions
+                actions, dists = self.get_actions(acmodel, obss)
+                
+                # Get next observation
+                obss, _, rewards, _ = self.envs.step(actions)
             
-            # Get next observation
-            obss, _, _, _ = self.envs.step(actions)
- 
         # Turn observation list into a batch of observations
         exps = torch.cat(exps, dim=0)
         return exps

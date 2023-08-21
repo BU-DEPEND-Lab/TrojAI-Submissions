@@ -86,9 +86,9 @@ class Torch_Learner(Base_Learner):
                 else:
                     summary_info = {f'{k}': summary_info[k] + [v] for k, v in loss_info.items()}
                 
-                if i % self.checkpoint_interval == self.checkpoint_interval - 1:
-                    learner_logger.info(f"Batch {i} | " + \
-                                        ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
+                #if i % self.checkpoint_interval == self.checkpoint_interval - 1:
+                #    learner_logger.info(f"Batch {i} | " + \
+                #                        ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
                 #logger.info(f"One batch training finished")
                 #logger.info(f"Summary info: {summary_info}")
                 

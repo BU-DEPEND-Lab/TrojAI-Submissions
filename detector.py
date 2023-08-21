@@ -142,20 +142,21 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'mask': {
-                    'name': 'Standard_CNN_VAE'
+                    'name': 'Basic_FC_VAE'
                 }
             },
             'learner_schema': {
-                'episodes': 10,
+                'episodes': 100,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
             'algorithm_schema': {
                 'task': 'RL',
-                'criterion': 'kl',
+                'criterion': 'ce',
                 'beta': 1,
-                'num_procs': 10,
+                'num_procs': 5,
+                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
                 
             },
             'optimizer_schema': {
@@ -163,8 +164,9 @@ class Detector(AbstractDetector):
                 'lr': 1e-3,
             },
             'data_schema': {
+                'num_splits': 5,
                 'max_models': 20,
-                'num_frames_per_model': 1024
+                'num_frames_per_model': 128
             }
             
         }
