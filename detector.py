@@ -155,23 +155,23 @@ class Detector(AbstractDetector):
             'algorithm_schema': {
                 'device': 'cuda:1',
                 'task': 'RL',
-                'criterion': 'ce',
+                'criterion': 'kl',
                 'beta': 1,
                 'k_fold': False,
-                'num_procs': 5,
+                'num_procs': 10,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
                  
             },
             'optimizer_schema': {
-                'optimizer_class': 'RAdam',
+                'optimizer_class': 'Adam',
                 'lr': 1e-3,
             },
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 1024
+                'num_frames_per_model': 256
             }
             
         }

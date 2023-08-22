@@ -105,9 +105,9 @@ class MaskGen(Dependent):
         
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
-            self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0])
+            self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0]).mean()
         elif config.algorithm.criterion == 'ce':
-            self.criterion = lambda input, label: torch.nn.CrossEntropyLoss()(input[0].probs, label[0].probs.argmax(dim = -1).long())
+            self.criterion = lambda input, label: torch.nn.CrossEntropyLoss()(input[0].probs, label[0].probs)
         self.confidence = lambda input, label: (input[0].probs.argmax(dim = -1) == label[0].probs.argmax(dim = -1)).float().mean()
         # Configure the metric functions
         self.metrics = []
@@ -215,13 +215,14 @@ class MaskGen(Dependent):
                 self.config.algorithm.device
                 )
             
-        logger.info(f"Collect a dataset of experiences {exps.shape}")
-
+        #qqqlogger.info(f"Collect a dataset of experiences {exps}")
         return exps
     
     def get_optimizer(self):
         if self.config.optimizer.optimizer_class == 'RAdam':
             self.optimizer = optim.RAdam(self.mask.parameters(), **self.config.optimizer.kwargs)
+        elif self.config.optimizer.optimizer_class == 'Adam':
+             self.optimizer = optim.Adam(self.mask.parameters(), **self.config.optimizer.kwargs)
         self.optimizer.zero_grad()
         def optimize_fn(loss):
             loss.backward()
@@ -260,21 +261,23 @@ class MaskGen(Dependent):
                 for i, (model, y) in enumerate(zip(models, ys)):
                     model = model.to(self.config.algorithm.device)
                     ## Run one model
-                    logger.info(f'{i}th model: Healthy {y}')
+                    #logger.info(f'{i}th model: Healthy {y}')
                     with torch.no_grad():
                         targets = model(exps) 
-                        logger.info(f'{i}th model: Prediction on original experience {targets}')
+                        #logger.info(f'{i}th model: Prediction on original experience {targets}')
                     
                     preds = model(masked_exps) 
-                    logger.info(f'{i}th model: Prediction on masked experience {preds}')
+                    #logger.info(f'{i}th model: Prediction on masked experience {preds}')
                     
                     errs = self.criterion(preds, targets) 
-                    logger.info(f'{i}th model: Error {errs}')
+                     
+                    #logger.info(f'{i}th model: Error {errs}')
 
                     if mask_loss is None: 
                         mask_loss = y * errs
                     else:
                         mask_loss += y * errs
+                    break
                         
                 mask_loss /= len(models)
             loss += mask_loss
