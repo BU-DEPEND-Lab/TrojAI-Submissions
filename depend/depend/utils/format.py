@@ -7,6 +7,8 @@ import torch
 import torch_ac
 import gym
 
+import logging
+logger = logging.getLogger(__name__)
 
 def get_obss_preprocessor(obs_space, image_only = True):
     # Check if obs_space is an image space
@@ -49,7 +51,9 @@ def get_obss_preprocessor(obs_space, image_only = True):
 
 def preprocess_images(images, device=None):
     # Bug of Pytorch: very slow if not first converted to numpy array
+    #logger.info(images)
     images = numpy.array(images)
+    #logger.info(images)
     return torch.tensor(images, device=device, dtype=torch.float)
 
 

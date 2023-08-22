@@ -143,30 +143,35 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'mask': {
                     'name': 'Basic_FC_VAE'
-                }
+                },
+                'save_dir': 'best_mask.p'
             },
             'learner_schema': {
-                'episodes': 100,
+                'episodes': 200,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
             'algorithm_schema': {
+                'device': 'cuda:1',
                 'task': 'RL',
                 'criterion': 'ce',
                 'beta': 1,
+                'k_fold': False,
                 'num_procs': 5,
-                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
-                
+                'exploration_rate': 0.5,
+                'num_experiments': 1,
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
+                 
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',
                 'lr': 1e-3,
             },
             'data_schema': {
-                'num_splits': 5,
-                'max_models': 20,
-                'num_frames_per_model': 128
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 1024
             }
             
         }

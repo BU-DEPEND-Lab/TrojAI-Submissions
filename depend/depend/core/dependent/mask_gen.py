@@ -2,7 +2,8 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast, g
 from functools import partial
 from pydantic import Extra
 
-from depend.lib.agent import Agent
+
+from depend.lib.agent import Agent, ParallelAgent
 
 from depend.utils.configs import DPConfig
 from depend.depend.utils.data_split import DataSplit
@@ -21,6 +22,7 @@ from depend.core.serializable import Serializable, Model_Indexer
 
 import pickle
 
+import random
 
 import torch
 import torch.nn as nn
@@ -88,18 +90,14 @@ class MaskGen(Dependent):
         self.logger = Logger(experiment_name, result_dir)
 
         # Select all the environments
-        envs = []
+        self.envs = []
         ps = []
         for i, env in enumerate(list(self.clean_example_dict['fvs'].keys())):
-            envs.append(ImgObsWrapper(make_env(env, self.config.learner.seed + 10000 * i)))
+            self.envs.append(env),
             ps.append(self.clean_example_dict['fvs'][env])
-        ps = [p / sum(ps) for p in ps]
-        self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
-        # Get observation preprocessor
-        self.obs_space, self.preprocess_obss = get_obss_preprocessor(self.envs.observation_space)
-        self.obs_space = np.asarray(self.obs_space)
+        self.envs_ratio = [p / sum(ps) for p in ps]
 
-
+       
         # Configure the trainer
         self.learner = Torch_Learner.configure(config.learner)
 
@@ -109,8 +107,8 @@ class MaskGen(Dependent):
         if config.algorithm.criterion == 'kl':
             self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0])
         elif config.algorithm.criterion == 'ce':
-            self.criterion = lambda input, label: torch.nn.CrossEntropyLoss()(input[0].probs, label[0].probs.amax(dim = -1).long())
-        self.confidence = lambda input, label: (input[0].probs.amax(dim = -1) == label[0].probs.amax(dim = -1)).float().mean()
+            self.criterion = lambda input, label: torch.nn.CrossEntropyLoss()(input[0].probs, label[0].probs.argmax(dim = -1).long())
+        self.confidence = lambda input, label: (input[0].probs.argmax(dim = -1) == label[0].probs.argmax(dim = -1)).float().mean()
         # Configure the metric functions
         self.metrics = []
         for metric in config.algorithm.metrics:
@@ -118,7 +116,8 @@ class MaskGen(Dependent):
                 self.metrics.append(BinaryAUROC())
         
         
-    def collect_experience(self):
+        
+    def build_dataset(self):
         # Build a dataset by using every targeted model and exeperiences
          
         # First bipartie the model table conditioned on whether the model is poisoned
@@ -163,46 +162,76 @@ class MaskGen(Dependent):
         
         # Combine the selected rows from both parties into a new PyArrow Table
         #logging.info(f"Total {len(combined_model_table)} selected table: {combined_model_table}")
-        
-        models = []
-        for model_class in combined_model_table['model_class'].unique():
-            for idx_in_class in combined_model_table[combined_model_table['model_class'] == model_class]['idx_in_class']:
-                #logging.info(f"Selected {model_class} No.{idx}")
-                models.append(self.target_model_indexer.model_dict[model_class][idx_in_class].to(self.config.algorithm.device))
-     
-        combined_model_table = pa.Table.from_pandas(combined_model_table,
+    
+        combined_model_table = pa.Table.from_pandas(combined_model_table.sample(frac = 1.0),
                                                     schema=pa.schema([
                                                         ('model_class', pa.string()),
                                                         ('idx_in_class', pa.int32()),
                                                         ('poisoned', pa.int8())
                                                     ]))
         dataset = Dataset(combined_model_table)
-        #logging.info(f"Built model dataset {dataset}")
-        
         logger.info(f"Collect a dataset of mixed models {dataset}.")
+        return dataset
+    
+     
+    def collect_experience(self):
         if hasattr(self.config.algorithm, 'load_experience'):
-            exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
+            exps = pickle.load(open(self.config.algorithm.load_experience, 'rb')).to(self.config.algorithm.device)
         else:
-            exps = Agent.collect_experience(\
-                self.envs, 
-                models, 
-                self.preprocess_obss, 
+            #self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
+            envs = [ImgObsWrapper(make_env(env, self.config.learner.seed + 10000 * len(self.envs))) \
+                    for env in np.random.choice(self.envs, size = self.config.algorithm.num_procs, p = self.envs_ratio)]
+            
+            #logging.info(f"Built model dataset {dataset}")
+            models = []
+            if self.config.algorithm.num_procs > 1:
+                poisoned_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 0].sample(self.config.algorithm.num_procs // 2)
+                clean_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 1].sample(self.config.algorithm.num_procs // 2)
+                
+                for (poisoned_model_class, clean_model_class) in zip(poisoned_model_rows['model_class'].unique(), clean_model_rows['model_class'].unique()):
+                    for idx_in_class in poisoned_model_rows[poisoned_model_rows['model_class'] == poisoned_model_class]['idx_in_class']:
+                        #logging.info(f"Selected {model_class} No.{idx}")
+                        models.append(self.target_model_indexer.model_dict[poisoned_model_class][idx_in_class].to(self.config.algorithm.device))
+                    for idx_in_class in clean_model_rows[clean_model_rows['model_class'] == clean_model_class]['idx_in_class']:
+                        #logging.info(f"Selected {model_class} No.{idx}")
+                        models.append(self.target_model_indexer.model_dict[clean_model_class][idx_in_class].to(self.config.algorithm.device))
+            if len(models) < self.config.algorithm.num_procs:
+                model_rows = self.target_model_table.sample(\
+                    n = self.config.algorithm.num_procs - len(models)
+                    )[['model_class', 'idx_in_class']].values
+                for [model_class, idx_in_class] in model_rows:
+                    models.append(\
+                        self.target_model_indexer.model_dict[model_class][idx_in_class].to(self.config.algorithm.device))
+
+             #self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
+
+           
+            exps = Agent.collect_experience(
+                envs, 
+                models,
                 self.logger, 
-                self.config.data.num_frames_per_model 
+                self.config.data.num_frames_per_model,
+                self.config.algorithm.exploration_rate,
+                self.config.algorithm.device
                 )
+            
         logger.info(f"Collect a dataset of experiences {exps.shape}")
 
-        with open('experience.p', 'wb') as fp:
-            pickle.dump(exps, fp)
-        
-        return dataset, exps 
+        return exps
     
     def get_optimizer(self):
+        if self.config.optimizer.optimizer_class == 'RAdam':
+            self.optimizer = optim.RAdam(self.mask.parameters(), **self.config.optimizer.kwargs)
+        self.optimizer.zero_grad()
         def optimize_fn(loss):
             loss.backward()
-            nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
+            #logger.info("????")
+            #nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
             self.optimizer.step()
+            #logger.info("????")
             self.optimizer.zero_grad()
+            #logger.info("????")
+
         return optimize_fn
  
     def get_loss(self, exps: torch.Tensor): 
@@ -220,7 +249,7 @@ class MaskGen(Dependent):
 
             kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
 
-            loss = recons_loss + self.config.algorithm.beta * kld_loss
+            loss = 0 #recons_loss + self.config.algorithm.beta * kld_loss
 
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
@@ -229,6 +258,7 @@ class MaskGen(Dependent):
 
             if True:
                 for i, (model, y) in enumerate(zip(models, ys)):
+                    model = model.to(self.config.algorithm.device)
                     ## Run one model
                     logger.info(f'{i}th model: Healthy {y}')
                     with torch.no_grad():
@@ -259,7 +289,8 @@ class MaskGen(Dependent):
  
     def get_metrics(self, exps: torch.Tensor): 
         def metrics_fn(data):
-            logger.info(f"evaluation data {data}")
+            #logger.info(f"evaluation data {data}")
+
             ## input is the inds of the selected model from a dataset
             ## label indicates whether the model is poisoned
             nonlocal exps
@@ -275,24 +306,28 @@ class MaskGen(Dependent):
             # Get model
             models = self.target_model_indexer.get_model(data)
             labels = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
-            acc = []
+            accs = []
+             
 
             for i, model in enumerate(models):
+                model = model.to(self.config.algorithm.device)
                 # Models make predictions on the masked inputs
                 preds = model(masked_exps) 
-                #logger.info(f"Get predictions {preds[0]}")
+                #logger.info(f"Get predictions {preds[0].probs.argmax(dim = -1)}")
                 # Models make predictions on the un-masked inputs
                 ys = model(exps) 
-                #logger.info(f"Labels {ys[0]}")
+                #logger.info(f"Labels {ys[0].probs.argmax(dim = -1)}")
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(preds, ys)
                 # Store model label
                 # Get model confidence
                 confs.append(conf)
-                acc.append(1. if (conf >= 0.5 and labels[i] == 1) or (conf < 0.5 and labels[i] == 0) else 0.)
-                logger.info(f"Prediction {preds[0]}, Truth {ys[0]}, confidence: {conf.shape}")
-            logger.info(f"Median acc: {sum(acc)/len(acc)}")
+                accs.append(1. if (conf >= 0.5 and labels[i] == 1) or (conf < 0.5 and labels[i] == 0) else 0.)
+                #logger.info(f"Prediction {preds[0]}, Truth {ys[0]}, confidence: {conf.shape}")
+            #logger.info(f"confs: {confs} | healthy: {labels} | accs: {accs}")
+            logger.info(f"Median ACC: {sum(accs)/len(accs)}")
             
+            confs = torch.tensor(confs).flatten().to(self.config.algorithm.device)
             # Initialize the metric info
             info = {}
             # Define measuring operation for each metric
@@ -300,7 +335,7 @@ class MaskGen(Dependent):
                 # Reset the measurements
                 metric.reset()
                 # Measure based on the confidences and labels
-                metric.update(torch.tensor(confs).flatten(), labels.flatten())
+                metric.update(confs, labels.flatten())
                 # Return the measurement
                 return metric.compute()
             # Map the measuring operation to each metric and store in the metric info
@@ -313,47 +348,47 @@ class MaskGen(Dependent):
         # Build model dataset 
         # K-split the model dataset and train the detector for multiple rounds 
         # Return the mean metric 
+        dataset = self.build_dataset()
+
         best_score = None
         best_exps = None
         best_loss_fn = None
         best_validation_info = None
         best_dataset = None
         #with mlflow.start_run as run:
-        if True:
+        for _ in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
              
             best_score = None
             best_exps = None
-            dataset, exps = self.collect_experience()
-            loss_fn = self.get_loss(exps)
-            metrics_fn = self.get_metrics(exps)
-            optimize_fn = self.get_optimizer()
+
+            exps = self.collect_experience()
 
             suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_splits)
             prefix_split = None
-            for split in range(1, self.config.data.num_splits + 1):
-                # Prepare the mask generator
-                self.mask = eval(self.config.model.mask.name)(
-                    input_size = self.obs_space, device = self.config.algorithm.device)
-                if self.config.model.mask.load_from_file:
-                    self.mask.load_state_dict(torch.load(self.config.model.mask.load_from_file))    
-
-                # Configure the mask generator optimizer
-                if self.config.optimizer.optimizer_class == 'RAdam':
-                    self.optimizer = optim.RAdam(self.mask.parameters(), **self.config.optimizer.kwargs)
-
-                # Split dataset
+            for split in range(1, min(2, self.config.data.num_splits + 1)):
+               # Split dataset
                 validation_set = suffix_split.head
                 suffix_split = suffix_split.tail
+                
                 if prefix_split is None:
                     train_set = suffix_split.tail.compose()
                 else:
                     train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
                 #logger.info("Split: %s \n" % (split))
-                self.optimizer.zero_grad()
-                
+
+                 # Prepare the mask generator
+                self.mask = eval(self.config.model.mask.name)(
+                    input_size = exps.shape[1:], device = self.config.algorithm.device).to(self.config.algorithm.device)
+                if self.config.model.mask.load_from_file:
+                    self.mask.load_state_dict(torch.load(self.config.model.mask.load_from_file))    
+
+                loss_fn = self.get_loss(exps)
+                metrics_fn = self.get_metrics(exps)
+                optimize_fn = self.get_optimizer()
+
                 #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
-                train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn)
+                train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
                 #for k, v in train_info.items():
                 #    mlflow.log_metric(k, v, step = split)
                 validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
@@ -364,9 +399,11 @@ class MaskGen(Dependent):
                 if best_score is None or best_score < score:
                     logger.info("New best model")
                     best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
-                    break
-            if final_train:
-                final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, self.optimizer)
+                    if not self.config.algorithm.k_fold:
+                        break
+        if final_train:
+            logger.info("Final train the best detector")
+            final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, optimize_fn)
                 #for k, v in final_info.items():
                 #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
             #mlflow.end_run()
@@ -394,6 +431,8 @@ class MaskGen(Dependent):
     
         
     def save_detector(self, exps: torch.Tensor, info: Dict[Any, Any]):
+        with open('best_experience.p', 'wb') as fp:
+            pickle.dump(exps, fp)
         torch.save(self.mask.state_dict(), self.config.model.save_dir)
         #self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
         

@@ -115,6 +115,7 @@ class Basic_FC_VAE(Basic_VAE):
         obs = self.preprocess_obss(obs)
         #logger.info(f"{obs.shape}")
         x = obs.reshape(obs.shape[0], -1)
+        #logger.info(f"{x}")
         mu, log_var = self.enc(x)
         z = self.reparameterize(mu, log_var)
         #logger.info(f"{z.shape}")

@@ -44,7 +44,9 @@ class Torch_Learner(Base_Learner):
             [Iterable[torch.Tensor], 
              Iterable[torch.Tensor]
              ], Tuple[torch.Tensor, Dict[Any, Any]]], 
-        optimize_function: Callable 
+        optimize_function: Callable,
+        test_set: Optional[Dataset],
+        metric_function: Optional[Callable],
     )-> Dict[str, float]:
         
         train_loader =  torch.utils.data.DataLoader(
@@ -52,12 +54,24 @@ class Torch_Learner(Base_Learner):
              batch_size = self.batch_size, 
              shuffle = True
              )
+        if test_set is not None:
+            test_loader =  torch.utils.data.DataLoader(
+                 test_set,
+                 batch_size=len(test_set)
+                 ) 
         
         summary_info = {}
-        info_gen = self.train_iterator(learner_logger, train_loader, loss_function, optimize_function)
+        train_info_gen = self.train_iterator(learner_logger, train_loader, loss_function, optimize_function)
+        
         for episode in range(1, self.episodes + 1):
-            info = next(info_gen)
-            summary_info.update(**info)
+            train_info = next(train_info_gen)
+            summary_info.update(**train_info)
+            if metric_function is not None:
+                with torch.no_grad():
+                    for i, data in enumerate(test_loader):
+                        eval_info = metric_function(data)
+                        #logger.info(f"Evaluation info {eval_info}")
+                        summary_info .update(**eval_info)
         return summary_info
 
     @Base_Learner.track 
@@ -78,9 +92,9 @@ class Torch_Learner(Base_Learner):
             for i, data in enumerate(train_loader):
                 #logger.info(f'Get data {data} from train_loader')
                 loss, loss_info = loss_function(data)
-                #logger.info(f"Get loss {loss}")
+                logger.info(f"Get loss {loss}")
                 optimize_function(loss)
-                #logger.info(f"One step optimization finished")
+                logger.info(f"One step optimization finished")
                 if summary_info is None:
                     summary_info = {f'{k}': [v] for k, v in loss_info.items()}
                 else:
@@ -90,7 +104,7 @@ class Torch_Learner(Base_Learner):
                 #    learner_logger.info(f"Batch {i} | " + \
                 #                        ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
                 #logger.info(f"One batch training finished")
-                #logger.info(f"Summary info: {summary_info}")
+                logger.info(f"Summary info: {summary_info}")
                 
             learner_logger.info(f"Episode {episode} | Train: " + \
                                 ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
@@ -109,7 +123,8 @@ class Torch_Learner(Base_Learner):
         metric_function: Callable
     )-> Dict[str, float]: 
         dataloader =  torch.utils.data.DataLoader(
-             dataset
+             dataset,
+             batch_size=len(dataset)
              ) 
         summary_info = None
         with torch.no_grad():
