@@ -289,7 +289,7 @@ class MaskGen(Dependent):
 
             kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
 
-            loss = recons_loss + self.config.algorithm.beta * kld_loss
+            loss = 0 #recons_loss + self.config.algorithm.beta * kld_loss
 
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
@@ -298,20 +298,18 @@ class MaskGen(Dependent):
 
 
             if True:
-                logger.info(f"Run {len(models)} models")
+                #logger.info(f"Run {len(models)} models")
                 for i, (_, model, y) in enumerate(zip(data, models, ys)):
                     ## Run one model
                     #logger.info(f'{i}th model: Healthy {y}')
                     with torch.no_grad():
-                        targets = model(exps)[0].probs
+                        targets = model(exps)[0]
                         #logger.info(f'{i}th model: Prediction on original experience {targets[0].probs}')
                     model.requires_grad_()
                     preds = self.get_model_output_from_embedding(model, zs, True) 
                     #logger.info(f'{i}th model: Prediction on masked experience {preds[0].probs}')
                 
-                    errs = (targets.log() * preds.probs).mean()
-                    #errs = self.criterion(preds, targets) 
-                    #errs = ((preds[0].probs - targets[0].probs)**2).mean()
+                    errs = self.criterion(preds, targets) 
                     #logger.info(f'{i}th model: Error {errs}')
 
                     if mask_loss is None: 
@@ -367,7 +365,7 @@ class MaskGen(Dependent):
                 # Store model label
                 # Get model confidence
                 confs.append(conf)
-                logger.info(f"confs vs labels: {list(zip(confs, labels))}")
+                #logger.info(f"confs vs labels: {list(zip(confs, labels))}")
                 accs.append(1. if (conf >= 0.5 and labels[i] == 1) or (conf < 0.5 and labels[i] == 0) else 0.)
                 #logger.info(f"Prediction {preds[0]}, Truth {ys[0]}, confidence: {conf.shape}")
             #logger.info(f"confs: {confs} | healthy: {labels} | accs: {accs}")
@@ -410,17 +408,25 @@ class MaskGen(Dependent):
 
             exps = self.collect_experience()
 
-            suffix_split = DataSplit.split_dataset(dataset, self.config.data.num_splits)
+            suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
-            for split in range(1, min(2, self.config.data.num_splits + 1)):
+            for split in range(1, self.config.data.num_splits):
                # Split dataset
                 validation_set = suffix_split.head
-                suffix_split = suffix_split.tail
-                
-                if prefix_split is None:
+            
+                if prefix_split is None and suffix_split.tail is not None:
                     train_set = suffix_split.tail.compose()
-                else:
-                    train_set = DataSplit.concatenate(prefix_split, suffix_split).compose()
+                    suffix_split = suffix_split.tail
+                    prefix_split = DataSplit.Split(validation_set, 1)
+                elif prefix_split is None and suffix_split.tail is None:
+                    raise NotImplementedError("No training set ???")
+                elif prefix_split is not None and suffix_split.tail is None:
+                    train_set = prefix_split.compose()
+                    prefix_split.append(validation_set)
+                elif prefix_split is not None and suffix_split.tail is not None:
+                    train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
+                    prefix_split.append(validation_set)
+                    suffix_split = suffix_split.tail
                 #logger.info("Split: %s \n" % (split))
 
                  # Prepare the mask generator
@@ -449,7 +455,7 @@ class MaskGen(Dependent):
                 
                 score = validation_info.get(self.config.algorithm.metrics[0])
                 if best_score is None or best_score < score:
-                    logger.info("New best model")
+                    #logger.info("New best model")
                     best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
                     if not self.config.algorithm.k_fold:
                         break

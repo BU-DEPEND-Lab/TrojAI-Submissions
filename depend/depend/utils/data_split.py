@@ -8,6 +8,9 @@ from datasets import concatenate_datasets
 from abc import ABC, abstractmethod      
 from pydantic import BaseModel, validator
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class BaseDataSplit(ABC):
     head: Dataset 
@@ -19,21 +22,21 @@ class DataSplit(BaseDataSplit):
  
 
     @classmethod
-    def append(cls, split: BaseDataSplit, dataset: Dataset):
+    def Append(cls, split: BaseDataSplit, dataset: Dataset):
         if split.tail is None:
             return cls(head = dataset)
         else:
             return cls(head = split.head, tail = cls.append(split.tail, dataset))
     
     @classmethod
-    def concatenate(cls, split1: BaseDataSplit, split2: BaseDataSplit):
+    def Concatenate(cls, split1: BaseDataSplit, split2: BaseDataSplit):
         if split1.tail is None:
-            return cls(split1.head, split2)
+            return cls(head = split1.head, tail = split2)
         else:
             return cls(head = split1.head, tail = cls.concatenate(split1.tail, split2))
  
     @classmethod
-    def split_dataset(
+    def Split(
         cls,
         dataset: Dataset,
         num_split: int, 
@@ -69,7 +72,7 @@ class DataSplit(BaseDataSplit):
         if data_split is not None:
             self.append(data_split.head)
             self.tail.concatenate(data_split.tail)
-   
+
     def compose(self) -> Dataset:
         if self.tail is None:
             return self.head
