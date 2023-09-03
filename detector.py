@@ -142,7 +142,8 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'mask': {
-                    'name': 'Basic_FC_VAE'
+                    'name': 'Basic_FC_VAE',
+                    'state_embedding_size': 64,
                 },
                 'save_dir': 'best_mask.p'
             },
@@ -155,7 +156,7 @@ class Detector(AbstractDetector):
             'algorithm_schema': {
                 'device': 'cuda:1',
                 'task': 'RL',
-                'criterion': 'kl',
+                'criterion': 'ce',
                 'beta': 1,
                 'k_fold': False,
                 'num_procs': 10,
@@ -171,7 +172,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 256
+                'num_frames_per_model': 128
             }
             
         }

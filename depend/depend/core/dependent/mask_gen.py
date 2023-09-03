@@ -27,6 +27,8 @@ import random
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from torch.distributions.categorical import Categorical
+
 import torch.optim as optim
 from torch_ac.utils import DictList, ParallelEnv
 
@@ -105,10 +107,14 @@ class MaskGen(Dependent):
         
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
-            self.criterion = lambda input, label: torch.distributions.kl.kl_divergence(input[0], label[0]).mean()
+            criterion = torch.distributions.kl.kl_divergence()
+            self.criterion = lambda input, label: criterion(input, label).mean()
         elif config.algorithm.criterion == 'ce':
-            self.criterion = lambda input, label: torch.nn.CrossEntropyLoss()(input[0].probs, label[0].probs)
-        self.confidence = lambda input, label: (input[0].probs.argmax(dim = -1) == label[0].probs.argmax(dim = -1)).float().mean()
+            criterion = torch.nn.CrossEntropyLoss()
+            self.criterion = lambda input, label: criterion(input.probs, label.probs.argmax(dim = -1)).mean()
+        elif config.algorithm.criterion == 'log':
+            self.criterion = lambda input, label: (input.probs.log() * label.probs).mean()
+        self.confidence = lambda input, label: (input.probs.argmax(dim = -1) != label.probs.argmax(dim = -1)).float().mean()
         # Configure the metric functions
         self.metrics = []
         for metric in config.algorithm.metrics:
@@ -223,17 +229,50 @@ class MaskGen(Dependent):
             self.optimizer = optim.RAdam(self.mask.parameters(), **self.config.optimizer.kwargs)
         elif self.config.optimizer.optimizer_class == 'Adam':
              self.optimizer = optim.Adam(self.mask.parameters(), **self.config.optimizer.kwargs)
-        self.optimizer.zero_grad()
-        def optimize_fn(loss):
-            loss.backward()
-            #logger.info("????")
-            #nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
-            self.optimizer.step()
-            #logger.info("????")
-            self.optimizer.zero_grad()
-            #logger.info("????")
+        return self.optimizer
+         
+    def get_model_output_from_observation(self, model_class, model, obs, requires_grad = True):
+        x = obs.transpose(1, 3).transpose(2, 3)
 
-        return optimize_fn
+        if model_class == 'BasicFCModel':
+            state_emb = model.state_emb.to(self.config.algorithm.device)
+            if requires_grad:
+                state_emb.requires_grad_()
+            x = x.reshape(obs.size()[0], -1)
+            x = state_emb(x.float())
+
+        elif model_class == 'SimplifiedRLStarter':
+            image_conv = model.image_conv.to(self.config.algorithm.device)
+            if requires_grad:
+                image_conv = image_conv.requires_grad_()
+            x = image_conv(x.float())
+        
+        actor = model.actor.to(self.config.algorithm.device)
+        if requires_grad:
+            actor.requires_grad_()
+
+        x = x.reshape(x.shape[0], -1)
+        x = actor(x)
+        x = F.softmax(x)
+        dist = Categorical(logits=F.log_softmax(x, dim=1))
+        return dist
+        
+    
+    def get_model_output_from_embedding(self, model, embedding, requires_grad = False):
+        x = embedding.reshape(embedding.shape[0], -1)
+        actor = model.actor.to(self.config.algorithm.device)
+        if requires_grad:
+            actor.requires_grad_()
+
+        x = x.reshape(x.shape[0], -1)
+        x = actor(x)
+        x = F.softmax(x)
+        dist = Categorical(logits=F.log_softmax(x, dim=1))
+        return dist
+        
+       
+
+        
  
     def get_loss(self, exps: torch.Tensor): 
         # Run the model to get the action 
@@ -243,41 +282,43 @@ class MaskGen(Dependent):
             ## Get the models
             nonlocal exps
             exps = exps.float()
-            masked_exps, mu, log_var = self.mask(exps)
+            masked_exps, zs, mu, log_var = self.mask(exps)
 
             #logger.info(f'Masked experience example {masked_exps[0]}')
             recons_loss = F.mse_loss(masked_exps, exps).div(exps.shape[0])
 
             kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
 
-            loss = 0 #recons_loss + self.config.algorithm.beta * kld_loss
+            loss = recons_loss + self.config.algorithm.beta * kld_loss
 
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
             #logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
-            mask_loss = None
+            mask_loss = 0 #None
+
 
             if True:
-                for i, (model, y) in enumerate(zip(models, ys)):
-                    model = model.to(self.config.algorithm.device)
+                logger.info(f"Run {len(models)} models")
+                for i, (_, model, y) in enumerate(zip(data, models, ys)):
                     ## Run one model
                     #logger.info(f'{i}th model: Healthy {y}')
                     with torch.no_grad():
-                        targets = model(exps) 
-                        #logger.info(f'{i}th model: Prediction on original experience {targets}')
-                    
-                    preds = model(masked_exps) 
-                    #logger.info(f'{i}th model: Prediction on masked experience {preds}')
-                    
-                    errs = self.criterion(preds, targets) 
-                     
+                        targets = model(exps)[0].probs
+                        #logger.info(f'{i}th model: Prediction on original experience {targets[0].probs}')
+                    model.requires_grad_()
+                    preds = self.get_model_output_from_embedding(model, zs, True) 
+                    #logger.info(f'{i}th model: Prediction on masked experience {preds[0].probs}')
+                
+                    errs = (targets.log() * preds.probs).mean()
+                    #errs = self.criterion(preds, targets) 
+                    #errs = ((preds[0].probs - targets[0].probs)**2).mean()
                     #logger.info(f'{i}th model: Error {errs}')
 
                     if mask_loss is None: 
                         mask_loss = y * errs
                     else:
                         mask_loss += y * errs
-                    break
+                  
                         
                 mask_loss /= len(models)
             loss += mask_loss
@@ -286,7 +327,7 @@ class MaskGen(Dependent):
                 'tot_loss': loss.item(),
                 'recons_loss': recons_loss.item(),
                 'kld_loss': kld_loss.item(),
-                'mask_loss': mask_loss
+                'mask_loss': mask_loss.item()
             }
         return loss_fn
  
@@ -299,7 +340,7 @@ class MaskGen(Dependent):
             nonlocal exps
             # Generate masked model inputs
             exps = exps.float()
-            masked_exps, _, _ = self.mask(exps)
+            masked_exps, zs, _, _ = self.mask(exps)
             ## store confidences on whether the modes are poisoned 
             confs = []
 
@@ -308,23 +349,25 @@ class MaskGen(Dependent):
             
             # Get model
             models = self.target_model_indexer.get_model(data)
-            labels = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
+            labels = torch.tensor(data['poisoned']).to(self.config.algorithm.device)
             accs = []
-             
+            
 
             for i, model in enumerate(models):
                 model = model.to(self.config.algorithm.device)
                 # Models make predictions on the masked inputs
-                preds = model(masked_exps) 
-                #logger.info(f"Get predictions {preds[0].probs.argmax(dim = -1)}")
+                preds = self.get_model_output_from_embedding(model, zs) 
+                #logger.info(f"Get predictions {preds.probs.argmax(dim = -1)}")
                 # Models make predictions on the un-masked inputs
-                ys = model(exps) 
-                #logger.info(f"Labels {ys[0].probs.argmax(dim = -1)}")
+                ys = model(exps)[0] 
+                #logger.info(f"Labels {ys.probs.argmax(dim = -1)}")
+   
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(preds, ys)
                 # Store model label
                 # Get model confidence
                 confs.append(conf)
+                logger.info(f"confs vs labels: {list(zip(confs, labels))}")
                 accs.append(1. if (conf >= 0.5 and labels[i] == 1) or (conf < 0.5 and labels[i] == 0) else 0.)
                 #logger.info(f"Prediction {preds[0]}, Truth {ys[0]}, confidence: {conf.shape}")
             #logger.info(f"confs: {confs} | healthy: {labels} | accs: {accs}")
@@ -382,9 +425,15 @@ class MaskGen(Dependent):
 
                  # Prepare the mask generator
                 self.mask = eval(self.config.model.mask.name)(
-                    input_size = exps.shape[1:], device = self.config.algorithm.device).to(self.config.algorithm.device)
+                    input_size = exps.shape[1:], 
+                    device = self.config.algorithm.device, 
+                    state_embedding_size = self.config.model.mask.state_embedding_size
+                    )
                 if self.config.model.mask.load_from_file:
                     self.mask.load_state_dict(torch.load(self.config.model.mask.load_from_file))    
+                    self.mask = self.mask.to(self.config.algorithm.device)
+
+                self.mask.train()
 
                 loss_fn = self.get_loss(exps)
                 metrics_fn = self.get_metrics(exps)

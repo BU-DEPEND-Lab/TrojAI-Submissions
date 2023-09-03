@@ -154,6 +154,7 @@ class BaseModelConfig(BaseConfig):
     name: str
     input_size: Optional[int] = None
     output_size: Optional[int] = None
+    state_embedding_size: Optional[int] = None
     load_from_file: Optional[str] = None
     
     class Config:

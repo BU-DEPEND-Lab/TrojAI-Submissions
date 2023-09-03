@@ -83,7 +83,7 @@ class Torch_Learner(Base_Learner):
             [Iterable[torch.Tensor], 
              Iterable[torch.Tensor]
              ], Tuple[torch.Tensor, Dict[Any, Any]]],
-        optimize_function: Callable
+        optimizer: Callable
         ):
         
  
@@ -91,10 +91,18 @@ class Torch_Learner(Base_Learner):
             summary_info = None
             for i, data in enumerate(train_loader):
                 #logger.info(f'Get data {data} from train_loader')
+                optimizer.zero_grad()
+
                 loss, loss_info = loss_function(data)
-                logger.info(f"Get loss {loss}")
-                optimize_function(loss)
-                logger.info(f"One step optimization finished")
+                #logger.info(f"Get loss {loss}")
+
+                loss.backward()
+                #logger.info("????")
+                #nn.utils.clip_grad_norm_(self.mask.parameters(), 1.0)
+                optimizer.step()
+
+                #optimizer(loss)
+                #logger.info(f"One step optimization finished")
                 if summary_info is None:
                     summary_info = {f'{k}': [v] for k, v in loss_info.items()}
                 else:
@@ -104,7 +112,7 @@ class Torch_Learner(Base_Learner):
                 #    learner_logger.info(f"Batch {i} | " + \
                 #                        ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
                 #logger.info(f"One batch training finished")
-                logger.info(f"Summary info: {summary_info}")
+                #logger.info(f"Summary info: {summary_info}")
                 
             learner_logger.info(f"Episode {episode} | Train: " + \
                                 ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))

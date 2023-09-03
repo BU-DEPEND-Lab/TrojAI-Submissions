@@ -60,7 +60,7 @@ class Basic_VAE(ABC, nn.Module):
         obs_ = self.dec(z)
         #logger.info(f"{obs_.shape}")
         obs_ = obs_.transpose(2, 3).transpose(3, 1)
-        return obs_, mu, log_var
+        return obs_, z, mu, log_var
 
 
 
@@ -122,7 +122,7 @@ class Basic_FC_VAE(Basic_VAE):
         x = self.dec(z)
         #logger.info(f"{obs_.shape}")
         x = x.reshape(obs.shape)
-        return x, mu, log_var
+        return x, z, mu, log_var
 
     
  
