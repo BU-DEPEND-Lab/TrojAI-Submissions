@@ -158,7 +158,7 @@ class Detector(AbstractDetector):
                 'device': 'cuda:2',
                 'task': 'RL',
                 'criterion': 'ce',
-                'beta': 1,
+                'beta': 0,
                 'k_fold': True,
                 'num_procs': 40,
                 'exploration_rate': 0.5,
@@ -299,10 +299,14 @@ class Detector(AbstractDetector):
             probability = self.inference_random_forest(model, examples_dirpath)
         elif self.method == 'mask_gen':
             probability = self.inference_with_mask_gen(model)
-        
+        else:
+            probability = self.inference_with_mask_gen(model)
         # write the trojan probability to the output file
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
+            logging.info(f"Wrote to result file {result_filepath}")
+        with open(result_filepath, "r") as fp:
+            logging.info(f"Check result file {fp.read()}")
 
         logging.info("Trojan probability: {}".format(probability))
  
