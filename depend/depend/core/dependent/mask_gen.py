@@ -117,7 +117,7 @@ class MaskGen(Dependent):
             self.criterion = lambda input, label: criterion(input.probs, label.probs.argmax(dim = -1)).mean()
         elif config.algorithm.criterion == 'log':
             self.criterion = lambda input, label: (input.probs.log() * label.probs).mean()
-        self.confidence = lambda input, label: (input.probs.argmax(dim = -1) != label.probs.argmax(dim = -1)).float().mean()
+        self.confidence = lambda input, label: (input.probs.argmax(dim = -1) != label.probs.argmax(dim = -1)).float().cpu().numpy().mean().item()
         # Configure the metric functions
         self.metrics = []
         for metric in config.algorithm.metrics:
