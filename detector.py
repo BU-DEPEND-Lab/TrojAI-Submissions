@@ -155,7 +155,7 @@ class Detector(AbstractDetector):
                 'eval_interval': 2,
             },
             'algorithm_schema': {
-                'device': 'cuda:2',
+                'device': 'cuda:1',
                 'task': 'RL',
                 'criterion': 'ce',
                 'beta': 0,
