@@ -285,6 +285,7 @@ class MaskGen(Dependent):
             ## Get the models
             nonlocal exps
             exps = exps.float()
+            
             masked_exps, zs, mu, log_var = self.mask(exps)
 
             #logger.info(f'Masked experience example {masked_exps[0]}')
@@ -292,7 +293,7 @@ class MaskGen(Dependent):
 
             kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1))
 
-            loss = 0 #recons_loss + self.config.algorithm.beta * kld_loss
+            loss = recons_loss + self.config.algorithm.beta * kld_loss
 
             models = self.target_model_indexer.get_model(data)
             ys = 1. - 2. * torch.tensor(data['poisoned']).to(self.config.algorithm.device)
@@ -434,7 +435,11 @@ class MaskGen(Dependent):
                 #logger.info("Split: %s \n" % (split))
 
                 exps = self.collect_experience()
-
+                logger.info(exps.shape)
+ 
+                exps_ = exps.view(exps.shape[0], -1, exps.shape[-1])
+                exps = exps_[:, torch.randperm(exps_.shape[1])].reshape(exps.shape)
+                 
                 # Prepare the mask generator
                 self.mask = eval(self.config.model.mask.name)(
                     input_size = exps.shape[1:], 

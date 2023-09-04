@@ -149,7 +149,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_mask.p'
             },
             'learner_schema': {
-                'episodes': 100,
+                'episodes': 200,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -160,7 +160,7 @@ class Detector(AbstractDetector):
                 'criterion': 'ce',
                 'beta': 1,
                 'k_fold': True,
-                'num_procs': 20,
+                'num_procs': 30,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
@@ -363,7 +363,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 2048
+                'num_frames_per_model': 128
             }
             
         }
