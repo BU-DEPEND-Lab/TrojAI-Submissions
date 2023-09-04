@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: python:3.8-bullseye
+From: python:3.9-bullseye
 
 %files
     ./depend /
@@ -9,14 +9,12 @@ From: python:3.8-bullseye
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
-    ./best_mask.p / 
-    ./best_experience.p /
 
 %post
     pip install --upgrade pip
-    pip install torch --index-url https://download.pytorch.org/whl/cpu
-    pip install trojai_rl
-    pip install gym_minigrid==1.0.2
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+    pip install gym gymnasium minigrid jsonschema jsonpickle scikit-learn opencv-python
+
     pip install jsonschema
     pip install jsonpickle
     pip install -e ./depend/
@@ -24,6 +22,8 @@ From: python:3.8-bullseye
     touch output.txt
     chmod 777 output.txt
     chmod -R 755 /utils
+    chmod 755 /*.json
+    chmod -R 755 /learned_parameters
 
 %runscript
     exec python3 /entrypoint.py "$@"

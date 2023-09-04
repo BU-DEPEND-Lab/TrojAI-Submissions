@@ -21,15 +21,13 @@ from depend.launch import Sponsor
 from sklearn.ensemble import RandomForestRegressor
 
 from utils.abstract import AbstractDetector
-from utils.models import load_model, load_models_dirpath
+from utils.model_utils import compute_action_from_trojai_rl_model
+from utils.models import load_model, load_models_dirpath, ImageACModel, ResNetACModel
 
-import torch
-import torch_ac
-import gym
-from gym_minigrid.wrappers import ImgObsWrapper
 
-from datetime import datetime
-timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+from utils.world import RandomLavaWorldEnv
+from utils.wrappers import ObsEnvWrapper, TensorWrapper
+
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
@@ -209,10 +207,7 @@ class Detector(AbstractDetector):
         self.write_metaparameters()
         logging.info("Configuration done!")
 
-
-    
-
-    def inference_on_example_data(self, model, examples_dirpath):
+    def inference_on_example_data(self, model, examples_dirpath, config_dict):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
@@ -220,58 +215,35 @@ class Detector(AbstractDetector):
             examples_dirpath: the directory path for the round example data
         """
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        logging.info("Using compute device: {}".format(device))
+        size = config_dict["grid_size"]
 
-        model.to(device)
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # model.to(device)
         model.eval()
 
-        preprocess = torch_ac.format.default_preprocess_obss
+        # logging.info("Using compute device: {}".format(device))
 
-        # Utilize open source minigrid environment model was trained on
-        env_string_filepath = os.path.join(examples_dirpath, 'env-string.txt')
-        with open(env_string_filepath) as env_string_file:
-            env_string = env_string_file.readline().strip()
-        logging.info('Evaluating on {}'.format(env_string))
+        model_name = type(model).__name__
+        observation_mode = "rgb" if model_name in [ImageACModel.__name__, ResNetACModel.__name__] else 'simple'
 
-        # Number of episodes to run
-        episodes = 100
+        wrapper_obs_mode = 'simple_rgb' if observation_mode == 'rgb' else 'simple'
 
-        env_perf = {}
+        env = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode=observation_mode, grid_size=size), mode=wrapper_obs_mode))
 
-        # Run episodes through an environment to collect what may be relevant information to trojan detection
-        # Construct environment and put it inside a observation wrapper
-        env = ImgObsWrapper(gym.make(env_string))
-        obs = env.reset()
-        obs = preprocess([obs], device=device)
+        obs, info = env.reset()
+        done = False
+        max_iters = 1000
+        iters = 0
+        reward = 0
 
-        final_rewards = []
-        with torch.no_grad():
-            # Episode loop
-            for _ in range(episodes):
-                done = False
-                # Use env observation to get action distribution
-                dist, value = model(obs)
-                # Per episode loop
-                while not done:
-                    # Sample from distribution to determine which action to take
-                    action = dist.sample()
-                    action = action.cpu().detach().numpy()
-                    # Use action to step environment and get new observation
-                    obs, reward, done, info = env.step(action)
-                    # Preprocessing function to prepare observation from env to be given to the model
-                    obs = preprocess([obs], device=device)
-                    # Use env observation to get action distribution
-                    dist, value = model(obs)
+        while not done and iters < max_iters:
+            env.render()
+            action = compute_action_from_trojai_rl_model(model, obs, sample=True)
+            obs, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
 
-                # Collect episode performance data (just the last reward of the episode)
-                final_rewards.append(reward)
-                # Reset environment after episode and get initial observation
-                obs = env.reset()
-                obs = preprocess([obs], device=device)
+        logging.info('Final reward: {}'.format(reward))
 
-        # Save final rewards
-        env_perf['final_rewards'] = final_rewards
 
     def infer(
             self,
@@ -292,15 +264,15 @@ class Detector(AbstractDetector):
         """
 
         # load the model
-        model, model_repr, model_class = load_model(model_filepath)
 
         probability = None
         if self.method == 'random_forest':
-            probability = self.inference_random_forest(model, examples_dirpath)
+            probability = self.inference_random_forest(model_filepath)
         elif self.method == 'mask_gen':
-            probability = self.inference_with_mask_gen(model)
+            probability = self.inference_with_mask_gen(model_filepath)
         else:
-            probability = self.inference_with_mask_gen(model)
+            probability = self.inference_with_mask_gen(model_filepath)
+        
         # write the trojan probability to the output file
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
@@ -311,15 +283,39 @@ class Detector(AbstractDetector):
         logging.info("Trojan probability: {}".format(probability))
  
 
+        # write the trojan probability to the output file
+        with open(result_filepath, "w") as fp:
+            fp.write(str(probability))
+
+        logging.info("Trojan probability: {}".format(probability))
 
 
-    def inference_with_random_forest(self, model, examples_dirpath):
+
+    def inference_with_random_forest(self, model_filepath):
+        model, model_repr, model_class = load_model(model_filepath)
+
+        # Load the config file
+        config_dict = {}
+
+        model_dirpath = os.path.dirname(model_filepath)
+
+        config_filepath = os.path.join(model_dirpath, 'config.json')
+
+        with open(config_filepath) as config_file:
+            config_dict = json.load(config_file)
+
         # Inferences on examples to demonstrate how it is done for a round
-        self.inference_on_example_data(model, examples_dirpath)
+        self.inference_on_example_data(model, examples_dirpath, config_dict)
 
         # build a fake random feature vector for this model, in order to compute its probability of poisoning
         rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
         X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
+
+        # # create a random model for testing (fit to nothing)
+        # model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+        # model.fit(X, [0])
+        # with open(self.model_filepath, "wb") as fp:
+        #     pickle.dump(model, fp)
 
         # load the RandomForest from the learned-params location
         with open(self.model_filepath, "rb") as fp:
@@ -330,8 +326,9 @@ class Detector(AbstractDetector):
         # clip the probability to reasonable values
         probability = np.clip(probability, a_min=0.01, a_max=0.99)
         return probability
-    
-    def inference_with_mask_gen(self, model):
+        
+    def inference_with_mask_gen(self, model_filepath):
+        model, model_repr, model_class = load_model(model_filepath)
         dependent = MaskGen()
         config = {
             'model_schema': {
