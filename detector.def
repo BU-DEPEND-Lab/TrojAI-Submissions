@@ -22,7 +22,7 @@ From: python:3.8-bullseye
     pip install -e ./depend/
     chmod 755 /*.py
     touch output.txt
-    chmod 755 output.txt
+    chmod 777 output.txt
     chmod -R 755 /utils
 
 %runscript
