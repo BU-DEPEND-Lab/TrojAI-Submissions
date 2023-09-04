@@ -45,8 +45,7 @@ class Sponsor:
             experiment_name = experiment_name,
             result_dir = result_dir
             )
-
-        return dependent.train_detector() 
+ 
 
 
 class HyperSponsor(Sponsor): 

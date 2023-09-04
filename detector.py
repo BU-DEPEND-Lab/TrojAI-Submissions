@@ -181,6 +181,7 @@ class Detector(AbstractDetector):
         result_dir = os.path.join('./logs', timestamp)
         os.mkdir(result_dir)
         Sponsor(**config).support(dependent, 'test', result_dir)
+        dependent.train_detector() 
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
@@ -366,5 +367,7 @@ class Detector(AbstractDetector):
             }
             
         }
-        dependent.configure(config)
+        result_dir = os.path.join('./logs', timestamp)
+        os.mkdir(result_dir)
+        Sponsor(**config).support(dependent, 'test', result_dir)
         return dependent.infer(model)

@@ -102,7 +102,7 @@ class MaskGen(Dependent):
                 ps.append(self.clean_example_dict['fvs'][env])
             self.envs_ratio = [p / sum(ps) for p in ps]
 
-       
+        
         # Configure the trainer
         self.learner = Torch_Learner.configure(config.learner)
 
