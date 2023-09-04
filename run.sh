@@ -25,11 +25,11 @@ singularity run \
 --nv \
 ./detector.simg \
 infer \
---model_filepath=./model/rl-lavaworld-jul2023-example/model.pt \
+--model_filepath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round14/rl-lavaworld-jul2023-train/models/id-00000000/model.pt \
 --result_filepath=./output.txt \
 --scratch_dirpath=./scratch/ \
---examples_dirpath=./model/rl-lavaworld-jul2023-example/clean-example-data/ \
+--examples_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round14/rl-lavaworld-jul2023-train/models/id-00000000/clean-example-data/ \
 --round_training_dataset_dirpath=/path/to/training/dataset/ \
---metaparameters_filepath=./metaparameters.json \
---schema_filepath=./metaparameters_schema.json \
---learned_parameters_dirpath=./learned_parameters/
+--metaparameters_filepath=/metaparameters.json \
+--schema_filepath=/metaparameters_schema.json \
+--learned_parameters_dirpath=/learned_parameters/

@@ -334,7 +334,7 @@ class Detector(AbstractDetector):
                 'mask': {
                     'name': 'Basic_FC_VAE',
                     'state_embedding_size': 64,
-                    'load_from_file': '/home/zwc662/Workspace/TrojAI-Submissions/best_mask.p'
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_mask.p')
                 },
                 'save_dir': 'best_mask.p'
             },
@@ -353,7 +353,7 @@ class Detector(AbstractDetector):
                 'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
                  
             },
             'optimizer_schema': {
@@ -367,7 +367,5 @@ class Detector(AbstractDetector):
             }
             
         }
-        result_dir = os.path.join('./logs', timestamp)
-        os.mkdir(result_dir)
-        Sponsor(**config).support(dependent, 'test', result_dir)
+        Sponsor(**config).support(dependent, None, None)
         return dependent.infer(model)

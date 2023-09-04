@@ -52,8 +52,8 @@ import numpy as np
 from gym_minigrid.wrappers import ImgObsWrapper
 import gym
 
-import mlflow
-import mlflow.pytorch
+#import mlflow
+#import mlflow.pytorch
 
 import logging
 logger = logging.getLogger(__name__)
@@ -503,7 +503,7 @@ class MaskGen(Dependent):
         conf = self.confidence(preds, ys)
         # Store model label
         # Get model confidence
-        self.logger.epoch_info("Trojan Probability: %f" % conf)
+        #self.logger.epoch_info("Trojan Probability: %f" % conf)
         logger.info("Trojan Probability: %f" % conf)
         
         return conf

@@ -9,8 +9,8 @@ From: python:3.8-bullseye
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
-    ./best_mask.p
-    ./best_experience.p
+    ./best_mask.p / 
+    ./best_experience.p /
 
 %post
     pip install --upgrade pip
@@ -21,6 +21,8 @@ From: python:3.8-bullseye
     pip install jsonpickle
     pip install -e ./depend/
     chmod 755 /*.py
+    touch output.txt
+    chmod 755 output.txt
     chmod -R 755 /utils
 
 %runscript
