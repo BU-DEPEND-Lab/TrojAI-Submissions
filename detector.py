@@ -28,7 +28,8 @@ import torch_ac
 import gym
 from gym_minigrid.wrappers import ImgObsWrapper
 
- 
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
@@ -159,10 +160,10 @@ class Detector(AbstractDetector):
                 'criterion': 'ce',
                 'beta': 1,
                 'k_fold': True,
-                'num_procs': 10,
+                'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
                  
             },
             'optimizer_schema': {
@@ -172,11 +173,14 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 128
+                'num_frames_per_model': 2048
             }
             
         }
-        Sponsor(**config).support(dependent, 'test', 'result')
+
+        result_dir = os.path.join('./logs', timestamp)
+        os.mkdir(result_dir)
+        Sponsor(**config).support(dependent, 'test', result_dir)
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
@@ -203,6 +207,9 @@ class Detector(AbstractDetector):
 
         self.write_metaparameters()
         logging.info("Configuration done!")
+
+
+    
 
     def inference_on_example_data(self, model, examples_dirpath):
         """Method to demonstrate how to inference on a round's example data.
@@ -286,6 +293,22 @@ class Detector(AbstractDetector):
         # load the model
         model, model_repr, model_class = load_model(model_filepath)
 
+        probability = None
+        if self.method == 'random_forest':
+            probability = self.inference_random_forest(model, examples_dirpath)
+        elif self.method == 'mask_gen':
+            probability = self.inference_with_mask_gen(model)
+        
+        # write the trojan probability to the output file
+        with open(result_filepath, "w") as fp:
+            fp.write(str(probability))
+
+        logging.info("Trojan probability: {}".format(probability))
+ 
+
+
+
+    def inference_with_random_forest(self, model, examples_dirpath):
         # Inferences on examples to demonstrate how it is done for a round
         self.inference_on_example_data(model, examples_dirpath)
 
@@ -301,10 +324,47 @@ class Detector(AbstractDetector):
         probability = regressor.predict(X)[0]
         # clip the probability to reasonable values
         probability = np.clip(probability, a_min=0.01, a_max=0.99)
-
-        # write the trojan probability to the output file
-        with open(result_filepath, "w") as fp:
-            fp.write(str(probability))
-
-        logging.info("Trojan probability: {}".format(probability))
- 
+        return probability
+    
+    def inference_with_mask_gen(self, model):
+        dependent = MaskGen()
+        config = {
+            'model_schema': {
+                'mask': {
+                    'name': 'Basic_FC_VAE',
+                    'state_embedding_size': 64,
+                    'load_from_file': '/home/zwc662/Workspace/TrojAI-Submissions/best_mask.p'
+                },
+                'save_dir': 'best_mask.p'
+            },
+            'learner_schema': {
+                'episodes': 100,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:1',
+                'task': 'RL',
+                'criterion': 'ce',
+                'beta': 1,
+                'k_fold': True,
+                'num_procs': 20,
+                'exploration_rate': 0.5,
+                'num_experiments': 1,
+                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
+                 
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'Adam',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 2048
+            }
+            
+        }
+        dependent.configure(config)
+        return dependent.infer(model)

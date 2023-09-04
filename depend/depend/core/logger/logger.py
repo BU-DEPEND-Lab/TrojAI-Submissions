@@ -55,6 +55,8 @@ class Logger(DataLogger, ConsoleLogger):
 
         suffix = '' if seed is None else '-' + str(seed)
 
+        self.results_dir = results_dir
+
         DataLogger.__init__(self, results_dir, suffix=suffix, append=append)
         ConsoleLogger.__init__(self, log_name, results_dir if log_console else None,
                                suffix=suffix, **kwargs)

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast, g
 from functools import partial
 from pydantic import Extra
 
+import os, sys
 
 from depend.lib.agent import Agent, ParallelAgent
 
@@ -84,20 +85,22 @@ class MaskGen(Dependent):
     def configure(
             self, 
             config: DPConfig = ...,
-            experiment_name: str = ...,
-            result_dir: str = ...
+            experiment_name: str = None,
+            result_dir: str = None
             ):
         self.config = config
         
-        self.logger = Logger(experiment_name, result_dir)
+        if experiment_name is not None and result_dir is not None:
+            self.logger = Logger(experiment_name, result_dir)
 
         # Select all the environments
-        self.envs = []
-        ps = []
-        for i, env in enumerate(list(self.clean_example_dict['fvs'].keys())):
-            self.envs.append(env),
-            ps.append(self.clean_example_dict['fvs'][env])
-        self.envs_ratio = [p / sum(ps) for p in ps]
+        if self.clean_example_dict is not None:
+            self.envs = []
+            ps = []
+            for i, env in enumerate(list(self.clean_example_dict['fvs'].keys())):
+                self.envs.append(env),
+                ps.append(self.clean_example_dict['fvs'][env])
+            self.envs_ratio = [p / sum(ps) for p in ps]
 
        
         # Configure the trainer
@@ -406,12 +409,13 @@ class MaskGen(Dependent):
             best_score = None
             best_exps = None
 
-            exps = self.collect_experience()
+            
 
             suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
             for split in range(1, self.config.data.num_splits):
-               # Split dataset
+                
+                # Split dataset
                 validation_set = suffix_split.head
             
                 if prefix_split is None and suffix_split.tail is not None:
@@ -429,7 +433,9 @@ class MaskGen(Dependent):
                     suffix_split = suffix_split.tail
                 #logger.info("Split: %s \n" % (split))
 
-                 # Prepare the mask generator
+                exps = self.collect_experience()
+
+                # Prepare the mask generator
                 self.mask = eval(self.config.model.mask.name)(
                     input_size = exps.shape[1:], 
                     device = self.config.algorithm.device, 
@@ -461,37 +467,56 @@ class MaskGen(Dependent):
                         break
         if final_train:
             logger.info("Final train the best detector")
-            final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, optimize_fn)
+            final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, optimize_fn, best_dataset, metrics_fn)
                 #for k, v in final_info.items():
                 #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
             #mlflow.end_run()
-            #mlflow.log_artifacts(self.result_dir, artifact_path="configure_events")
+            #mlflow.log_artifacts(self.logger.results_dir, artifact_path="configure_events")
 
         self.save_detector(best_exps, best_validation_info)
         return best_score
+ 
+    def infer(self, model) -> List[float]:
+        # Prepare the mask generator
+        exps = pickle.load(open(self.config.algorithm.load_experience, 'rb')).to(self.config.algorithm.device).float()
 
-  
-    def infer(self, 
-               detector_path: str, 
-               target_paths: List[str]
-                ) -> List[float]:
-        model_dict, _,  _,  _,  _ = load_models_dirpath(target_paths)
-        exps, info = self.load_mask(detector_path)
-        probs = []
-        for model_class in model_dict:
-            for i, model in enumerate(model_dict[model_class]):
-                prob = (model(self.mask(exps))[0].probs.max(1, keepdim=True) == model(exps)[0].probs.max(1, keepdim=True)).sum() / exps.shape[0]
-                probs.append(prob)
-                self.logger.epoch_info("Target: %s:%d Probability: %f" % (model_class, i, prob))
-                logger.info("Target: %s:%d Probability: %f" % (model_class, i, prob))
-        return probs
-                    
-    
+        self.mask = eval(self.config.model.mask.name)(
+            input_size = exps.shape[1:], 
+            device = self.config.algorithm.device, 
+            state_embedding_size = self.config.model.mask.state_embedding_size
+            )
+        if self.config.model.mask.load_from_file:
+            self.mask.load_state_dict(torch.load(self.config.model.mask.load_from_file))    
+            self.mask = self.mask.to(self.config.algorithm.device)
+        
+        masked_exps, zs, mu, log_var = self.mask(exps)
+ 
+        model = model.to(self.config.algorithm.device)
+        # Models make predictions on the masked inputs
+        preds = self.get_model_output_from_embedding(model, zs) 
+        #logger.info(f"Get predictions {preds.probs.argmax(dim = -1)}")
+        # Models make predictions on the un-masked inputs
+        ys = model(exps)[0] 
+        #logger.info(f"Labels {ys.probs.argmax(dim = -1)}")
+
+        # Confidence equals the rate of false prediction
+        conf = self.confidence(preds, ys)
+        # Store model label
+        # Get model confidence
+        self.logger.epoch_info("Trojan Probability: %f" % conf)
+        logger.info("Trojan Probability: %f" % conf)
+        
+        return conf
+   
         
     def save_detector(self, exps: torch.Tensor, info: Dict[Any, Any]):
         with open('best_experience.p', 'wb') as fp:
             pickle.dump(exps, fp)
         torch.save(self.mask.state_dict(), self.config.model.save_dir)
+        
+        with open(os.path.join(self.logger.results_dir, 'best_experience.p'), 'wb') as fp:
+            pickle.dump(exps, fp)
+        torch.save(self.mask.state_dict(), os.path.join(self.logger.results_dir, self.config.model.save_dir))
         #self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
         
 

@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 class Dependent(ABC, BaseModel):
     __registry__: ClassVar[Dict[str, Any]] = {}
     
-    target_model_indexer: Model_Indexer = ...
+    target_model_indexer: Model_Indexer = None
     target_model_table: pd.DataFrame = None
-    clean_example_dict: Dict[str, Dict[str, Any]] = ...
-    poisoned_example_dict: Dict[str, Dict[str, Any]] = ...
+    clean_example_dict: Dict[str, Dict[str, Any]] = None
+    poisoned_example_dict: Dict[str, Dict[str, Any]] = None
     
     class Config:
         arbitrary_types_allowed = True
@@ -77,8 +77,7 @@ class Dependent(ABC, BaseModel):
             target_model_indexer = model_indexer,
             clean_example_dict = data_infos[3],
             poisoned_example_dict = data_infos[4]
-        )
-    
+        )  
     
     @abstractmethod
     def train_detector(self):
