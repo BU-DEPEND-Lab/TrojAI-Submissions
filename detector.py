@@ -155,12 +155,12 @@ class Detector(AbstractDetector):
                 'eval_interval': 2,
             },
             'algorithm_schema': {
-                'device': 'cuda:1',
+                'device': 'cuda:2',
                 'task': 'RL',
                 'criterion': 'ce',
                 'beta': 1,
                 'k_fold': True,
-                'num_procs': 30,
+                'num_procs': 40,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
