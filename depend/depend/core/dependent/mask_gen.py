@@ -303,9 +303,9 @@ class MaskGen(Dependent):
                     #logger.info(f'{i}th model: Error {errs}')
 
                     if mask_loss is None: 
-                        mask_loss = y * errs
+                        mask_loss = (2 * y - 1) * errs
                     else:
-                        mask_loss += y * errs
+                        mask_loss += (2 * y - 1) * errs
                   
                         
                 mask_loss /= len(models)
