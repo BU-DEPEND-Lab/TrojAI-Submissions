@@ -149,7 +149,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_mask.p'
             },
             'learner_schema': {
-                'episodes': 200,
+                'episodes': 150,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
