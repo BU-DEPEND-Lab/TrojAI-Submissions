@@ -234,30 +234,16 @@ class MaskGen(Dependent):
              self.optimizer = optim.Adam(self.mask.parameters(), **self.config.optimizer.kwargs)
         return self.optimizer
          
-    def get_model_output_from_observation(self, model_class, model, obs, requires_grad = True):
-        x = obs.transpose(1, 3).transpose(2, 3)
+    def get_model_output_from_observation(self, model, obs, requires_grad = False):
+        x = obs.transpose(1, 3).transpose(2, 3).float()
+        model = model.to(self.config.algorithm.device)
 
-        if model_class == 'BasicFCModel':
-            state_emb = model.state_emb.to(self.config.algorithm.device)
-            if requires_grad:
-                state_emb.requires_grad_()
-            x = x.reshape(obs.size()[0], -1)
-            x = state_emb(x.float())
-
-        elif model_class == 'SimplifiedRLStarter':
-            image_conv = model.image_conv.to(self.config.algorithm.device)
-            if requires_grad:
-                image_conv = image_conv.requires_grad_()
-            x = image_conv(x.float())
-        
-        actor = model.actor.to(self.config.algorithm.device)
         if requires_grad:
-            actor.requires_grad_()
+            model.requires_grad_()
 
         x = x.reshape(x.shape[0], -1)
-        x = actor(x)
-        x = F.softmax(x)
-        dist = Categorical(logits=F.log_softmax(x, dim=1))
+        dist = model(x)[0]
+         
         return dist
         
     
@@ -498,7 +484,9 @@ class MaskGen(Dependent):
  
         model = model.to(self.config.algorithm.device)
         # Models make predictions on the masked inputs
-        preds = self.get_model_output_from_embedding(model, zs) 
+        #preds = self.get_model_output_from_embedding(model, zs) 
+        preds = self.get_model_output_from_observation(model, masked_exps)
+
         #logger.info(f"Get predictions {preds.probs.argmax(dim = -1)}")
         # Models make predictions on the un-masked inputs
         ys = model(exps)[0] 

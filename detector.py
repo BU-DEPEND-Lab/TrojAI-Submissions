@@ -29,6 +29,10 @@ from utils.world import RandomLavaWorldEnv
 from utils.wrappers import ObsEnvWrapper, TensorWrapper
 
 
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+
+
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
         """Detector initialization function.
@@ -136,7 +140,6 @@ class Detector(AbstractDetector):
 
     
     def manual_configure_mask_gen(self, model_path_list: List[str]):
-        import gym_minigrid
         dependent = MaskGen.get_assets(model_path_list)
         config = {
             'model_schema': {
@@ -179,6 +182,8 @@ class Detector(AbstractDetector):
         result_dir = os.path.join('./logs', timestamp)
         os.mkdir(result_dir)
         Sponsor(**config).support(dependent, 'test', result_dir)
+        for i in range(len(dependent.envs)):
+            dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
         dependent.train_detector() 
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
@@ -267,7 +272,7 @@ class Detector(AbstractDetector):
 
         probability = None
         if self.method == 'random_forest':
-            probability = self.inference_random_forest(model_filepath)
+            probability = self.inference_random_forest(model_filepath, examples_dirpath)
         elif self.method == 'mask_gen':
             probability = self.inference_with_mask_gen(model_filepath)
         else:
@@ -291,7 +296,7 @@ class Detector(AbstractDetector):
 
 
 
-    def inference_with_random_forest(self, model_filepath):
+    def inference_with_random_forest(self, model_filepath, examples_dirpath):
         model, model_repr, model_class = load_model(model_filepath)
 
         # Load the config file

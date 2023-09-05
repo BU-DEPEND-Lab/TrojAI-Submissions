@@ -173,3 +173,26 @@ def load_models_dirpath(models_dirpath):
             pass
     return model_dict, model_repr_dict, model_ground_truth_dict, clean_example_dict, poisoned_example_dict
 
+"""
+def create_models(model_classes, obs_space, action_space):
+    def init_weights(module):
+        if type(module) == nn.Linear:
+            torch.nn.init.kaiming_uniform_(module.weight, a=math.sqrt(5)) 
+            if module.bias is not None: 
+                fan_in, _ = torch.nn.init._calculate_fan_in_and_fan_out(module.weight) 
+                bound = 1 / math.sqrt(fan_in) 
+                torch.nn.init.uniform_(module.bias, -bound, bound) 
+        elif type(module) == nn.Conv2d:
+            n = module.in_channels 
+            torch.nn.init.kaiming_uniform_(module.weight, a=math.sqrt(5)) 
+            if module.bias is not None: 
+                fan_in, _ = torch.nn.init._calculate_fan_in_and_fan_out(module.weight) 
+                bound = 1 / math.sqrt(fan_in) 
+                torch.nn.init.uniform_(module.bias, -bound, bound) 
+
+    for (class_name, model_num, model_class) in model_classes:
+        model = eval(model_class)(obs_space, action_space)
+        model.state_emb.apply(init_weights)  # Define state embedding
+        model.actor.apply(init_weights)  # Define actor's model
+        model.critic.apply(init_weights)  # Define critic's model
+"""
