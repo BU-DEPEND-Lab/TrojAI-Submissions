@@ -115,7 +115,7 @@ class MaskGen(Dependent):
         elif config.algorithm.criterion == 'ce':
             criterion = torch.nn.CrossEntropyLoss()
             self.criterion = lambda input, label: criterion(input.probs, label.probs.argmax(dim = -1)).mean()
-        elif config.algorithm.criterion == 'log':
+        elif config.algorithm.criterion == 'logloss':
             self.criterion = lambda input, label: (input.probs.log() * label.probs).mean()
         self.confidence = lambda input, label: (input.probs.argmax(dim = -1) != label.probs.argmax(dim = -1)).float().cpu().numpy().mean().item()
         # Configure the metric functions
@@ -437,8 +437,8 @@ class MaskGen(Dependent):
                 exps = self.collect_experience()
                 logger.info(exps.shape)
  
-                exps_ = exps.view(exps.shape[0], -1, exps.shape[-1])
-                exps = exps_[:, torch.randperm(exps_.shape[1])].reshape(exps.shape)
+                #exps_ = exps.view(exps.shape[0], -1, exps.shape[-1])
+                #exps = exps_[:, torch.randperm(exps_.shape[1])].reshape(exps.shape)
                  
                 # Prepare the mask generator
                 self.mask = eval(self.config.model.mask.name)(
