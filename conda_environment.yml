@@ -1,4 +1,4 @@
-name: trojai-example
+name: round15
 channels:
   - defaults
 dependencies:
@@ -54,8 +54,8 @@ dependencies:
       - scipy==1.11.2
       - sympy==1.11.1
       - threadpoolctl==3.2.0
-      - torch==2.0.1+cpu
-      - torchvision==0.15.2+cpu
+      #- torch==2.0.1+cpu
+      #- torchvision==0.15.2+cpu
       - typing-extensions==4.4.0
       - urllib3==1.26.13
       - zipp==3.16.2

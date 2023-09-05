@@ -6,7 +6,7 @@ authors = ["zwc662 <zwc662@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 torch = "2.0.1"
 captum = "^0.6.0"
 pydantic = "^2.0.3"
