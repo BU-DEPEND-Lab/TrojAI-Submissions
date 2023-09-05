@@ -157,7 +157,7 @@ class Detector(AbstractDetector):
             'algorithm_schema': {
                 'device': 'cuda:3',
                 'task': 'RL',
-                'criterion': 'logloss',
+                'criterion': 'kl',
                 'beta': 0,
                 'k_fold': False,
                 'num_procs': 40,

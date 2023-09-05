@@ -110,7 +110,7 @@ class MaskGen(Dependent):
         
         # Configure the criterion function
         if config.algorithm.criterion == 'kl':
-            criterion = torch.distributions.kl.kl_divergence()
+            criterion = torch.distributions.kl.kl_divergence
             self.criterion = lambda input, label: criterion(input, label).mean()
         elif config.algorithm.criterion == 'ce':
             criterion = torch.nn.CrossEntropyLoss()
@@ -436,7 +436,7 @@ class MaskGen(Dependent):
 
                 exps = self.collect_experience()
                 logger.info(exps.shape)
- 
+                
                 #exps_ = exps.view(exps.shape[0], -1, exps.shape[-1])
                 #exps = exps_[:, torch.randperm(exps_.shape[1])].reshape(exps.shape)
                  
@@ -455,7 +455,7 @@ class MaskGen(Dependent):
                 loss_fn = self.get_loss(exps)
                 metrics_fn = self.get_metrics(exps)
                 optimize_fn = self.get_optimizer()
-
+                
                 #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
                 train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
                 #for k, v in train_info.items():
@@ -465,6 +465,10 @@ class MaskGen(Dependent):
                 #    mlflow.log_metric(k, v, step = split)
                 
                 score = validation_info.get(self.config.algorithm.metrics[0])
+                """
+                score = 0
+                validation_info = {}
+                """
                 if best_score is None or best_score < score:
                     #logger.info("New best model")
                     best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
