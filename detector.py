@@ -155,15 +155,15 @@ class Detector(AbstractDetector):
                 'eval_interval': 2,
             },
             'algorithm_schema': {
-                'device': 'cuda:1',
+                'device': 'cuda:3',
                 'task': 'RL',
                 'criterion': 'ce',
                 'beta': 0,
-                'k_fold': True,
+                'k_fold': False,
                 'num_procs': 40,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
+                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
                  
             },
             'optimizer_schema': {
