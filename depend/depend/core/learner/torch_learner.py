@@ -54,21 +54,15 @@ class Torch_Learner(Base_Learner):
              batch_size = self.batch_size, 
              shuffle = True
              )
-        test_loader = None
-        if test_set is not None:
-            test_loader =  torch.utils.data.DataLoader(
-                 test_set,
-                 batch_size=len(test_set)
-                 ) 
-        
+         
         summary_info = {}
         train_info_gen = self.train_iterator(
             learner_logger, 
             train_loader, 
             loss_function, 
             optimize_function, 
-            metric_function, 
-            test_loader)
+            test_set, 
+            metric_function)
         
         for episode in range(1, self.episodes + 1):
             train_info = next(train_info_gen)
@@ -86,8 +80,8 @@ class Torch_Learner(Base_Learner):
              Iterable[torch.Tensor]
              ], Tuple[torch.Tensor, Dict[Any, Any]]],
         optimizer: Callable, 
+        test_set: Optional[Dataset] = None,
         metric_function: Optional[Callable] = None,
-        test_loader: Optional[DataLoader] = None
         ):
         
  
@@ -121,14 +115,7 @@ class Torch_Learner(Base_Learner):
             
 
             if metric_function is not None:
-                with torch.no_grad():
-                    for i, data in enumerate(test_loader):
-                        eval_info = metric_function(data)
-                        for k, v in eval_info.items():
-                            if k not in summary_info:
-                                summary_info.update({f'{k}': [v]})
-                            else:
-                                summary_info.updaet({f'{k}': summary_info[k] + [v]})                
+                self.evaluate(self.logger, )
              
             learner_logger.info(f"Episode {episode} | Train: " + \
                                 ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
