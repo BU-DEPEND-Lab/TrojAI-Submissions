@@ -14,7 +14,7 @@ import numpy as np
 from typing import List
 
 
-from depend.core.dependent import MaskGen
+from depend.core.dependent import MaskGen, AttributionClassifier
 from depend.launch import Sponsor
 
 
@@ -140,23 +140,22 @@ class Detector(AbstractDetector):
 
     
     def manual_configure_mask_gen(self, model_path_list: List[str]):
-        dependent = MaskGen.get_assets(model_path_list)
+        dependent = AttributionClassifier.get_assets(model_path_list)
         config = {
             'model_schema': {
-                'mask': {
-                    'name': 'Basic_FC_VAE',
-                    'state_embedding_size': 64,
+                'classifier': {
+                    'name': 'FCModel', 
                 },
-                'save_dir': 'best_mask.p'
+                'save_dir': 'best_cls.p'
             },
             'learner_schema': {
-                'episodes': 200,
+                'episodes': 30,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
             'algorithm_schema': {
-                'device': 'cuda:2',
+                'device': 'cuda:3',
                 'task': 'RL',
                 'criterion': 'ce',
                 'beta': 0,
@@ -174,7 +173,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 1024
+                'num_frames_per_model': 256
             }
             
         }
@@ -273,11 +272,11 @@ class Detector(AbstractDetector):
         probability = None
         if self.method == 'random_forest':
             probability = self.inference_random_forest(model_filepath, examples_dirpath)
-        elif self.method == 'mask_gen':
-            probability = self.inference_with_mask_gen(model_filepath)
+        elif self.method == 'attribution':
+            probability = self.inference_with_attr_cls(model_filepath)
         else:
-            probability = self.inference_with_mask_gen(model_filepath)
-        
+            probability = self.inference_with_attr_cls(model_filepath)
+ 
         # write the trojan probability to the output file
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
@@ -332,17 +331,16 @@ class Detector(AbstractDetector):
         probability = np.clip(probability, a_min=0.01, a_max=0.99)
         return probability
         
-    def inference_with_mask_gen(self, model_filepath):
+    def inference_with_attr_cls(self, model_filepath):
         model, model_repr, model_class = load_model(model_filepath)
-        dependent = MaskGen()
+        dependent = AttributionClassifier()
         config = {
             'model_schema': {
-                'mask': {
-                    'name': 'Basic_FC_VAE',
-                    'state_embedding_size': 64,
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_mask.p')
+                'classifier': {
+                    'name': 'FCModel', 
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
                 },
-                'save_dir': 'best_mask.p'
+                'save_dir': 'best_cls.p'
             },
             'learner_schema': {
                 'episodes': 100,
@@ -371,7 +369,6 @@ class Detector(AbstractDetector):
                 'max_models': 238,
                 'num_frames_per_model': 128
             }
-            
         }
         Sponsor(**config).support(dependent, None, None)
         return dependent.infer(model)
