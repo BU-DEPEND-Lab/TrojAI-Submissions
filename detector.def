@@ -9,16 +9,19 @@ From: python:3.9-bullseye
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
+    ./best_cls.p / 
+    ./best_experience.p /
 
 %post
     pip install --upgrade pip
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-    pip install gym gymnasium minigrid jsonschema jsonpickle scikit-learn opencv-python
+    pip install gym gymnasium minigrid torch_ac jsonschema jsonargparse jsonpickle scikit-learn==1.1.2 opencv-python gym_minigrid==1.0.2
 
     pip install jsonschema
     pip install jsonpickle
     pip install -e ./depend/
     chmod 755 /*.py
+     
     touch output.txt
     chmod 777 output.txt
     chmod -R 755 /utils

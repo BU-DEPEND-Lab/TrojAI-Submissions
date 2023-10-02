@@ -5,8 +5,7 @@ from abc import ABC
 from typing import Any, Dict, List, Tuple, Callable, Literal, TypedDict, Union, cast, Optional
 
 from pydantic import BaseModel, PrivateAttr, model_validator, Extra
-
-from depend.core.logger import Logger
+ 
 from depend.utils.format import get_obss_preprocessor
 
 import random
@@ -14,6 +13,7 @@ import random
 import torch
 import torch.nn as nn
 
+import torch_ac
 from torch_ac.utils import ParallelEnv
 
 
@@ -56,7 +56,7 @@ class Worker(mp.Process):
         # Start counting the frames
         for num_frames in tqdm(range(self.num_frames), desc ="Agents Collecting Experience: "):
             # Store the observation in serialized manner
-            preprocessed_obss = torch.tensor(self.preprocess_obs(obs)).unsqueeze(0)
+            preprocessed_obss = torch.tensor(self.preprocess_obs(obs)['image']).unsqueeze(0)
             self.exps_queue.put(preprocessed_obss)
             dist, _ = self.acmodel(preprocessed_obss)
             exploration = int(self.exploration_rate > random.random())
@@ -75,8 +75,7 @@ class Worker(mp.Process):
 class ParallelAgent(BaseModel):
     """A multi-model agent.
     """
-    workers: List[mp.Process] = ...
-    logger: Logger = ...
+    workers: List[mp.Process] = ... 
     
     class Config:
         arbitrary_types_allowed = True  # Allow custom classes without validation
@@ -87,8 +86,7 @@ class ParallelAgent(BaseModel):
     def collect_experience(
         cls, 
         envs: List[Any] = ...,
-        acmodels: List[Callable] = ...,
-        logger: Logger = ...,
+        acmodels: List[Callable] = ..., 
         num_frames_per_model: int = ...,
         exploration_rate: Optional[float] = ...,
         device: Any = ...
@@ -147,7 +145,6 @@ class Agent(BaseModel):
     envs: List[Any] = ...
     acmodels: List[Callable] = ... 
     num_frames_per_model: int = ...
-    logger: Logger = ...
     exploration_rate: Optional[float] = -1.0
     device: Any = ...
    
@@ -159,7 +156,7 @@ class Agent(BaseModel):
     @model_validator(mode='after')
     def on_create(cls, values):
         assert len(values.acmodels) >= 1, "No model given."
-        #ogging.info(f"Run {len(values.acmodels)} models")
+        #logger.info(f"Run {len(values.acmodels)} models")
         for model in values.acmodels:
             model.cpu()
             model.eval()
@@ -171,8 +168,7 @@ class Agent(BaseModel):
     def collect_experience(
         cls, 
         envs: List[Any] = ...,
-        acmodels: List[Callable] = ...,
-        logger: Logger = ...,
+        acmodels: List[Callable] = ..., 
         num_frames_per_model: int = ...,
         exploration_rate: Optional[float] = ...,
         device: Any = ...
@@ -181,13 +177,12 @@ class Agent(BaseModel):
         agent = cls(
             envs = envs,
             acmodels = acmodels,
-            num_frames_per_model = num_frames_per_model,
-            logger = logger,
+            num_frames_per_model = num_frames_per_model, 
             exploration_rate = exploration_rate,
             device = device
             )
        
-        _, preprocess_obss = get_obss_preprocessor(agent.envs[0].observation_space)
+        _, preprocess_obss = get_obss_preprocessor(agent.envs[0].observation_space, False)
         
         """
         logging.info(f"Run {len(acmodels)} models")
@@ -210,19 +205,20 @@ class Agent(BaseModel):
     def reset(self):
         obss = []
         for env in self.envs:
-            obss.append(env.reset())
+            obss.append(env.reset()[0])
         return obss
 
     def step(self, obss):
         next_obss = []
-        for i, obs in enumerate(obss):
-            dist, _ = self.acmodels[i](obss[i].unsqueeze(0))
+        for i in range(len(obss)):
+            #logger.info(f"{obss[i].shape}")
+            dist, _ = self.acmodels[i](obss[i].transpose(2, 3).transpose(1, 3))
             action = dist.sample().cpu().numpy().item() * int(random.random() < self.exploration_rate) + \
                 random.randint(0, len(dist.probs)) * int(random.random() >= self.exploration_rate)
        
-            obs, reward, done, info = self.envs[i].step(action)
+            obs, reward, done, truncated, info = self.envs[i].step(action)
             if done:
-                next_obss.append(self.envs[i].reset()) 
+                next_obss.append(self.envs[i].reset()[0]) 
             else:
                 next_obss.append(obs) 
         return next_obss
@@ -243,25 +239,29 @@ class Agent(BaseModel):
         return actions, dists
     
     def run(self, preprocess_obss: Callable = ...) -> torch.Tensor:
-        exps = []
+        exps = {"image": [], "direction": []}
 
         # Reset the environment
         obss = self.reset()
 
-        #logging.info("Number of envs {}; \
-        # number of obss {}".format(len(self.envs.envs), len(obss))
-        # )
+        #logging.info("Number of envs {};  number of obss {}".format(len(self.envs), len(obss)))
+        #logging.info(f"Obs 1: {obss[0]}")
 
         # Start counting the frames
         for num_frames in tqdm(range(self.num_frames_per_model), desc ="Agents Collecting Experience: "):
             # Store the observation in serialized manner
-            preprocessed_obss = torch.tensor(preprocess_obss(obss))
-            exps = exps + [preprocessed_obss]
+            images = [obs['image'].to(self.device) for obs in obss]
+            exps['image'] += images
+            directions = [obs['direction'].to(self.device) for obs in obss]
+            exps['direction'] += directions
             # Get new actions and policy distribitions
-            obss = self.step(preprocessed_obss)
+            #logger.info(f"Processed obss: {preprocessed_obss}")
+           
+            obss = self.step(images)
              
         # Turn observation list into a batch of observations
-        exps = torch.cat(exps, dim=0).to(self.device)
+        for k, v in exps.items():
+            exps[k] = torch.cat(v, dim=0).to(self.device)
         return exps
     
  

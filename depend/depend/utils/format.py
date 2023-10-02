@@ -6,11 +6,13 @@ import re
 import torch
 import torch_ac
 import gym
+import gymnasium
 
 import logging
 logger = logging.getLogger(__name__)
 
 def get_obss_preprocessor(obs_space, image_only = True):
+    logger.info(type(obs_space))
     # Check if obs_space is an image space
     if isinstance(obs_space, gym.spaces.Box):
         if image_only:
@@ -25,11 +27,19 @@ def get_obss_preprocessor(obs_space, image_only = True):
                 })
 
     # Check if it is a MiniGrid observation space
-    elif isinstance(obs_space, gym.spaces.Dict) and "image" in obs_space.spaces.keys():
+    elif isinstance(obs_space, gymnasium.spaces.dict.Dict) and "image" in obs_space.spaces.keys():
         if image_only:
             obs_space = obs_space.shape
             def preprocess_obss(obss, device=None):
                 return preprocess_images([obs["image"] for obs in obss], device=device)
+        elif 'direction' in obs_space.spaces.keys():
+            obs_space = {"image": obs_space.spaces['image'].shape, "direction": obs_space.spaces['direction'].shape}
+            def preprocess_obss(obss, device=None):
+                return torch_ac.DictList({
+                    "image": [obs["image"].to(device) for obs in obss],
+                    "direction": [obs["direction"].to(device) for obs in obss]
+                })
+
         else:
             obs_space = {"image": obs_space.spaces["image"].shape, "text": 100}
 

@@ -121,14 +121,13 @@ class Torch_Learner(Base_Learner):
             
 
             if metric_function is not None:
-                with torch.no_grad():
-                    for i, data in enumerate(test_loader):
-                        eval_info = metric_function(data)
-                        for k, v in eval_info.items():
-                            if k not in summary_info:
-                                summary_info.update({f'{k}': [v]})
-                            else:
-                                summary_info.updaet({f'{k}': summary_info[k] + [v]})                
+                for i, data in enumerate(test_loader):
+                    eval_info = metric_function(data)
+                    for k, v in eval_info.items():
+                        if k not in summary_info:
+                            summary_info.update({f'{k}': [v]})
+                        else:
+                            summary_info.updaet({f'{k}': summary_info[k] + [v]})                
              
             learner_logger.info(f"Episode {episode} | Train: " + \
                                 ' | '.join([f'{k} : {sum(v)/len(v)}' for k, v in summary_info.items()]))
@@ -151,21 +150,21 @@ class Torch_Learner(Base_Learner):
              batch_size=len(dataset)
              ) 
         summary_info = None
-        with torch.no_grad():
-            for i, data in enumerate(dataloader):
-                eval_info = metric_function(data)
-                #logger.info(f"Evaluation info {eval_info}")
-                if summary_info is None:
-                    summary_info = {k: [v] for k, v in eval_info.items()}
-                else:
-                    summary_info = {k: summary_info[k] + [v] for k, v in eval_info.items()}
+        
+        for i, data in enumerate(dataloader):
+            eval_info = metric_function(data)
+            #logger.info(f"Evaluation info {eval_info}")
+            if summary_info is None:
+                summary_info = {k: [v] for k, v in eval_info.items()}
+            else:
+                summary_info = {k: summary_info[k] + [v] for k, v in eval_info.items()}
 
-            summary_info = {k: sum(v) / len(v) for k, v in summary_info.items()}
-            
-            learner_logger.info(f"Evaluation: " + \
-                        ' | '.join([f'{k} : {v}' for k, v in summary_info.items()])
-                        )
-            logger.info(f"Evaluation: " + \
-                        ' | '.join([f'{k} : {v}' for k, v in summary_info.items()])
-                        )
+        summary_info = {k: sum(v) / len(v) for k, v in summary_info.items()}
+        
+        learner_logger.info(f"Evaluation: " + \
+                    ' | '.join([f'{k} : {v}' for k, v in summary_info.items()])
+                    )
+        logger.info(f"Evaluation: " + \
+                    ' | '.join([f'{k} : {v}' for k, v in summary_info.items()])
+                    )
         return summary_info
