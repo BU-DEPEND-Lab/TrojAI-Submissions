@@ -1,2 +1,8 @@
 *.pyc
 */__pycache__/*
+*.simg
+*.p
+best_experience.p
+detector.def
+experience.p
+depend/depend/lib/__pycache__/attribution_extractor.cpython-38.pyc

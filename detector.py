@@ -17,7 +17,7 @@ from typing import List
 from depend.core.dependent import MaskGen, AttributionClassifier
 from depend.launch import Sponsor
 
-
+import torch
 from sklearn.ensemble import RandomForestRegressor
 
 from utils.abstract import AbstractDetector
@@ -333,6 +333,8 @@ class Detector(AbstractDetector):
         
     def inference_with_attr_cls(self, model_filepath):
         model, model_repr, model_class = load_model(model_filepath)
+        model.eval()
+        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
         dependent = AttributionClassifier()
         config = {
             'model_schema': {
