@@ -14,7 +14,7 @@ import numpy as np
 from typing import List
 
 
-from depend.core.dependent import MaskGen, AttributionClassifier
+from depend.core.dependent import MaskGen, AttributionClassifier, ConfidenceContrast
 from depend.launch import Sponsor
 
 import torch
@@ -135,11 +135,59 @@ class Detector(AbstractDetector):
         logging.info(f"Loading %d models...", len(model_path_list))
         if self.method == 'random_forest':
             self.manual_configure_random_forest(model_path_list)
-        elif self.method == 'mask_gen':
-            self.manual_configure_mask_gen(model_path_list)
+        elif self.method == 'attr_cls':
+            self.manual_configure_attr_cls(model_path_list)
+        elif self.method == 'conf_cont':
+            self.manual_configure_conf_cont(model_path_list)
 
-    
-    def manual_configure_mask_gen(self, model_path_list: List[str]):
+    def manual_configure_conf_cont(self, model_path_list: List[str]):
+        dependent = ConfidenceContrast.get_assets(model_path_list)
+        config = {
+            'model_schema': {
+                'classifier': {
+                    'name': 'FCModel', 
+                },
+                'save_dir': 'best_cls.p'
+            },
+            'learner_schema': {
+                'episodes': 10,
+                'batch_size': 16,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:3',
+                'task': 'RL',
+                'criterion': 'ce',
+                'beta': 0,
+                'k_fold': True,
+                'num_procs': 20,
+                'exploration_method': 'reverse',
+                'num_experiments': 1,
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
+                 
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'Adam',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 128
+            }
+            
+        }
+
+        result_dir = os.path.join('./logs', timestamp)
+        os.mkdir(result_dir)
+        Sponsor(**config).support(dependent, 'test', result_dir)
+        for i in range(len(dependent.envs)):
+            dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
+        dependent.train_detector() 
+
+
+    def manual_configure_attr_cls(self, model_path_list: List[str]):
         dependent = AttributionClassifier.get_assets(model_path_list)
         config = {
             'model_schema': {
@@ -272,8 +320,10 @@ class Detector(AbstractDetector):
         probability = None
         if self.method == 'random_forest':
             probability = self.inference_random_forest(model_filepath, examples_dirpath)
-        elif self.method == 'attribution':
+        elif self.method == 'attr_cls':
             probability = self.inference_with_attr_cls(model_filepath)
+        elif self.method == 'conf_cont':
+            probability = self.inference_with_conf_cont(model_filepath)
         else:
             probability = self.inference_with_attr_cls(model_filepath)
  
@@ -374,3 +424,51 @@ class Detector(AbstractDetector):
         }
         Sponsor(**config).support(dependent, None, None)
         return dependent.infer(model)
+
+
+    def inference_with_conf_cont(self, model_filepath):
+        model, model_repr, model_class = load_model(model_filepath)
+        model.eval()
+        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
+        dependent = ConfidenceContrast()
+        config = {
+            'model_schema': {
+                'classifier': {
+                    'name': 'FCModel', 
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
+                },
+                'save_dir': 'best_cls.p'
+            },
+            'learner_schema': {
+                'episodes': 100,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:1',
+                'task': 'RL',
+                'criterion': 'ce',
+                'beta': 1,
+                'k_fold': True,
+                'num_procs': 20,
+                'exploration_rate': 0.5,
+                'num_experiments': 1,
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
+                 
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'Adam',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 128
+            }
+        }
+        Sponsor(**config).support(dependent, None, None)
+        return dependent.infer(model)
+
+
+    
