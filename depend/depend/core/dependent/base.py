@@ -167,10 +167,10 @@ class Dependent(ABC, BaseModel):
                         models.append(self.target_model_indexer.model_dict[clean_model_class][idx_in_class].to(self.config.algorithm.device))
              
             exps = Agent.collect_experience(
-                envs, 
+                self.envs, 
                 models,
                 self.config.data.num_frames_per_model,
-                self.config.algorithm.exploration_rate,
+                self.config.algorithm.exploration_method,
                 self.config.algorithm.device
                 )
         with open('experience.p', 'wb') as fp:

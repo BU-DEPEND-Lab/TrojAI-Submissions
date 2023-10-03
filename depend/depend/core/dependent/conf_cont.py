@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 @register
-class AttributionClassifier(Dependent):
+class ConfidenceContrast(Dependent):
     """
     ########## Attribution Classifier ############
     # Build a dataset of model indices and model labels
@@ -109,23 +109,9 @@ class AttributionClassifier(Dependent):
             if metric == 'auroc':
                 self.metrics.append(BinaryAUROC())
      
+     
     
-    
-    
-    def get_model_output_from_observation(self, model, obs, requires_grad = False):
-        x = obs.transpose(2, 3).transpose(1, 3).float()
-        model = model.to(self.config.algorithm.device)
-
-        if requires_grad:
-            model.requires_grad_()
-
-        x = x.reshape(x.shape[0], -1)
-        dist = model(x)[0]
-         
-        return dist
-        
-    
-    def get_attribute_from_image(self, model, obs):
+    def add_confidence_to_observation(self, model, obs):
         model = model.to(self.config.algorithm.device)
         for k, v in obs.items():
             obs[k] = obs[k].float().detach()
@@ -133,11 +119,10 @@ class AttributionClassifier(Dependent):
             #logger.info(obs[k])
         model.zero_grad()
         dist, _ = model(obs['image'].transpose(2, 3).transpose(1, 3).float())
-        dist.entropy().sum().backward(retain_graph = True)
+        logits = dist.logits
+        obs['confidence'] = logits
         #logger.info(obs['direction'].grad)
          
-        norm = lambda attrs: (attrs  - attrs.min()) / (attrs.max() - attrs.min() + 1.e-5)
-        return {k: v.grad.data if k == 'image' else v for k, v in obs.items()}
     
     
  
@@ -154,13 +139,12 @@ class AttributionClassifier(Dependent):
             #logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
             tot_loss = 0
             if True:
-                logger.info(f"Run {len(models)} models")
+                #logger.info(f"Run {len(models)} models")
                 for i, (model, y) in enumerate(zip(models, ys)):
                     ## Run one model
                     #logger.info(f"{i}th model")
-                    attrs = self.get_attribute_from_image(model, exps) 
-                    inputs = {k: attrs[k].detach() if k == 'image' else v for k, v in exps.items()}
-                    pred = cls(inputs).mean(dim = 0)
+                    self.add_confidence_to_observation(model, exps) 
+                    pred = cls(exps).mean(dim = 0)
                     #logger.info(f"Label {y} vs. Prediction {pred}")
                     loss = self.criterion(pred, torch.tensor([y])) 
                     #logger.info(f'{i}th model: Error {errs}')
@@ -199,9 +183,8 @@ class AttributionClassifier(Dependent):
             for i, model in enumerate(models):
                 model = model.to(self.config.algorithm.device)
                 ## Run one model
-                attrs = self.get_attribute_from_image(model, exps) 
-                inputs = {k: attrs[k].detach() if k == 'image' else v for k, v in exps.items()}
-                pred = cls(inputs).mean(dim = 0).item()
+                self.add_confidence_to_observation(model, exps) 
+                pred = cls(exps).mean(dim = 0).item()
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(pred)
                 # Store model label
@@ -273,17 +256,17 @@ class AttributionClassifier(Dependent):
                     prefix_split.append(validation_set)
                     suffix_split = suffix_split.tail
                 #logger.info("Split: %s \n" % (split))
-
-                exps = self.collect_experience(
-                    num_clean_models = self.config.algorithm.num_procs // 2,
-                    num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2
-                )
+                with torch.no_grad():
+                    exps = self.collect_experience(
+                        num_clean_models = self.config.algorithm.num_procs // 2,
+                        num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2
+                    )
                 logger.info(exps['image'].shape)
  
-                 
+                
                 # Prepare the mask generator
                 cls = eval(self.config.model.classifier.name)(
-                    obs_space = self.envs[0].observation_space).to(self.config.algorithm.device)
+                    obs_space = self.envs[0].observation_space, extra_size = 3).to(self.config.algorithm.device)
                     
                 if self.config.model.classifier.load_from_file:
                     cls.load_state_dict(torch.load(self.config.model.classifier.load_from_file))    
@@ -329,6 +312,7 @@ class AttributionClassifier(Dependent):
         #logger.info(exps)
         cls = eval(self.config.model.classifier.name)(
             obs_space = gymnasium.spaces.Box(0, 255, (3, 7, 7), dtype=np.uint8),
+            extra_size = 3,
             ) 
         if self.config.model.classifier.load_from_file:
             stored_dict = torch.load(self.config.model.classifier.load_from_file, \
@@ -342,16 +326,13 @@ class AttributionClassifier(Dependent):
              
         model = model.to(self.config.algorithm.device)
         model.zero_grad()
-        exps['image'].requires_grad_()
+         
         # Models make predictions on the masked inputs
         #preds = self.get_model_entropy_from_image(model, exps['image']) 
-        entropy = Categorical(logits=F.log_softmax(model(exps), dim=1)).entropy().mean()
-        entropy.backward(retain_graph = True)
-        #logger.info(obs['direction'].grad)
-        norm = lambda attrs: (attrs  - attrs.min()) / (attrs.max() - attrs.min() + 1.e-5)
-        inputs = {k: v.grad.data if k == 'image' else v for k, v in exps.items()}
-        preds = cls(inputs).detach().cpu().numpy()
-        #preds = (preds > 0.5)
+        logits = F.log_softmax(model(exps), dim=1)
+        exps['confidence'] = logits
+        preds = 1. - cls(exps).detach().cpu().numpy()
+        #preds = (preds < 0.5)
         pred = preds.mean().item() 
 
         # Confidence equals the rate of false prediction
@@ -365,17 +346,17 @@ class AttributionClassifier(Dependent):
    
         
     def save_detector(self, cls: Any, exps: Any, info: Dict[Any, Any]):
-        with open('best_attr_experience.p', 'wb') as fp:
+        with open('best_conf_experience.p', 'wb') as fp:
             pickle.dump(exps, fp)
         torch.save({'model': self.config.model.classifier.name,
-                    'obs_space': self.envs[0].observation_space,
+                    #'obs_space': self.envs[0].observation_space,
                     'state_dict': cls.state_dict()
                     }, self.config.model.save_dir)
         
-        with open(os.path.join(self.logger.results_dir, 'best_attr_experience.p'), 'wb') as fp:
+        with open(os.path.join(self.logger.results_dir, 'best_conf_experience.p'), 'wb') as fp:
             pickle.dump(exps, fp)
         torch.save({'model': self.config.model.classifier.name,
-                    'obs_space': self.envs[0].observation_space,
+                    #'obs_space': self.envs[0].observation_space,
                     'state_dict': cls.state_dict()
                     }, os.path.join(self.logger.results_dir, self.config.model.save_dir))
         #self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
