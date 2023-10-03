@@ -5,7 +5,7 @@
   "technique_description": "Use VAE to generate embedding, perturb the embedding to only make the poisoned model to change its action",
   "technique_changes": "Technique variant 8",
   "technique_type": ["Weight Analysis"],
-  "commit_id": "39cdb8d6d39240515a46db538d158feba7a22083",
+  "commit_id": "73c2efce2207f7aaf73b4253a1ce7dd58e563067",
   "repo_name": "---",
   "required": [],
   "additionalProperties": false,

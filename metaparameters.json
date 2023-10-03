@@ -1,5 +1,5 @@
 {
-	"method": "conf_cont", 
+	"method": "attr_cls", 
 	"train_input_features": 100,
 	"train_weight_rso_seed": 1234,
 	"train_weight_params_mean": 0.9,
