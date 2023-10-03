@@ -147,11 +147,11 @@ class Detector(AbstractDetector):
                 'classifier': {
                     'name': 'FCModel', 
                 },
-                'save_dir': 'best_cls.p'
+                'save_dir': 'best_conf_cls.p'
             },
             'learner_schema': {
-                'episodes': 10,
-                'batch_size': 16,
+                'episodes': 30,
+                'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
@@ -174,7 +174,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 128
+                'num_frames_per_model': 256
             }
             
         }
@@ -194,7 +194,7 @@ class Detector(AbstractDetector):
                 'classifier': {
                     'name': 'FCModel', 
                 },
-                'save_dir': 'best_cls.p'
+                'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
                 'episodes': 30,
@@ -209,7 +209,7 @@ class Detector(AbstractDetector):
                 'beta': 0,
                 'k_fold': True,
                 'num_procs': 40,
-                'exploration_rate': 0.5,
+                'exploration_method': 0.5,
                 'num_experiments': 1,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
                  
@@ -390,9 +390,9 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls.p')
                 },
-                'save_dir': 'best_cls.p'
+                'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
                 'episodes': 100,
@@ -409,7 +409,7 @@ class Detector(AbstractDetector):
                 'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_experience.p')
                  
             },
             'optimizer_schema': {
@@ -435,9 +435,9 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_conf_cls.p')
                 },
-                'save_dir': 'best_cls.p'
+                'save_dir': 'best_conf_cls.p'
             },
             'learner_schema': {
                 'episodes': 100,
@@ -454,7 +454,7 @@ class Detector(AbstractDetector):
                 'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
                  
             },
             'optimizer_schema': {
