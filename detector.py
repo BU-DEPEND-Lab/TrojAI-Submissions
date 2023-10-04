@@ -174,7 +174,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 256
+                'num_frames_per_model': 512
             }
             
         }
