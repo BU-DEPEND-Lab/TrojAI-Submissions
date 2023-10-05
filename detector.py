@@ -435,7 +435,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_conf_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
