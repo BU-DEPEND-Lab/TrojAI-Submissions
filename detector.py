@@ -162,7 +162,7 @@ class Detector(AbstractDetector):
                 'beta': 0,
                 'k_fold': True,
                 'num_procs': 20,
-                'exploration_method': 'reverse',
+                'exploration_method': 'reverse::0.5',
                 'num_experiments': 1,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
                  
@@ -174,7 +174,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 512
+                'num_frames_per_model': 128
             }
             
         }
@@ -435,7 +435,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_conf_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -454,7 +454,7 @@ class Detector(AbstractDetector):
                 'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
                  
             },
             'optimizer_schema': {
