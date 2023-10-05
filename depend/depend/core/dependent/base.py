@@ -148,8 +148,8 @@ class Dependent(ABC, BaseModel):
             exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
         else:
             #self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
-            envs = [make_env(env, self.config.learner.seed + 10000 * len(self.envs), wrapper = 'ImgObsWrapper') \
-                    for env in np.random.choice(self.envs, size = num_clean_models + num_poisoned_models, p = self.envs_ratio)]
+            envs = [make_env(env, self.config.learner.seed + 10000 * i, wrapper = 'ImgObsWrapper') \
+                    for (i, env) in enumerate(np.random.choice(self.envs, size = num_clean_models + num_poisoned_models, p = self.envs_ratio))]
             
             #logging.info(f"Built model dataset {dataset}")
             models = []
