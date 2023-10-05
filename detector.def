@@ -11,6 +11,8 @@ From: python:3.9-bullseye
     ./learned_parameters /
     ./best_cls.p / 
     ./best_experience.p /
+    ./best_conf_cls.p /
+    ./best_conf_experience.p /
 
 %post
     pip install --upgrade pip
