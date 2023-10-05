@@ -435,7 +435,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_conf_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -454,7 +454,7 @@ class Detector(AbstractDetector):
                 'num_procs': 20,
                 'exploration_rate': 0.5,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
                  
             },
             'optimizer_schema': {
