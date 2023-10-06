@@ -150,7 +150,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_r14_unique_640_cls.p'
             },
             'learner_schema': {
-                'episodes': 30,
+                'episodes': 5,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -161,8 +161,8 @@ class Detector(AbstractDetector):
                 'criterion': 'ce',
                 'beta': 0,
                 'k_fold': True,
-                'num_procs': 10,
-                'exploration_method': 'standard::1.5',
+                'num_procs': 4,
+                'exploration_method': 'reverse::0.5',
                 'num_experiments': 1,
                 'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/r15_non_repeating_experience_640.p'
                  
@@ -174,7 +174,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 64
+                'num_frames_per_model': 128
             }
             
         }
@@ -436,7 +436,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_r14_unique_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -455,7 +455,7 @@ class Detector(AbstractDetector):
                 'num_procs': 10,
                 'exploration_method': None,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
                  
             },
             'optimizer_schema': {
@@ -471,7 +471,7 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         #dependent.distill(model)
         #exit(0)
-        return dependent.infer(model)
+        return dependent.infer(model, True)
 
 
     
