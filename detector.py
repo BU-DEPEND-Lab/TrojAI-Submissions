@@ -147,7 +147,7 @@ class Detector(AbstractDetector):
                 'classifier': {
                     'name': 'FCModel', 
                 },
-                'save_dir': 'best_conf_cls.p'
+                'save_dir': 'best_r15_non_repeating_cls.p'
             },
             'learner_schema': {
                 'episodes': 30,
@@ -162,9 +162,9 @@ class Detector(AbstractDetector):
                 'beta': 0,
                 'k_fold': True,
                 'num_procs': 20,
-                'exploration_method': 'reverse::-0.5',
+                'exploration_method': 'reverse::1.5',
                 'num_experiments': 1,
-                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
+                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/r15_non_repeating_experience.p'
                  
             },
             'optimizer_schema': {
@@ -431,11 +431,12 @@ class Detector(AbstractDetector):
         model.eval()
         #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
         dependent = ConfidenceContrast()
+        dependent.clean_example_dict = {'fvs': {'MiniGrid-LavaCrossingS9N1-v0': 1}}
         config = {
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_conf_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_r14_unique_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -452,9 +453,9 @@ class Detector(AbstractDetector):
                 'beta': 1,
                 'k_fold': True,
                 'num_procs': 20,
-                'exploration_rate': 0.5,
+                'exploration_method': None,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'r14_experience_unique.p')
                  
             },
             'optimizer_schema': {
@@ -468,7 +469,8 @@ class Detector(AbstractDetector):
             }
         }
         Sponsor(**config).support(dependent, None, None)
-        return dependent.infer(model)
+        
+        return dependent.infer(model, False)
 
 
     
