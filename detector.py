@@ -150,7 +150,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_non_repeating_cls.p'
             },
             'learner_schema': {
-                'episodes': 20,
+                'episodes': 40,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
