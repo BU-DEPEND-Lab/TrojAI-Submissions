@@ -162,7 +162,7 @@ class Detector(AbstractDetector):
                 'beta': 0,
                 'k_fold': True,
                 'num_procs': 10,
-                'exploration_method': 'reverse::1.5',
+                'exploration_method': 'standard::1.5',
                 'num_experiments': 1,
                 'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/r15_non_repeating_experience_640.p'
                  
@@ -436,7 +436,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_r15_non_repeating_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_r14_unique_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -455,7 +455,7 @@ class Detector(AbstractDetector):
                 'num_procs': 10,
                 'exploration_method': None,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'r15_non_repeating_experience_640.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
                  
             },
             'optimizer_schema': {
