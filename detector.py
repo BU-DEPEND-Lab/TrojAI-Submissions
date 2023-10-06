@@ -150,7 +150,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_non_repeating_cls.p'
             },
             'learner_schema': {
-                'episodes': 40,
+                'episodes': 80,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -471,7 +471,7 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         #dependent.distill(model)
         #exit(0)
-        return dependent.infer(model, True)
+        return dependent.infer(model, distill = True)#, visualize = True)
 
 
     
