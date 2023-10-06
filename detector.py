@@ -455,7 +455,7 @@ class Detector(AbstractDetector):
                 'num_procs': 10,
                 'exploration_method': None,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'r15_non_repeating_experience_640.p')
                  
             },
             'optimizer_schema': {
