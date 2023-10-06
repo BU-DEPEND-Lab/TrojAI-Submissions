@@ -147,7 +147,7 @@ class Detector(AbstractDetector):
                 'classifier': {
                     'name': 'FCModel', 
                 },
-                'save_dir': 'best_r15_non_repeating_cls.p'
+                'save_dir': 'best_r14_unique_640_cls.p'
             },
             'learner_schema': {
                 'episodes': 30,
@@ -161,10 +161,10 @@ class Detector(AbstractDetector):
                 'criterion': 'ce',
                 'beta': 0,
                 'k_fold': True,
-                'num_procs': 20,
+                'num_procs': 10,
                 'exploration_method': 'reverse::1.5',
                 'num_experiments': 1,
-                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/r15_non_repeating_experience.p'
+                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/r15_non_repeating_experience_640.p'
                  
             },
             'optimizer_schema': {
@@ -174,7 +174,7 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 128
+                'num_frames_per_model': 64
             }
             
         }
@@ -452,10 +452,10 @@ class Detector(AbstractDetector):
                 'criterion': 'ce',
                 'beta': 1,
                 'k_fold': True,
-                'num_procs': 20,
+                'num_procs': 10,
                 'exploration_method': None,
                 'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'r15_non_repeating_experience.p')
+                'load_experience': os.path.join(os.path.dirname(__file__), 'r15_non_repeating_experience_640.p')
                  
             },
             'optimizer_schema': {
@@ -465,12 +465,13 @@ class Detector(AbstractDetector):
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 128
+                'num_frames_per_model': 64
             }
         }
         Sponsor(**config).support(dependent, None, None)
-        
-        return dependent.infer(model, False)
+        #dependent.distill(model)
+        #exit(0)
+        return dependent.infer(model)
 
 
     
