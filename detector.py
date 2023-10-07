@@ -468,10 +468,6 @@ class Detector(AbstractDetector):
         cnt = 0
         with open(f'{root_path}/logits.txt', 'w') as fp:
             while not done and iters < max_iters:
-                obs = {
-                    'image': torch.tensor((obs['image'].transpose((2, 0, 1)))).unsqueeze(0),
-                    'direction' = torch.tensor((observation['direction']))
-        observation['direction'].resize_(1, 1)
                 img = env.render(mode='rgb_array')
                 logging.info(img)
                 logits_000 = model_000(obs)
