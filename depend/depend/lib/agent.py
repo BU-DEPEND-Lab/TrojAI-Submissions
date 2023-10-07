@@ -9,6 +9,7 @@ from pydantic import BaseModel, PrivateAttr, model_validator, Extra
 from depend.utils.format import get_obss_preprocessor
 
 import random
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -88,7 +89,7 @@ class ParallelAgent(BaseModel):
         envs: List[Any] = ...,
         acmodels: List[Callable] = ..., 
         num_frames_per_model: int = ...,
-        exploration_rate: Optional[float] = ...,
+        exploration_method: Optional[float] = ...,
         device: Any = ...
         ):
         exps_queue = mp.Queue()
@@ -96,7 +97,7 @@ class ParallelAgent(BaseModel):
         for (env, acmodel) in zip(envs, acmodels):
             acmodel = acmodel.cpu()
             acmodel.eval()
-            workers.append(Worker(env, acmodel, exploration_rate, num_frames_per_model, exps_queue))
+            workers.append(Worker(env, acmodel, exploration_method, num_frames_per_model, exps_queue))
         
         agent = cls(
             workers = workers,
@@ -145,7 +146,7 @@ class Agent(BaseModel):
     envs: List[Any] = ...
     acmodels: List[Callable] = ... 
     num_frames_per_model: int = ...
-    exploration_rate: Optional[float] = -1.0
+    exploration_method: Optional[Union[str, float]] = -1.0
     device: Any = ...
    
     
@@ -170,7 +171,7 @@ class Agent(BaseModel):
         envs: List[Any] = ...,
         acmodels: List[Callable] = ..., 
         num_frames_per_model: int = ...,
-        exploration_rate: Optional[float] = ...,
+        exploration_method: Optional[Union[str, float]] = ...,
         device: Any = ...
         ):
         
@@ -178,7 +179,7 @@ class Agent(BaseModel):
             envs = envs,
             acmodels = acmodels,
             num_frames_per_model = num_frames_per_model, 
-            exploration_rate = exploration_rate,
+            exploration_method = exploration_method,
             device = device
             )
        
@@ -213,8 +214,18 @@ class Agent(BaseModel):
         for i in range(len(obss)):
             #logger.info(f"{obss[i].shape}")
             dist, _ = self.acmodels[i](obss[i].transpose(2, 3).transpose(1, 3))
-            action = dist.sample().cpu().numpy().item() * int(random.random() < self.exploration_rate) + \
-                random.randint(0, len(dist.probs)) * int(random.random() >= self.exploration_rate)
+            #dist = torch.distributions.Categorical(logits = self.acmodels[i](obss[i]))
+            #logger.info(f"Exploration method")
+            if self.exploration_method:
+                (exploration_method, exploration_rate) = self.exploration_method.split("::")
+                p = dist.logits.exp().detach().cpu().flatten().numpy()
+                if exploration_method == 'reverse':
+                    p = 1 - p
+                    p = p / p.sum()
+                action = np.random.choice(dist.logits.shape[1], 1, p = p).item() * int(random.random() < float(exploration_rate)) + \
+                    random.randint(0, len(dist.probs)) * int(random.random() >= float(exploration_rate))
+            else:
+                action = dist.sample().cpu().numpy().item()
        
             obs, reward, done, truncated, info = self.envs[i].step(action)
             if done:
@@ -257,8 +268,8 @@ class Agent(BaseModel):
             # Get new actions and policy distribitions
             #logger.info(f"Processed obss: {preprocessed_obss}")
            
+            #obss = self.step(obss)
             obss = self.step(images)
-             
         # Turn observation list into a batch of observations
         for k, v in exps.items():
             exps[k] = torch.cat(v, dim=0).to(self.device)

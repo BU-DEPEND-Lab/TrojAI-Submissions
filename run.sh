@@ -20,7 +20,7 @@ then
         singularity run \
         --bind /home/zwc662/Workspace/TrojAI-Submissions/model/ \
         --nv \
-        ./detector.simg \
+        ./rl-randomized-lavaworld-aug2023_test_TrinitySRITrojAI-BostonU.simg \
         infer \
         --model_filepath=/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000000/model.pt \
         --result_filepath=./output.txt \

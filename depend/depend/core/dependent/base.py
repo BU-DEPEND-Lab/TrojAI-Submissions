@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Any, Dict, List, ClassVar, Callable, Iterable, Union, cast, get_type_hints
 import os
 
+from PIL import Image
 
 from depend.lib.agent import Agent, ParallelAgent
 from depend.utils.env import make_env
@@ -97,7 +98,9 @@ class Dependent(ABC, BaseModel):
         if self.config.optimizer.optimizer_class == 'RAdam':
             self.optimizer = optim.RAdam(model.parameters(), **self.config.optimizer.kwargs)
         elif self.config.optimizer.optimizer_class == 'Adam':
-             self.optimizer = optim.Adam(model.parameters(), **self.config.optimizer.kwargs)
+            self.optimizer = optim.Adam(model.parameters(), **self.config.optimizer.kwargs)
+        elif self.config.optimizer.optimizer_class == 'RMSprop':
+            self.optimizer = optim.RMSprop(model.parameters(), **self.config.optimizer.kwargs)
         return self.optimizer
          
 
@@ -142,32 +145,51 @@ class Dependent(ABC, BaseModel):
         dataset = Dataset(combined_model_table)
         logger.info(f"Collect a dataset of mixed models {dataset}.")
         return dataset
+    
+    def visualize_experience(self, env, exps, logits, preds):
+        import gym
+        import gym_minigrid
+        env = gym.make(env)#, wrapper = 'ImgObsWrapper') 
+        with open('images/logits.txt', 'w') as fp:
+            for i, logit in enumerate(logits.detach().cpu().numpy()):
+                fp.write(str(i) + "::" + "::".join([str(p) for p in logit]) + ';\n')
+        for i, (image, direction, pred) in enumerate(zip(exps['image'], exps['direction'], preds)):
+            #obs = {'image': image, 'direction': direction}
+            logger.info(f"Image {image}")
+            obs_img = Image.fromarray(env.get_obs_render(image.transpose(2, 0).detach().cpu().numpy()))
+            obs_img = obs_img.rotate(90).transpose(Image.FLIP_TOP_BOTTOM)
+            obs_img.save(f'images/{i}_{int(pred * 100)}.jpg')
+            
 
-    def collect_experience(self, num_clean_models, num_poisoned_models):
-        if hasattr(self.config.algorithm, 'load_experience'):
-            exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
+    def collect_experience(self, num_clean_models, num_poisoned_models, models = [], load_from_file = None):
+        #if hasattr(self.config.algorithm, 'load_experience') and getattr(self.config.algorithm, 'load_experience') is not None:
+        logger.info(f"???????/{load_from_file}")
+        if load_from_file is not None:
+            logger.info("Loading experience from file")
+            exps = pickle.load(open(load_from_file, 'rb'))
         else:
             #self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
-            envs = [make_env(env, self.config.learner.seed + 10000 * i, wrapper = 'ImgObsWrapper') \
-                    for (i, env) in enumerate(np.random.choice(self.envs, size = num_clean_models + num_poisoned_models, p = self.envs_ratio))]
             
             #logging.info(f"Built model dataset {dataset}")
             models = []
-            if num_poisoned_models > 0:
-                poisoned_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 0].sample(num_poisoned_models)
-                for poisoned_model_class in poisoned_model_rows['model_class'].unique():
-                    for idx_in_class in poisoned_model_rows[poisoned_model_rows['model_class'] == poisoned_model_class]['idx_in_class']:
-                        #logging.info(f"Selected {model_class} No.{idx}")
-                        models.append(self.target_model_indexer.model_dict[poisoned_model_class][idx_in_class].to(self.config.algorithm.device))
-            if num_clean_models > 0:
-                clean_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 1].sample(num_clean_models)
-                for clean_model_class in clean_model_rows['model_class'].unique():
-                    for idx_in_class in clean_model_rows[clean_model_rows['model_class'] == clean_model_class]['idx_in_class']:
-                        #logging.info(f"Selected {model_class} No.{idx}")
-                        models.append(self.target_model_indexer.model_dict[clean_model_class][idx_in_class].to(self.config.algorithm.device))
-             
+            if len(models) == 0:
+                if num_poisoned_models > 0:
+                    poisoned_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 0].sample(num_poisoned_models)
+                    for poisoned_model_class in poisoned_model_rows['model_class'].unique():
+                        for idx_in_class in poisoned_model_rows[poisoned_model_rows['model_class'] == poisoned_model_class]['idx_in_class']:
+                            #logging.info(f"Selected {model_class} No.{idx}")
+                            models.append(self.target_model_indexer.model_dict[poisoned_model_class][idx_in_class].to(self.config.algorithm.device))
+                if num_clean_models > 0:
+                    clean_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 1].sample(num_clean_models)
+                    for clean_model_class in clean_model_rows['model_class'].unique():
+                        for idx_in_class in clean_model_rows[clean_model_rows['model_class'] == clean_model_class]['idx_in_class']:
+                            #logging.info(f"Selected {model_class} No.{idx}")
+                            models.append(self.target_model_indexer.model_dict[clean_model_class][idx_in_class].to(self.config.algorithm.device))
+            envs = [make_env(env, self.config.learner.seed + 10000 * i, wrapper = 'ImgObsWrapper') \
+                    for (i, env) in enumerate(np.random.choice(self.envs, size = len(models), p = self.envs_ratio))]
+            
             exps = Agent.collect_experience(
-                self.envs, 
+                envs, 
                 models,
                 self.config.data.num_frames_per_model,
                 self.config.algorithm.exploration_method,

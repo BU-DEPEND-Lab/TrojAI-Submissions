@@ -13,6 +13,8 @@ import pickle
 import numpy as np
 from typing import List
 
+from PIL import Image
+
 
 from depend.core.dependent import MaskGen, AttributionClassifier, ConfidenceContrast
 from depend.launch import Sponsor
@@ -150,7 +152,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_non_repeating_cls.p'
             },
             'learner_schema': {
-                'episodes': 80,
+                'episodes': 100,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -158,23 +160,21 @@ class Detector(AbstractDetector):
             'algorithm_schema': {
                 'device': 'cuda:3',
                 'task': 'RL',
-                'criterion': 'ce',
-                'beta': 0,
+                'criterion': 'ce', 
                 'k_fold': False,
-                'num_procs': 4,
-                'exploration_method': 'reverse::0.5',
+                'num_procs': 10,
+                'exploration_method': 'standard::0.5',
                 'num_experiments': 1,
                 'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
-                 
             },
             'optimizer_schema': {
-                'optimizer_class': 'Adam',
+                'optimizer_class': 'RMSprop',
                 'lr': 1e-3,
             },
             'data_schema': {
                 'num_splits': 7,
                 'max_models': 238,
-                'num_frames_per_model': 128
+                'num_frames_per_model': 64
             }
             
         }
@@ -316,6 +316,10 @@ class Detector(AbstractDetector):
         """
 
         # load the model
+        model_000, _, _ = load_model(model_filepath)
+        model_150, _, _ = load_model(os.path.join(os.path.dirname(os.path.dirname(model_filepath)), 'id-00000150/model.pt'))
+        self.dual_state_simulation(model_000, model_150)
+
 
         probability = None
         if self.method == 'random_forest':
@@ -425,6 +429,73 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         return dependent.infer(model)
 
+    def dual_state_simulation(self, model_000, model_150):
+        """Method to demonstrate how to inference on a round's example data.
+
+        Args:
+            model: the pytorch model
+            examples_dirpath: the directory path for the round example data
+        """
+
+        size = 9
+        
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # model.to(device)
+        model_000.eval()
+        model_150.eval()
+
+        # logging.info("Using compute device: {}".format(device))
+
+        model_name_000 = type(model_000).__name__
+        model_name_150 = type(model_150).__name__
+        
+        observation_mode = 'simple'
+        wrapper_obs_mode = 'simple'
+        
+        env = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode=observation_mode, grid_size=size), mode=wrapper_obs_mode))
+        import gym
+        import gym_minigrid
+        env = gym.make('MiniGrid-LavaCrossingS9N1-v0')
+        env = ObsEnvWrapper(env, mode=wrapper_obs_mode)
+        obs = env.reset()
+        done = False
+        max_iters = 1000
+        iters = 0
+        reward = 0
+        root_path = './image_000_150'
+        if not os.path.exists(root_path):
+            os.mkdir(root_path)
+        cnt = 0
+        with open(f'{root_path}/logits.txt', 'w') as fp:
+            while not done and iters < max_iters:
+                obs = {
+                    'image': torch.tensor((obs['image'].transpose((2, 0, 1)))).unsqueeze(0),
+                    'direction' = torch.tensor((observation['direction']))
+        observation['direction'].resize_(1, 1)
+                img = env.render(mode='rgb_array')
+                logging.info(img)
+                logits_000 = model_000(obs)
+                action_000 = torch.argmax(logits_000).item()
+                logits_150 = model_150(obs)
+                action_150 = torch.argmax(logits_150).item()
+                if action_000 != action_150:
+                    logging.info(f"Iteration {iters} ;; logit_000: {logits_000} ;; logit_150: {logits_150}")
+                    cnt += 1
+                     
+                    for i in range(len(logits_000.detach().cpu().numpy())):
+                        fp.write(str(cnt) + \
+                                 "::000::" + "::".join([str(p) for p in logits_000]) + \
+                                    "::150::" + "::".join([str(p) for p in logits_150]) + ';\n')
+                        print(img)
+                        obs_img = Image.fromarray(img)
+                    
+                        #obs_img = obs_img.rotate(90).transpose(Image.FLIP_TOP_BOTTOM)
+                        obs_img.save(f'{root_path}/{cnt}.jpg')
+                    
+            obs, reward, terminated, truncated, info = env.step(action_000)
+            done = terminated or truncated
+
+        logging.info('Final reward: {}'.format(reward))
 
     def inference_with_conf_cont(self, model_filepath):
         model, model_repr, model_class = load_model(model_filepath)
@@ -471,7 +542,7 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         #dependent.distill(model)
         #exit(0)
-        return dependent.infer(model, distill = True)#, visualize = True)
+        return dependent.infer(model, distill = False, visualize = True)
 
 
     

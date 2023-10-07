@@ -55,11 +55,15 @@ class ClassifierBackbone(nn.Module):
         
 
     def forward(self, obs):
-        agent_dir = obs['direction'].long()
-        obs = obs['image']
-        x = self.state_emb(obs.float())
-        x = x.reshape(x.shape[0], -1)
-        x = torch.concat([x, agent_dir], dim=1)
+        x = None
+        for k, v in obs.items():
+            if k == 'image':
+                x = self.state_emb(obs['image'].float())
+                x = x.reshape(x.shape[0], -1)
+            elif k == 'direction':
+                x = torch.concat([x, obs['direction'].long()], dim=1)
+            else:
+                x = torch.concat([x, obs[k]], dim=1)
         return self.classifier(x)
   
 
@@ -70,7 +74,7 @@ class ClassifierBackbone(nn.Module):
 class FCModel(ClassifierBackbone):
     """Fully-connected actor-critic model with shared embedding"""
 
-    def __init__(self, obs_space, linear_embedding_dims=(512, 256), actor_linear_mid_dims=(64, 32),
+    def __init__(self, obs_space, linear_embedding_dims=(512, 256), actor_linear_mid_dims=(64, 32), extra_size = 0,
                  critic_linear_mid_dims=(64, 32)):
         """
         Initialize the model.
@@ -95,7 +99,7 @@ class FCModel(ClassifierBackbone):
         
 
         # +1 because we concat direction information to embedding
-        self.state_embedding_size = linear_embedding_dims[-1] + 1
+        self.state_embedding_size = linear_embedding_dims[-1] + 1 + extra_size
         embedding = linear_w_relu([flattened_dims] + [d for d in linear_embedding_dims])
         embedding.insert(0, nn.Flatten())  # put a flattening layer in front
         actor_dims = [self.state_embedding_size] + list(actor_linear_mid_dims) + [1]
@@ -116,7 +120,7 @@ class FCModel(ClassifierBackbone):
 class CNNModel(ClassifierBackbone):
     """Simple actor-critic model with CNN embedding"""
 
-    def __init__(self, obs_space, action_space, channels=(16, 32, 64), actor_linear_mid_dims=(144,),
+    def __init__(self, obs_space, channels=(16, 32, 64), actor_linear_mid_dims=(144,), extra_size = 0,
                  critic_linear_mid_dims=(144,)):
         """
         Initialize the model.
@@ -139,7 +143,7 @@ class CNNModel(ClassifierBackbone):
         self.actor_linear_mid_dims = actor_linear_mid_dims
         
         c1, c2, c3 = channels
-        image_embedding_size = 4 * 4 * c3 + 1  # +1 because we concat direction information to embedding
+        image_embedding_size = 4 * 4 * c3 + extra_size +1 #because we concat direction information to embedding
         image_conv = nn.Sequential(
             nn.Conv2d(3, c1, (2, 2)),
             nn.ReLU(),
@@ -167,7 +171,7 @@ class CNNModel(ClassifierBackbone):
 class ImageACModel(ClassifierBackbone):
     """Simple CNN Actor-Critic model designed for MiniGrid. Assumes 48x48 grayscale or RGB images."""
 
-    def __init__(self, obs_space, action_space, channels=(8, 16, 32), actor_linear_mid_dims=(144,),
+    def __init__(self, obs_space, action_space, channels=(8, 16, 32), actor_linear_mid_dims=(144,), extra_size = 1,
                  critic_linear_mid_dims=(144,)):
         """
         Initialize the model.
@@ -192,7 +196,7 @@ class ImageACModel(ClassifierBackbone):
 
         num_channels = obs_space['image'].shape[0]
         c1, c2, c3 = channels
-        image_embedding_size = 3 * 3 * c3 + 1  # +1 because we concat direction information to embedding
+        image_embedding_size = 3 * 3 * c3 + extra_size  # +1 because we concat direction information to embedding
         image_conv = nn.Sequential(
             nn.Conv2d(num_channels, c1, (3, 3), stride=3),
             nn.ReLU(),
@@ -222,7 +226,7 @@ class ImageACModel(ClassifierBackbone):
 class ResNetACModel(ClassifierBackbone):
     """Actor-Critic model with ResNet18 embedding designed for MiniGrid. Assumes 112x112 RGB images."""
 
-    def __init__(self, obs_space, action_space, actor_linear_mid_dims=(512,), critic_linear_mid_dims=(512,)):
+    def __init__(self, obs_space, action_space, actor_linear_mid_dims=(512,), critic_linear_mid_dims=(512,), extra_size = 1):
         """
         Initialize the model.
         :param obs_space: (gym.Spaces) Observation space of the environment being used for training. Technically unused
@@ -239,7 +243,7 @@ class ResNetACModel(ClassifierBackbone):
         self.actor_linear_mid_dims = actor_linear_mid_dims
         self.critic_linear_mid_dims = critic_linear_mid_dims
 
-        image_embedding_size = 512 + 1  # +1 because we concat direction information to embedding
+        image_embedding_size = 512 + extra_size  # +1 because we concat direction information to embedding
         embedding = ModdedResnet18()
         actor_dims = [image_embedding_size] + list(actor_linear_mid_dims) + [action_space.n]
         critic_dims = [image_embedding_size] + list(critic_linear_mid_dims) + [1]

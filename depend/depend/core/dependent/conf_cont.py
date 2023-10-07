@@ -225,7 +225,7 @@ class ConfidenceContrast(Dependent):
         best_exps = None
         best_loss_fn = None
         best_validation_info = None
-        best_dataset = None
+        best_dataset = dataset
         #with mlflow.start_run as run:
         for _ in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
@@ -237,34 +237,8 @@ class ConfidenceContrast(Dependent):
 
             suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
-            for split in range(1, self.config.data.num_splits):
-                
-                # Split dataset
-                validation_set = suffix_split.head
-            
-                if prefix_split is None and suffix_split.tail is not None:
-                    train_set = suffix_split.tail.compose()
-                    suffix_split = suffix_split.tail
-                    prefix_split = DataSplit.Split(validation_set, 1)
-                elif prefix_split is None and suffix_split.tail is None:
-                    raise NotImplementedError("No training set ???")
-                elif prefix_split is not None and suffix_split.tail is None:
-                    train_set = prefix_split.compose()
-                    prefix_split.append(validation_set)
-                elif prefix_split is not None and suffix_split.tail is not None:
-                    train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
-                    prefix_split.append(validation_set)
-                    suffix_split = suffix_split.tail
-                #logger.info("Split: %s \n" % (split))
-                with torch.no_grad():
-                    exps = self.collect_experience(
-                        num_clean_models = self.config.algorithm.num_procs // 2,
-                        num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2
-                    )
-                logger.info(exps['image'].shape)
- 
-                
-                # Prepare the mask generator
+            for split in range(1, max(2, self.config.data.num_splits + 1)):
+                 # Prepare the mask generator
                 cls = eval(self.config.model.classifier.name)(
                     obs_space = self.envs[0].observation_space, extra_size = 3).to(self.config.algorithm.device)
                     
@@ -274,28 +248,70 @@ class ConfidenceContrast(Dependent):
 
                 cls.train()
 
-                loss_fn = self.get_loss(cls, exps)
-                metrics_fn = self.get_metrics(cls, exps)
-                optimize_fn = self.get_optimizer(cls)
+                with torch.no_grad():
+                    exps = self.collect_experience(
+                        num_clean_models = self.config.algorithm.num_procs // 2,
+                        num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2,
+                        load_from_file = None if not hasattr(self.config.algorithm, 'load_experience') else self.config.algorithm.load_experience,
+                    )
+                    exps = self.filter(exps)
+                    if best_exps is None:
+                        best_exps = exps
+                    
 
-                #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
-                train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
-                #for k, v in train_info.items():
-                #    mlflow.log_metric(k, v, step = split)
-                validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
-                #for k, v in validation_info.items():
-                #    mlflow.log_metric(k, v, step = split)
+                # Split dataset
+                if self.config.algorithm.k_fold and split < self.config.data.num_splits:
+                    validation_set = suffix_split.head
                 
-                score = validation_info.get(self.config.algorithm.metrics[0])
-                if best_score is None or best_score < score:
-                    #logger.info("New best model")
-                    best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
-                    self.save_detector(cls, best_exps, best_validation_info)
-                    if not self.config.algorithm.k_fold:
-                        break
-        if final_train:
-            logger.info("Final train the best detector")
-            final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, optimize_fn, best_dataset, metrics_fn)
+                    if prefix_split is None and suffix_split.tail is not None:
+                        train_set = suffix_split.tail.compose()
+                        suffix_split = suffix_split.tail
+                        prefix_split = DataSplit.Split(validation_set, 1)
+                    elif prefix_split is None and suffix_split.tail is None:
+                        raise NotImplementedError("No training set ???")
+                    elif prefix_split is not None and suffix_split.tail is None:
+                        train_set = prefix_split.compose()
+                        prefix_split.append(validation_set)
+                    elif prefix_split is not None and suffix_split.tail is not None:
+                        train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
+                        prefix_split.append(validation_set)
+                        suffix_split = suffix_split.tail
+                    #logger.info("Split: %s \n" % (split))
+                    #logger.info(f"Load from file {hasattr(self.config.algorithm, 'load_experience')}")
+                    
+                    logger.info(exps['image'].shape)
+    
+                    
+               
+
+                    loss_fn = self.get_loss(cls, exps)
+                    metrics_fn = self.get_metrics(cls, exps)
+                    optimize_fn = self.get_optimizer(cls)
+
+                    #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
+                    train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
+                    #for k, v in train_info.items():
+                    #    mlflow.log_metric(k, v, step = split)
+                    validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
+                    #for k, v in validation_info.items():
+                    #    mlflow.log_metric(k, v, step = split)
+                    
+                    score = validation_info.get(self.config.algorithm.metrics[0])
+                    if best_score is None or best_score < score:
+                        #logger.info("New best model")
+                        best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
+                        
+                        #if not self.config.algorithm.k_fold:
+                        #   break
+                elif final_train:
+                    logger.info("Final train the best detector")
+                    loss_fn = self.get_loss(cls, best_exps)
+                    metrics_fn = self.get_metrics(cls, best_exps)
+                    optimize_fn = self.get_optimizer(cls)
+                    final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn)
+                    #final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
+                    self.save_detector(cls, best_exps, final_train_info)
+                    break
                 #for k, v in final_info.items():
                 #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
             #mlflow.end_run()
@@ -304,11 +320,136 @@ class ConfidenceContrast(Dependent):
         self.save_detector(cls, best_exps, best_validation_info)
         return best_score
  
-    def infer(self, model) -> List[float]:
+    
+    def get_stats(self, exps, model):
+        logger.info(exps['image'].size())
+        obss = torch.unique(exps['image'], dim = 0)
+        self.config.algorithm.load_experience = None
+        new_exps = self.collect_experience(
+                        num_clean_models = self.config.algorithm.num_procs // 2,
+                        num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2,
+                        model = model 
+                    )
+        
+    def filter(self, exps14):
+        if False:
+            exps = exps14
+            #self.distill(model)
+            obss = torch.stack((exps['image'], exps['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps['image'].shape)), dim = 1)
+            logger.info(f"Total states: {obss.size()}")
+            #logger.info(f"R14 total states: {obss14.shape}")
+            obss = torch.unique(obss, dim = 0)
+            logger.info(f"Unique states: {obss.size()}")
+            exps['image'] = obss[:, 0, :]
+            exps['direction'] = obss[:, 1, 0, 0, 0:1] 
+            return exps
+        
+        exps15 = pickle.load(open(
+            os.path.join(os.path.dirname(self.config.algorithm.load_experience), "r15_non_repeating_experience_640.p")
+            , 'rb')
+            )
+        obss14 = torch.stack((exps14['image'], exps14['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps14['image'].shape)), dim = 1)
+        obss15 = torch.stack((exps15['image'], exps15['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps15['image'].shape)), dim = 1)
+        logger.info(f"R14 total states: {obss14.shape}")
+        obss14 = torch.unique(obss14, dim = 0)
+        obss15 = torch.unique(obss15, dim = 0)
+        logger.info(f"R14 non repeating states: {obss14.shape}")
+        
+        obss_14_15 = torch.cat((obss14, obss15), dim = 0)
+        obss_14_15, counts = obss_14_15.unique(return_counts = True, dim = 0)
+        obss_14_15 = obss_14_15[counts > 1]
+        logger.info(f'R14/15 overlapping states {obss_14_15.size()}')
+        
+        obss14 = torch.cat((obss14, obss_14_15))
+        obss14, counts = obss14.unique(return_counts = True, dim = 0)
+        obss14 = obss14[counts == 1]
+        logger.info(f'R14 Unique states {obss14.size()}')
+        
+        exps = {}
+        exps['image'] = obss14[:, 0, :]
+        exps['direction'] = obss14[:, 1, 0, 0, 0:1] 
+        
+        with open(self.config.algorithm.load_experience.split('.p')[0] + '_unique.p', 'wb') as fp:
+            pickle.dump(exps, fp)
+        return exps
+
+    def distill(self, model) -> List[float]:
+        exps15 = self.collect_experience(
+                        num_clean_models = self.config.algorithm.num_procs // 2,
+                        num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2,
+                        model = model 
+                    )
+        print(exps15)
+        with open(os.path.join(os.path.dirname(self.config.algorithm.load_experience), "r15_experience_640.p"), 'wb') as fp:
+            pickle.dump(exps15, fp)
+        
+
         # Prepare the mask generator
+        exps14 = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
+        exps15 = pickle.load(open(
+            os.path.join(os.path.dirname(self.config.algorithm.load_experience), "r15_experience_640.p")
+            , 'rb')
+            )
+        print('1', exps14['image'].size())
+        print('1', exps14['direction'].size())
+        obss14 = torch.stack((exps14['image'], exps14['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps14['image'].shape)), dim = 1)
+        obss15 = torch.stack((exps15['image'], exps15['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps15['image'].shape)), dim = 1)
+        print('2', obss14.size(), obss15.size())
+        obss14 = torch.unique(obss14, dim = 0)
+        obss15 = torch.unique(obss15, dim = 0)
+
+        exps = {}
+        exps['image'] = obss15[:, 0, :]
+        exps['direction'] = obss15[:, 1, 0, 0, 0:1] 
+        print('6', exps['image'].shape, exps['direction'].shape)
+        with open(os.path.join(os.path.dirname(self.config.algorithm.load_experience), "r15_non_repeating_experience_640.p"), 'wb') as fp:
+            pickle.dump(exps, fp)
+        
+         
+        print('3', obss14.size(), obss15.size())
+        obss_14_15 = torch.cat((obss14, obss15), dim = 0)
+        obss_14_15, counts = obss_14_15.unique(return_counts = True, dim = 0)
+        obss_14_15 = obss_14_15[counts > 1]
+        print('4', obss_14_15.size())
+        
+        obss14 = torch.cat((obss14, obss_14_15))
+        obss14, counts = obss14.unique(return_counts = True, dim = 0)
+        obss14 = obss14[counts == 1]
+        print('5', obss14.size())
+        exps = {}
+        exps['image'] = obss14[:, 0, :]
+        exps['direction'] = obss14[:, 1, 0, 0, 0:1] 
+        print('6', exps['image'].shape, exps['direction'].shape)
+        with open(self.config.algorithm.load_experience.split('.p')[0] + '_unique.p', 'wb') as fp:
+            pickle.dump(exps, fp)
+        
+        obss15 = torch.cat((obss15, obss_14_15))
+        obss15, counts = obss15.unique(return_counts = True, dim = 0)
+        obss15 = obss15[counts == 1]
+        print('5', obss15.size())
+        exps = {}
+        exps['image'] = obss15[:, 0, :]
+        exps['direction'] = obss15[:, 1, 0, 0, 0:1] 
+        print('6', exps['image'].shape, exps['direction'].shape)
+        with open(os.path.join(os.path.dirname(self.config.algorithm.load_experience), "r15_experience_640_unique.p"), 'wb') as fp:
+            pickle.dump(exps, fp)
+        exit(0)
+
+    def infer(self, model, distill = False, visualize = False) -> List[float]:
         exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
+        if distill:
+            #self.distill(model)
+            obss = torch.stack((exps['image'], exps['direction'].unsqueeze(-1).unsqueeze(-1).expand(exps['image'].shape)), dim = 1)
+            logger.info(f"Total states: {obss.size()}")
+            #logger.info(f"R14 total states: {obss14.shape}")
+            obss = torch.unique(obss, dim = 0)
+            logger.info(f"Unique states: {obss.size()}")
+            exps['image'] = obss[:, 0, :]
+            exps['direction'] = obss[:, 1, 0, 0, 0:1] 
+            
         for k, v in exps.items():
             exps[k] = v.to(self.config.algorithm.device).float()
+        
         #logger.info(exps)
         cls = eval(self.config.model.classifier.name)(
             obs_space = gymnasium.spaces.Box(0, 255, (3, 7, 7), dtype=np.uint8),
@@ -326,12 +467,18 @@ class ConfidenceContrast(Dependent):
              
         model = model.to(self.config.algorithm.device)
         model.zero_grad()
-         
+        
         # Models make predictions on the masked inputs
         #preds = self.get_model_entropy_from_image(model, exps['image']) 
         logits = F.log_softmax(model(exps), dim=1)
         exps['confidence'] = logits
         preds = 1. - cls(exps).detach().cpu().numpy()
+        if visualize:
+            #idx = np.argmin(preds)
+            #obs = {'image': exps['image'][idx], 'direction': exps['direction'][idx]}
+            self.visualize_experience('MiniGrid-SimpleCrossingS9N1-v0', exps, logits, preds)
+
+            
         #preds = (preds < 0.5)
         pred = preds.mean().item() 
 
@@ -343,7 +490,7 @@ class ConfidenceContrast(Dependent):
         logger.info("Trojan Probability: %f" % conf)
         
         return conf
-   
+    
         
     def save_detector(self, cls: Any, exps: Any, info: Dict[Any, Any]):
         with open('best_conf_experience.p', 'wb') as fp:

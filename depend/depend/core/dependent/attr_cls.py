@@ -321,9 +321,19 @@ class AttributionClassifier(Dependent):
         self.save_detector(cls, best_exps, best_validation_info)
         return best_score
  
-    def infer(self, model) -> List[float]:
+    def get_stats(self, exps, model):
+        obss = exps['image']
+        new_exps = self.collect_experience(models = [model] * self.config.algorithm.num_procs)
+        new_obss = new_exps['image']
+        print(obss)
+        print(new_obss)
+        
+
+    def infer(self, model, get_stats = False) -> List[float]:
         # Prepare the mask generator
         exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
+        if get_stats:
+            self.get_stats(exps, model)
         for k, v in exps.items():
             exps[k] = v.to(self.config.algorithm.device).float()
         #logger.info(exps)

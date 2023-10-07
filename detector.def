@@ -9,11 +9,9 @@ From: python:3.9-bullseye
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
-    ./best_cls.p / 
     ./best_experience.p /
-    ./best_conf_cls.p /
-    ./best_conf_experience.p /
-
+    ./best_non_repeating_cls.p /
+   
 %post
     pip install --upgrade pip
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
