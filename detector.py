@@ -16,8 +16,9 @@ from typing import List
 from PIL import Image
 
 
-from depend.core.dependent import MaskGen, AttributionClassifier, ConfidenceContrast
+from depend.core.dependent import MaskGen, AttributionClassifier, ConfidenceContrast, ValueDiscriminator
 from depend.launch import Sponsor
+from depend.utils.models import load_model as load_r14_model
 
 import torch
 from sklearn.ensemble import RandomForestRegressor
@@ -141,6 +142,54 @@ class Detector(AbstractDetector):
             self.manual_configure_attr_cls(model_path_list)
         elif self.method == 'conf_cont':
             self.manual_configure_conf_cont(model_path_list)
+        elif self.method == 'value_disc':
+            self.manual_configure_value_disc(model_path_list)
+
+
+    def manual_configure_value_disc(self, model_path_list: List[str]):
+        dependent = ValueDiscriminator.get_assets(model_path_list)
+        config = {
+            'model_schema': {
+                'classifier': {
+                    'name': 'FCModel', 
+                    #'load_from_file': 'best_cls.p',
+                },
+                'save_dir': 'best_valuedisc_cls.p'
+            },
+            'learner_schema': {
+                'episodes': 100,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:3',
+                'task': 'RL',
+                'criterion': 'ce', 
+                'k_fold': True,
+                'num_procs': 10,
+                'exploration_method': 'standard::1.5',
+                'num_experiments': 1,
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'RMSprop',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 256
+            }
+            
+        }
+
+        result_dir = os.path.join('./logs', timestamp)
+        os.mkdir(result_dir)
+        Sponsor(**config).support(dependent, 'test', result_dir)
+        for i in range(len(dependent.envs)):
+            dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
+        dependent.train_detector() 
 
     def manual_configure_conf_cont(self, model_path_list: List[str]):
         dependent = ConfidenceContrast.get_assets(model_path_list)
@@ -148,6 +197,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
+                    'load_from_file': 'best_cls.p',
                 },
                 'save_dir': 'best_non_repeating_cls.p'
             },
@@ -161,7 +211,7 @@ class Detector(AbstractDetector):
                 'device': 'cuda:3',
                 'task': 'RL',
                 'criterion': 'ce', 
-                'k_fold': False,
+                'k_fold': True,
                 'num_procs': 10,
                 'exploration_method': 'standard::0.5',
                 'num_experiments': 1,
@@ -316,9 +366,9 @@ class Detector(AbstractDetector):
         """
 
         # load the model
-        model_000, _, _ = load_model(model_filepath)
-        model_150, _, _ = load_model(os.path.join(os.path.dirname(os.path.dirname(model_filepath)), 'id-00000150/model.pt'))
-        self.dual_state_simulation(model_000, model_150)
+        #model, _, _ = load_model(model_filepath)
+        #model_150, _, _ = load_model(os.path.join(os.path.dirname(os.path.dirname(model_filepath)), 'id-00000150/model.pt'))
+        #self.dual_state_simulation(model_000, model_150)
 
 
         probability = None
@@ -328,6 +378,8 @@ class Detector(AbstractDetector):
             probability = self.inference_with_attr_cls(model_filepath)
         elif self.method == 'conf_cont':
             probability = self.inference_with_conf_cont(model_filepath)
+        elif self.method == 'value_disc':
+            probability = self.inference_with_value_disc(model_filepath)
         else:
             probability = self.inference_with_attr_cls(model_filepath)
  
@@ -503,7 +555,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_non_repeating_cls.p')
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
                 },
                 'save_dir': 'best_conf_cls.p'
             },
@@ -538,7 +590,55 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         #dependent.distill(model)
         #exit(0)
-        return dependent.infer(model, distill = False, visualize = True)
+        return dependent.infer(model, distill = True) #False, visualize = True)
+
+
+    def inference_with_value_disc(self, model_filepath):
+        model, model_repr, model_class = load_model(model_filepath)
+        model.eval()
+        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
+        dependent = ValueDiscriminator()
+        dependent.clean_example_dict = {'fvs': {'MiniGrid-LavaCrossingS9N1-v0': 1}}
+        config = {
+            'model_schema': {
+                'classifier': {
+                    'name': 'FCModel', 
+                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_valuedisc_cls.p')
+                },
+                'save_dir': 'best_valuedisc_cls.p'
+            },
+            'learner_schema': {
+                'episodes': 100,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:1',
+                'task': 'RL',
+                'criterion': 'ce',
+                'beta': 1,
+                'k_fold': True,
+                'num_procs': 10,
+                'exploration_method': None,
+                'num_experiments': 1,
+                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
+                 
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'Adam',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 7,
+                'max_models': 238,
+                'num_frames_per_model': 64
+            }
+        }
+        Sponsor(**config).support(dependent, None, None)
+        #dependent.distill(model)
+        #exit(0)
+        return dependent.infer(model, distill = True) #False, visualize = True)
 
 
     
