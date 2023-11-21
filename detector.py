@@ -157,7 +157,8 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_valuedisc_cls.p'
             },
             'learner_schema': {
-                'episodes': 100,
+                'xval_episodes': 10,
+                'final_episodes': 50,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -169,7 +170,7 @@ class Detector(AbstractDetector):
                 'k_fold': True,
                 'num_procs': 10,
                 'exploration_method': 'standard::1.5',
-                'num_experiments': 1,
+                'num_experiments': 5,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
             'optimizer_schema': {
@@ -177,7 +178,7 @@ class Detector(AbstractDetector):
                 'lr': 1e-3,
             },
             'data_schema': {
-                'num_splits': 7,
+                'num_splits': 5,
                 'max_models': 238,
                 'num_frames_per_model': 256
             }
@@ -202,7 +203,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_non_repeating_cls.p'
             },
             'learner_schema': {
-                'episodes': 100,
+                'episodes': 20,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -243,11 +244,13 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'FCModel', 
+                    #'load_from_file': 'best_cls.p',
                 },
                 'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
-                'episodes': 30,
+                'xval_episodes': 10,
+                'final_episodes': 50,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -255,21 +258,19 @@ class Detector(AbstractDetector):
             'algorithm_schema': {
                 'device': 'cuda:3',
                 'task': 'RL',
-                'criterion': 'ce',
-                'beta': 0,
+                'criterion': 'ce', 
                 'k_fold': True,
-                'num_procs': 40,
-                'exploration_method': 0.5,
-                'num_experiments': 1,
-                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/experience.p'
-                 
+                'num_procs': 10,
+                'exploration_method': 'standard::1.5',
+                'num_experiments': 5,
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
             'optimizer_schema': {
-                'optimizer_class': 'Adam',
+                'optimizer_class': 'RMSprop',
                 'lr': 1e-3,
             },
             'data_schema': {
-                'num_splits': 7,
+                'num_splits': 5,
                 'max_models': 238,
                 'num_frames_per_model': 256
             }
@@ -608,7 +609,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_valuedisc_cls.p'
             },
             'learner_schema': {
-                'episodes': 100,
+                'episodes': 20,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -630,7 +631,7 @@ class Detector(AbstractDetector):
                 'lr': 1e-3,
             },
             'data_schema': {
-                'num_splits': 7,
+                'num_splits': 3,
                 'max_models': 238,
                 'num_frames_per_model': 64
             }
