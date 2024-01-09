@@ -16,6 +16,14 @@
 		"type": "string",
 		"enum": ["mask_gen", "attr_cls", "conf_cont", "value_disc"]
 	},
+	"infer_cyber_model_skew": {
+		"description": "Skew parameters for all models of the cyber round.",
+		"type": "number",
+		"minimum": 0.01,
+		"maximum": 5.0,
+		"suggested_minimum": 0.3,
+		"suggested_maximum": 0.75
+	},
 	"train_input_features":  {
 		"description": "The input features for training.",
 		"type": "integer",
