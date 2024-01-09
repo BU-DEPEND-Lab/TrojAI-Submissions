@@ -14,8 +14,7 @@ class Model_Indexer:
     def __post_init__(self):
         for model_class in self.model_dict:
             for model in self.model_dict[model_class]:
-                for param in model.parameters():
-                    param.requires_grad = True
+                model.requires_grad = True
 
     @property
     def attributes(self) -> Dict:

@@ -9,12 +9,11 @@ From: python:3.9-bullseye
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
-    ./best_experience.p /
-    ./best_cls.p /
+    ./best_attr_cls.p /
    
 %post
     pip install --upgrade pip
-    pip install jsonschema jsonargparse jsonpickle scikit-learn==1.1.2  
+    pip install torch==2.0.1 torchvision==0.15.2 jsonschema jsonargparse jsonpickle scikit-learn==1.1.2 poetry  
  
     pip install -e ./depend/
     chmod 755 /*.py

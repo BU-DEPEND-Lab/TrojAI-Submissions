@@ -52,43 +52,46 @@ class Detector(AbstractDetector):
         self.model_skew = {
             "__all__": metaparameters["infer_cyber_model_skew"],
         }
-
+        
+        self.method = metaparameters['method']
         self.input_features = metaparameters["train_input_features"]
-        self.weight_table_params = {
-            "random_seed": metaparameters["train_weight_table_random_state"],
-            "mean": metaparameters["train_weight_table_params_mean"],
-            "std": metaparameters["train_weight_table_params_std"],
-            "scaler": metaparameters["train_weight_table_params_scaler"],
-        }
-        self.random_forest_kwargs = {
-            "n_estimators": metaparameters[
-                "train_random_forest_regressor_param_n_estimators"
-            ],
-            "criterion": metaparameters[
-                "train_random_forest_regressor_param_criterion"
-            ],
-            "max_depth": metaparameters[
-                "train_random_forest_regressor_param_max_depth"
-            ],
-            "min_samples_split": metaparameters[
-                "train_random_forest_regressor_param_min_samples_split"
-            ],
-            "min_samples_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_samples_leaf"
-            ],
-            "min_weight_fraction_leaf": metaparameters[
-                "train_random_forest_regressor_param_min_weight_fraction_leaf"
-            ],
-            "max_features": metaparameters[
-                "train_random_forest_regressor_param_max_features"
-            ],
-            "min_impurity_decrease": metaparameters[
-                "train_random_forest_regressor_param_min_impurity_decrease"
-            ],
-        }
+        if self.method == 'random_forest':
+            self.weight_table_params = {
+                "random_seed": metaparameters["train_weight_table_random_state"],
+                "mean": metaparameters["train_weight_table_params_mean"],
+                "std": metaparameters["train_weight_table_params_std"],
+                "scaler": metaparameters["train_weight_table_params_scaler"],
+            }
+            self.random_forest_kwargs = {
+                "n_estimators": metaparameters[
+                    "train_random_forest_regressor_param_n_estimators"
+                ],
+                "criterion": metaparameters[
+                    "train_random_forest_regressor_param_criterion"
+                ],
+                "max_depth": metaparameters[
+                    "train_random_forest_regressor_param_max_depth"
+                ],
+                "min_samples_split": metaparameters[
+                    "train_random_forest_regressor_param_min_samples_split"
+                ],
+                "min_samples_leaf": metaparameters[
+                    "train_random_forest_regressor_param_min_samples_leaf"
+                ],
+                "min_weight_fraction_leaf": metaparameters[
+                    "train_random_forest_regressor_param_min_weight_fraction_leaf"
+                ],
+                "max_features": metaparameters[
+                    "train_random_forest_regressor_param_max_features"
+                ],
+                "min_impurity_decrease": metaparameters[
+                    "train_random_forest_regressor_param_min_impurity_decrease"
+                ],
+            }
 
     def write_metaparameters(self):
         metaparameters = {
+            "method": 'attr_cls',
             "infer_cyber_model_skew": self.model_skew["__all__"],
             "train_input_features": self.input_features,
             "train_weight_table_random_state": self.weight_table_params["random_seed"],
@@ -141,6 +144,13 @@ class Detector(AbstractDetector):
             self.manual_configure_attr_cls(model_path_list)
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
+        print(model_path_list)
+        model, model_repr, model_class = load_model(join(model_path_list[0], "model.pt"))
+       
+        # Inferences on examples to demonstrate how it is done for a round
+        # This is not needed for the random forest classifier
+        self.inference_on_example_data(model, "/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/")
+
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
 
         models_padding_dict = create_models_padding(model_repr_dict)
@@ -206,7 +216,7 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'classifier': {
-                    'name': 'FCModel', 
+                    'name': 'DrebinNet3', 
                     #'load_from_file': 'best_cls.p',
                 },
                 'save_dir': 'best_attr_cls.p'
@@ -219,12 +229,10 @@ class Detector(AbstractDetector):
                 'eval_interval': 2,
             },
             'algorithm_schema': {
-                'device': 'cuda:3',
-                'task': 'RL',
+                'device': 'cpu',
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'exploration_method': 'standard::1.5',
                 'num_experiments': 5,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
@@ -234,8 +242,7 @@ class Detector(AbstractDetector):
             },
             'data_schema': {
                 'num_splits': 5,
-                'max_models': 238,
-                'num_frames_per_model': 256
+                'max_models': 238 
             }
             
         }
@@ -259,6 +266,7 @@ class Detector(AbstractDetector):
 
         for examples_dir_entry in os.scandir(examples_dirpath):
             if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
+                
                 base_example_name = os.path.splitext(examples_dir_entry.name)[0]
                 ground_truth_filename = os.path.join(examples_dirpath, '{}.json'.format(base_example_name))
                 if not os.path.exists(ground_truth_filename):
@@ -266,17 +274,17 @@ class Detector(AbstractDetector):
                     continue
 
                 new_input = np.load(examples_dir_entry.path)
-
+                
                 if inputs_np is None:
                     inputs_np = new_input
                 else:
                     inputs_np = np.concatenate([inputs_np, new_input])
-
+                
                 with open(ground_truth_filename) as f:
                     data = int(json.load(f))
 
                 g_truths.append(data)
-
+  
         g_truths_np = np.asarray(g_truths)
 
         p = model.predict(inputs_np)
@@ -386,22 +394,24 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath = None
             ):
          # List all available model
-        if round_training_dataset_dirpath is not None:
-            model_path_list = sorted([join(round_training_dataset_dirpath, model) for model in listdir(round_training_dataset_dirpath)])
-            logging.info(f"Loading %d models...", len(model_path_list))
+        
+        model_path_list = sorted([join(round_training_dataset_dirpath, model) for model in listdir(round_training_dataset_dirpath)])
+        logging.info(f"Loading %d models...", len(model_path_list))
+        if False:
             dependent = self.manual_configure_attr_cls(model_path_list)
         else:
-            dependent = AttributionClassifier()
+            dependent = AttributionClassifier.get_assets(model_path_list)
             config = {
                 'model_schema': {
                     'classifier': {
-                        'name': 'FCModel', 
+                        'name': 'DrebinNet3', 
                         'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls.p')
                     },
                     'save_dir': 'best_attr_cls.p'
                 },
-                'learner_schema': {
-                    'episodes': 100,
+                 'learner_schema': {
+                    'xval_episodes': 10,
+                    'final_episodes': 50,
                     'batch_size': 32,
                     'checkpoint_interval': 1,
                     'eval_interval': 2,
@@ -431,8 +441,7 @@ class Detector(AbstractDetector):
             Sponsor(**config).support(dependent, None, None)
 
         model, model_repr, model_class = load_model(model_filepath)
-        model.eval()
         #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
 
         
-        return dependent.infer(model, examples_dirpath)
+        return dependent.infer(model)

@@ -5,9 +5,7 @@ from typing import Any, Dict, List, ClassVar, Callable, Iterable, Union, cast, g
 import os
 
 from PIL import Image
-
-from depend.lib.agent import Agent, ParallelAgent
-from depend.utils.env import make_env
+ 
 from depend.utils.configs import DPConfig
 from depend.utils.models import load_models_dirpath, load_model
 from depend.depend.core.serializable.utils import serialize_with_pyarrow
@@ -66,16 +64,16 @@ class Dependent(ABC, BaseModel):
         logger.info(f"Loaded target_model_dict {data_infos[0].keys()}")
         logger.info(f"Loaded target_model_repr_dict {data_infos[1].keys()}")
         logger.info(f"Loaded model_ground_truth_dict {data_infos[2]}")
-        logger.info(f"Loaded clean models {data_infos[3]}")
-        logger.info(f"Loaded poisoned models {data_infos[4]}")
-
+        logger.info(f"Loaded clean examples {data_infos[3]}")
+        logger.info(f"Loaded poisoned examples {data_infos[4]}")
+        
         model_ground_truth_dict = data_infos[2]
 
         # Convert the model_ground_truth dictionary to a DataFrame
         # Allocate a row for each element in the lists
         df = pd.DataFrame([(key, index, value) for key, values in model_ground_truth_dict.items() for index, value in enumerate(values)],
                   columns=['model_class', 'idx_in_class', 'poisoned'])
-        logging.info(df[df['model_class']=='SimplifiedRLStarter']['poisoned'] == 0)
+    
         #df = pa.Table.from_pandas(df)
        
         df = df.dropna()
@@ -118,14 +116,22 @@ class Dependent(ABC, BaseModel):
         # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
         
         combined_model_table = None
-        if len(poisoned_model_table) > 0:
+        if len(poisoned_model_table) <= 1:
+            combined_model_table = poisoned_model_table
+        else:
             poisoned_ids = np.random.choice(np.arange(len(poisoned_model_table)), num_poisoned_models)
             # Slice the selected rows from each party
             poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
             if combined_model_table is None: 
                 combined_model_table = poisoned_models_selected
         
-        if len(clean_model_table) > 0:
+
+        if len(clean_model_table) <= 1:
+            if combined_model_table is None:
+                combined_model_table = clean_model_table
+            elif len(clean_model_table) > 0:
+                combined_model_table = pd.concat([combined_model_table, clean_model_table])
+        else:
             clean_ids = np.random.choice(np.arange(len(clean_model_table)), num_clean_models)
             # Slice the selected rows from each party
             clean_models_selected = clean_model_table.take(clean_ids)
@@ -147,59 +153,6 @@ class Dependent(ABC, BaseModel):
         logger.info(f"Collect a dataset of mixed models {dataset}.")
         return dataset
     
-    def visualize_experience(self, env, exps, logits, preds):
-        import gym
-        import gym_minigrid
-        env = gym.make(env)#, wrapper = 'ImgObsWrapper') 
-        with open('images/logits.txt', 'w') as fp:
-            for i, logit in enumerate(logits.detach().cpu().numpy()):
-                fp.write(str(i) + "::" + "::".join([str(p) for p in logit]) + ';\n')
-        for i, (image, direction, pred) in enumerate(zip(exps['image'], exps['direction'], preds)):
-            #obs = {'image': image, 'direction': direction}
-            logger.info(f"Image {image}")
-            obs_img = Image.fromarray(env.get_obs_render(image.transpose(2, 0).detach().cpu().numpy()))
-            obs_img = obs_img.rotate(90).transpose(Image.FLIP_TOP_BOTTOM)
-            obs_img.save(f'images/{i}_{int(pred * 100)}.jpg')
-            
-
-    def collect_experience(self, num_clean_models, num_poisoned_models, models = [], load_from_file = None):
-        #if hasattr(self.config.algorithm, 'load_experience') and getattr(self.config.algorithm, 'load_experience') is not None:
-        logger.info(f"???????/{load_from_file}")
-        if load_from_file is not None:
-            logger.info("Loading experience from file")
-            exps = pickle.load(open(load_from_file, 'rb'))
-        else:
-            #self.envs = ParallelEnv([env for env in np.random.choice(envs, size = config.algorithm.num_procs, p = ps)])
-            
-            #logging.info(f"Built model dataset {dataset}")
-            models = []
-            if len(models) == 0:
-                if num_poisoned_models > 0:
-                    poisoned_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 0].sample(num_poisoned_models)
-                    for poisoned_model_class in poisoned_model_rows['model_class'].unique():
-                        for idx_in_class in poisoned_model_rows[poisoned_model_rows['model_class'] == poisoned_model_class]['idx_in_class']:
-                            #logging.info(f"Selected {model_class} No.{idx}")
-                            models.append(self.target_model_indexer.model_dict[poisoned_model_class][idx_in_class].to(self.config.algorithm.device))
-                if num_clean_models > 0:
-                    clean_model_rows = self.target_model_table[self.target_model_table['poisoned'] == 1].sample(num_clean_models)
-                    for clean_model_class in clean_model_rows['model_class'].unique():
-                        for idx_in_class in clean_model_rows[clean_model_rows['model_class'] == clean_model_class]['idx_in_class']:
-                            #logging.info(f"Selected {model_class} No.{idx}")
-                            models.append(self.target_model_indexer.model_dict[clean_model_class][idx_in_class].to(self.config.algorithm.device))
-            envs = [make_env(env, self.config.learner.seed + 10000 * i, wrapper = 'ImgObsWrapper') \
-                    for (i, env) in enumerate(np.random.choice(self.envs, size = len(models), p = self.envs_ratio))]
-            
-            exps = Agent.collect_experience(
-                envs, 
-                models,
-                self.config.data.num_frames_per_model,
-                self.config.algorithm.exploration_method,
-                self.config.algorithm.device
-                )
-        with open('experience.p', 'wb') as fp:
-            pickle.dump(exps, fp)
-        #logger.info(f"Collect a dataset of experiences {exps}")
-        return exps
     
     @abstractmethod
     def get_detector(self):
@@ -219,30 +172,20 @@ class Dependent(ABC, BaseModel):
         best_validation_info = None
         best_dataset = dataset
         #with mlflow.start_run as run:
-        best_exps = None
+       
         
         for _ in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
-
+            logging.info("Start training experiment!!")
             tot_score = 0 
-            
-
-            exps = self.collect_experience(
-                    num_clean_models = self.config.algorithm.num_procs // 2,
-                    num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2,
-                    load_from_file = None if not hasattr(self.config.algorithm, 'load_experience') else self.config.algorithm.load_experience,
-                )
-
+         
             suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
             for split in range(1, max(2, self.config.data.num_splits + 1)):
                  # Prepare the mask generator
                 cls = self.get_detector()
-
-                
-                #exps = self.filter(exps)
+      
         
-                    
                 # Split dataset
                 if self.config.algorithm.k_fold and split <= self.config.data.num_splits:
                     validation_set = suffix_split.head
@@ -260,13 +203,10 @@ class Dependent(ABC, BaseModel):
                         train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
                         prefix_split.append(validation_set)
                         suffix_split = suffix_split.tail
-                    #logger.info("Split: %s \n" % (split))
-                    #logger.info(f"Load from file {hasattr(self.config.algorithm, 'load_experience')}")
-                    
-                    logger.info(exps['image'].shape)
-     
-                    loss_fn = self.get_loss(cls, exps)
-                    metrics_fn = self.get_metrics(cls, exps)
+                    logger.info("Split: %s \n" % (split))
+                     
+                    loss_fn = self.get_loss(cls)
+                    metrics_fn = self.get_metrics(cls)
                     optimize_fn = self.get_optimizer(cls)
 
                     #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
@@ -290,17 +230,17 @@ class Dependent(ABC, BaseModel):
             avg_score = tot_score/self.config.data.num_splits
             logging.info(f"Cross Validation Score: {avg_score}")
             if best_score is None or best_score < avg_score:
-                best_score, best_exps = avg_score, exps
+                best_score = avg_score 
 
         if True or final_train:
             logger.info("Final train the detector with the {best_score=}")
             best_cls = self.get_detector()
-            loss_fn = self.get_loss(cls, best_exps)
-            metrics_fn = self.get_metrics(cls, best_exps)
+            loss_fn = self.get_loss(cls)
+            metrics_fn = self.get_metrics(cls)
             optimize_fn = self.get_optimizer(cls)
             final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn, final_train = True)
             final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
-            self.save_detector(best_cls, best_exps, final_train_info)
+            self.save_detector(best_cls, final_train_info)
             
             #for k, v in final_info.items():
             #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)

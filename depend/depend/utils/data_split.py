@@ -44,6 +44,8 @@ class DataSplit(BaseDataSplit):
         if num_split > 1: 
             tot_samples = len(dataset)    
             samples_per_split = tot_samples // num_split 
+            assert samples_per_split > 0
+            
             tot_samples_added = 0
             while tot_samples_added < tot_samples:
                 if tot_samples_added == 0:

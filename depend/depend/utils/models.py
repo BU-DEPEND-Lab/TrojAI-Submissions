@@ -16,6 +16,8 @@ from pandas import DataFrame
 import pyarrow as pa
 import jsonpickle
 
+from utils.drebinnn import DrebinNN
+
 
 def create_layer_map(model_repr_dict):
     model_layer_map = {}
@@ -41,7 +43,7 @@ def create_layer_map(model_repr_dict):
     return model_layer_map
 
 
-def load_model(model_filepath: str):
+def load_model(model_filepath: str) -> (dict, str):
     """Load a model given a specific model_path.
 
     Args:
@@ -50,14 +52,20 @@ def load_model(model_filepath: str):
     Returns:
         model, dict, str - Torch model + dictionary representation of the model + model class name
     """
-    model = torch.load(model_filepath)
-    model_class = model.__class__.__name__
+
+    conf_filepath = os.path.join(os.path.dirname(model_filepath), 'reduced-config.json')
+    with open(conf_filepath, 'r') as f:
+        full_conf = json.load(f)
+
+    model = DrebinNN(991, full_conf)
+    model.load('.', model_filepath)
+    # model = torch.load(model_filepath)
+    model_class = model.model.__class__.__name__
     model_repr = OrderedDict(
-        {layer: tensor.numpy() for (layer, tensor) in model.state_dict().items()}
+        {layer: tensor.cpu().numpy() for (layer, tensor) in model.model.state_dict().items()}
     )
 
     return model, model_repr, model_class
-
 
 def load_ground_truth(model_dirpath: str):
     """Returns the ground truth for a given model.
@@ -92,13 +100,14 @@ def load_examples(model_dirpath: str, clean = True):
                     feature_vector = read_image(examples_dir_entry.path).unsqueeze(dim = 0).float()
                     fvs[idx] = feature_vector
                 elif examples_dir_entry.name.endswith(".npy"):
-                    idx = examples_dir_entry.name.split('.jpn')[0] 
+                    idx = examples_dir_entry.name.split('.npy')[0] 
                     feature_vector = np.load(examples_dir_entry.path).reshape(1, -1)
                     fvs[idx] = feature_vector
                 elif examples_dir_entry.name.endswith(".json"):
                     idx = examples_dir_entry.name.split('.json')[0]
-                    label = json.load(examples_dir_entry.path)
-                    labels[idx] = label
+                    with open(examples_dir_entry.path, 'r') as fp:
+                        label = json.load(fp)
+                        labels[idx] = label
                 elif examples_dir_entry.name == 'env-string.txt':
                     logger.info("Find {}".format(examples_dir_entry.name))
                     with open(examples_dir_entry.path, 'r') as file:
@@ -115,13 +124,14 @@ def load_examples(model_dirpath: str, clean = True):
                         fvs[idx] = 1
                 else:
                     logger.info('Unrecognized file format: %s' % examples_dir_entry.name)
-             
+     
     return fvs, labels
 
 def load_models_dirpath(models_dirpath):
     model_dict = {}
     model_repr_dict = {}
     model_ground_truth_dict = {}
+    
     clean_example_dict = {'fvs': {}, 'labels': {}}
     poisoned_example_dict = {'fvs': {}, 'labels': {}}
 
@@ -155,8 +165,12 @@ def load_models_dirpath(models_dirpath):
                     if idx not in clean_example_dict['fvs']:
                         clean_example_dict['fvs'][idx] = 0
                     clean_example_dict['fvs'][idx] += clean_example_fvs[idx]
-        except:
-            logger.info("No clean example")
+                for idx in clean_example_labels:
+                    if idx not in clean_example_dict['labels']:
+                        clean_example_dict['labels'][idx] = clean_example_labels[idx]
+                        
+        except Exception as e:
+            logger.info(f"{e}. No clean example")
             pass
         try:
             poisoned_example_fvs, poisoned_example_labels = load_examples(model_path, False)
