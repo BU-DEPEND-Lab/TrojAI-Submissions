@@ -6,7 +6,7 @@ import warnings
 
 import jsonschema
 
-from detector_bak import Detector
+from detector import Detector
 
 warnings.filterwarnings("ignore")
 

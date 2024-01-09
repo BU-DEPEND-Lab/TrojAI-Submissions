@@ -7,12 +7,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 #python = "^3.9"
-#torch = "2.0.1"
+torch = "2.0.1"
 captum = "^0.6.0"
 pydantic = "^2.0.3"
 datasets = "^2.14.0"
-#torchvision = "^0.15.2"
-torch-ac = {version = "1.1.0", optional = true}
 pyarrow = "^12.0.1"
 torcheval = "^0.0.6"
 wandb = "^0.15.8"

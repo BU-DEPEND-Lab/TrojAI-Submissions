@@ -36,8 +36,6 @@ from utils.reduction import (
     use_feature_reduction_algorithm,
 )
 
-from datetime import datetime
-timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):

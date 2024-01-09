@@ -22,6 +22,14 @@ from utils.reduction import (
     use_feature_reduction_algorithm,
 )
 
+from depend.core.dependent import AttributionClassifier 
+from depend.launch import Sponsor
+from typing import List
+
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+
+
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
         """Detector initialization function.
@@ -127,6 +135,12 @@ class Detector(AbstractDetector):
         model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
 
+        if self.method == 'random_forest':
+            self.manual_configure_random_forest(model_path_list)
+        elif self.method == 'attr_cls':
+            self.manual_configure_attr_cls(model_path_list)
+
+    def manual_configure_random_forest(self, model_path_list: List[str]):
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
 
         models_padding_dict = create_models_padding(model_repr_dict)
@@ -175,7 +189,7 @@ class Detector(AbstractDetector):
                     continue
 
                 X = np.vstack((X, model_feats * self.model_skew["__all__"]))
-
+        
         logging.info("Training RandomForestRegressor model...")
         model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
         model.fit(X, y)
@@ -186,6 +200,52 @@ class Detector(AbstractDetector):
 
         self.write_metaparameters()
         logging.info("Configuration done!")
+
+    def manual_configure_attr_cls(self, model_path_list: List[str]):
+        dependent = AttributionClassifier.get_assets(model_path_list)
+        config = {
+            'model_schema': {
+                'classifier': {
+                    'name': 'FCModel', 
+                    #'load_from_file': 'best_cls.p',
+                },
+                'save_dir': 'best_attr_cls.p'
+            },
+            'learner_schema': {
+                'xval_episodes': 10,
+                'final_episodes': 50,
+                'batch_size': 32,
+                'checkpoint_interval': 1,
+                'eval_interval': 2,
+            },
+            'algorithm_schema': {
+                'device': 'cuda:3',
+                'task': 'RL',
+                'criterion': 'ce', 
+                'k_fold': True,
+                'num_procs': 10,
+                'exploration_method': 'standard::1.5',
+                'num_experiments': 5,
+                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
+            },
+            'optimizer_schema': {
+                'optimizer_class': 'RMSprop',
+                'lr': 1e-3,
+            },
+            'data_schema': {
+                'num_splits': 5,
+                'max_models': 238,
+                'num_frames_per_model': 256
+            }
+            
+        }
+
+        result_dir = os.path.join('./logs', timestamp)
+        os.mkdir(result_dir)
+        Sponsor(**config).support(dependent, 'test', result_dir)
+        dependent.train_detector() 
+        return dependent
+ 
 
     def inference_on_example_data(self, model, examples_dirpath):
         """Method to demonstrate how to inference on a round's example data.
@@ -243,6 +303,26 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath:
         """
 
+        probability = None
+        if self.method == 'random_forest':
+            probability = self.inference_random_forest(model_filepath, examples_dirpath, round_training_dataset_dirpath)
+        elif self.method == 'attr_cls':
+            probability = self.inference_with_attr_cls(model_filepath, examples_dirpath, round_training_dataset_dirpath)
+        
+        # write the trojan probability to the output file
+        with open(result_filepath, "w") as fp:
+            fp.write(str(probability))
+
+        logging.info("Trojan probability: {}".format(probability))
+
+
+    def inference_with_random_forest(
+            self, 
+            model_filepath, 
+            examples_dirpath, 
+            round_training_dataset_dirpath
+            ):
+   
         with open(self.model_layer_map_filepath, "rb") as fp:
             model_layer_map = pickle.load(fp)
 
@@ -285,6 +365,7 @@ class Detector(AbstractDetector):
             * self.model_skew["__all__"]
         )
 
+        probability = None
         try:
             with open(self.model_filepath, "rb") as fp:
                 regressor: RandomForestRegressor = pickle.load(fp)
@@ -293,7 +374,65 @@ class Detector(AbstractDetector):
         except Exception as e:
             logging.info('Failed to run regressor, there may have an issue during fitting, using random for trojan probability: {}'.format(e))
             probability = str(np.random.rand())
-        with open(result_filepath, "w") as fp:
-            fp.write(probability)
+        
+        
+        return probability
 
-        logging.info("Trojan probability: %s", probability)
+
+    def inference_with_attr_cls(
+            self, 
+            model_filepath, 
+            examples_dirpath, 
+            round_training_dataset_dirpath = None
+            ):
+         # List all available model
+        if round_training_dataset_dirpath is not None:
+            model_path_list = sorted([join(round_training_dataset_dirpath, model) for model in listdir(round_training_dataset_dirpath)])
+            logging.info(f"Loading %d models...", len(model_path_list))
+            dependent = self.manual_configure_attr_cls(model_path_list)
+        else:
+            dependent = AttributionClassifier()
+            config = {
+                'model_schema': {
+                    'classifier': {
+                        'name': 'FCModel', 
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls.p')
+                    },
+                    'save_dir': 'best_attr_cls.p'
+                },
+                'learner_schema': {
+                    'episodes': 100,
+                    'batch_size': 32,
+                    'checkpoint_interval': 1,
+                    'eval_interval': 2,
+                },
+                'algorithm_schema': {
+                    'device': 'cuda:1',
+                    'task': 'RL',
+                    'criterion': 'ce',
+                    'beta': 1,
+                    'k_fold': True,
+                    'num_procs': 20,
+                    'exploration_rate': 0.5,
+                    'num_experiments': 1,
+                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_experience.p')
+                    
+                },
+                'optimizer_schema': {
+                    'optimizer_class': 'Adam',
+                    'lr': 1e-3,
+                },
+                'data_schema': {
+                    'num_splits': 7,
+                    'max_models': 238,
+                    'num_frames_per_model': 128
+                }
+            }
+            Sponsor(**config).support(dependent, None, None)
+
+        model, model_repr, model_class = load_model(model_filepath)
+        model.eval()
+        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
+
+        
+        return dependent.infer(model, examples_dirpath)
