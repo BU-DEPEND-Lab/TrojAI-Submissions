@@ -10,31 +10,34 @@ import os
 import json
 import jsonpickle
 import pickle
+from os import listdir, makedirs
+from os.path import join, exists, basename
+
 import numpy as np
 from typing import List
-
-from PIL import Image
-
-
 from depend.core.dependent import MaskGen, AttributionClassifier, ConfidenceContrast, ValueDiscriminator
 from depend.launch import Sponsor
 from depend.utils.models import load_model as load_r14_model
 
 import torch
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import accuracy_score
+
+from tqdm import tqdm
 
 from utils.abstract import AbstractDetector
-from utils.model_utils import compute_action_from_trojai_rl_model
-from utils.models import load_model, load_models_dirpath, ImageACModel, ResNetACModel
-
-
-from utils.world import RandomLavaWorldEnv
-from utils.wrappers import ObsEnvWrapper, TensorWrapper
-
+from utils.flatten import flatten_model, flatten_models
+from utils.healthchecks import check_models_consistency
+from utils.models import create_layer_map, load_model, \
+    load_models_dirpath
+from utils.padding import create_models_padding, pad_model
+from utils.reduction import (
+    fit_feature_reduction_algorithm,
+    use_feature_reduction_algorithm,
+)
 
 from datetime import datetime
 timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
@@ -43,23 +46,25 @@ class Detector(AbstractDetector):
         Args:
             metaparameter_filepath: str - File path to the metaparameters file.
             learned_parameters_dirpath: str - Path to the learned parameters directory.
+            scale_parameters_filepath: str - File path to the scale_parameters file.
         """
         metaparameters = json.load(open(metaparameter_filepath, "r"))
 
         self.metaparameter_filepath = metaparameter_filepath
         self.learned_parameters_dirpath = learned_parameters_dirpath
-        self.model_filepath = os.path.join(self.learned_parameters_dirpath, "model.bin")
-        self.models_padding_dict_filepath = os.path.join(self.learned_parameters_dirpath, "models_padding_dict.bin")
-        self.model_layer_map_filepath = os.path.join(self.learned_parameters_dirpath, "model_layer_map.bin")
-        self.layer_transform_filepath = os.path.join(self.learned_parameters_dirpath, "layer_transform.bin")
+        self.model_filepath = join(self.learned_parameters_dirpath, "model.bin")
+        self.models_padding_dict_filepath = join(self.learned_parameters_dirpath, "models_padding_dict.bin")
+        self.model_layer_map_filepath = join(self.learned_parameters_dirpath, "model_layer_map.bin")
+        self.layer_transform_filepath = join(self.learned_parameters_dirpath, "layer_transform.bin")
 
         self.method = metaparameters['method']
         self.input_features = metaparameters["train_input_features"]
         if self.method == 'random_forest':
-            self.weight_params = {
-                "rso_seed": metaparameters["train_weight_rso_seed"],
-                "mean": metaparameters["train_weight_params_mean"],
-                "std": metaparameters["train_weight_params_std"],
+            self.weight_table_params = {
+                "random_seed": metaparameters["train_weight_table_random_state"],
+                "mean": metaparameters["train_weight_table_params_mean"],
+                "std": metaparameters["train_weight_table_params_std"],
+                "scaler": metaparameters["train_weight_table_params_scaler"],
             }
             self.random_forest_kwargs = {
                 "n_estimators": metaparameters[
@@ -87,15 +92,16 @@ class Detector(AbstractDetector):
                     "train_random_forest_regressor_param_min_impurity_decrease"
                 ],
             }
-       
 
     def write_metaparameters(self):
         if self.method == 'random_forest':
             metaparameters = {
+                "infer_cyber_model_skew": self.model_skew["__all__"],
                 "train_input_features": self.input_features,
-                "train_weight_rso_seed": self.weight_params["rso_seed"],
-                "train_weight_params_mean": self.weight_params["mean"],
-                "train_weight_params_std": self.weight_params["std"],
+                "train_weight_table_random_state": self.weight_table_params["random_seed"],
+                "train_weight_table_params_mean": self.weight_table_params["mean"],
+                "train_weight_table_params_std": self.weight_table_params["std"],
+                "train_weight_table_params_scaler": self.weight_table_params["scaler"],
                 "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
                 "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
                 "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
@@ -107,8 +113,9 @@ class Detector(AbstractDetector):
             }
         elif self.method == 'mask_gen':
             metaparameters = {}
-        with open(os.path.join(self.learned_parameters_dirpath, os.path.basename(self.metaparameter_filepath)), "w") as fp:
-            fp.write(jsonpickle.encode(metaparameters, warn=True, indent=2))
+
+        with open(join(self.learned_parameters_dirpath, basename(self.metaparameter_filepath)), "w") as fp:
+            json.dump(metaparameters, fp)
 
     def automatic_configure(self, models_dirpath: str):
         """Configuration of the detector iterating on some of the parameters from the
@@ -119,7 +126,7 @@ class Detector(AbstractDetector):
             models_dirpath: str - Path to the list of model to use for training
         """
         for random_seed in np.random.randint(1000, 9999, 10):
-            self.weight_params["rso_seed"] = random_seed
+            self.weight_table_params["random_seed"] = random_seed
             self.manual_configure(models_dirpath)
 
     def manual_configure(self, models_dirpath: str):
@@ -130,114 +137,77 @@ class Detector(AbstractDetector):
             models_dirpath: str - Path to the list of model to use for training
         """
         # Create the learned parameter folder if needed
-        if not os.path.exists(self.learned_parameters_dirpath):
-            os.makedirs(self.learned_parameters_dirpath)
+        if not exists(self.learned_parameters_dirpath):
+            makedirs(self.learned_parameters_dirpath)
 
         # List all available model
-        model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
+        model_path_list = sorted([join(models_dirpath, model) for model in listdir(models_dirpath)])
         logging.info(f"Loading %d models...", len(model_path_list))
         if self.method == 'random_forest':
             self.manual_configure_random_forest(model_path_list)
         elif self.method == 'attr_cls':
             self.manual_configure_attr_cls(model_path_list)
-        elif self.method == 'conf_cont':
-            self.manual_configure_conf_cont(model_path_list)
-        elif self.method == 'value_disc':
-            self.manual_configure_value_disc(model_path_list)
 
+    def manual_configure_random_forest(self, model_path_list: List[str]):
+        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
 
-    def manual_configure_value_disc(self, model_path_list: List[str]):
-        dependent = ValueDiscriminator.get_assets(model_path_list)
-        config = {
-            'model_schema': {
-                'classifier': {
-                    'name': 'FCModel', 
-                    #'load_from_file': 'best_cls.p',
-                },
-                'save_dir': 'best_valuedisc_cls.p'
-            },
-            'learner_schema': {
-                'xval_episodes': 10,
-                'final_episodes': 50,
-                'batch_size': 32,
-                'checkpoint_interval': 1,
-                'eval_interval': 2,
-            },
-            'algorithm_schema': {
-                'device': 'cuda:3',
-                'task': 'RL',
-                'criterion': 'ce', 
-                'k_fold': True,
-                'num_procs': 10,
-                'exploration_method': 'standard::1.5',
-                'num_experiments': 5,
-                #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
-            },
-            'optimizer_schema': {
-                'optimizer_class': 'RMSprop',
-                'lr': 1e-3,
-            },
-            'data_schema': {
-                'num_splits': 5,
-                'max_models': 238,
-                'num_frames_per_model': 256
-            }
-            
-        }
+        models_padding_dict = create_models_padding(model_repr_dict)
+        with open(self.models_padding_dict_filepath, "wb") as fp:
+            pickle.dump(models_padding_dict, fp)
 
-        result_dir = os.path.join('./logs', timestamp)
-        os.mkdir(result_dir)
-        Sponsor(**config).support(dependent, 'test', result_dir)
-        for i in range(len(dependent.envs)):
-            dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
-        dependent.train_detector() 
+        for model_class, model_repr_list in model_repr_dict.items():
+            for index, model_repr in enumerate(model_repr_list):
+                model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
 
-    def manual_configure_conf_cont(self, model_path_list: List[str]):
-        dependent = ConfidenceContrast.get_assets(model_path_list)
-        config = {
-            'model_schema': {
-                'classifier': {
-                    'name': 'FCModel', 
-                    'load_from_file': 'best_cls.p',
-                },
-                'save_dir': 'best_non_repeating_cls.p'
-            },
-            'learner_schema': {
-                'episodes': 20,
-                'batch_size': 32,
-                'checkpoint_interval': 1,
-                'eval_interval': 2,
-            },
-            'algorithm_schema': {
-                'device': 'cuda:3',
-                'task': 'RL',
-                'criterion': 'ce', 
-                'k_fold': True,
-                'num_procs': 10,
-                'exploration_method': 'standard::0.5',
-                'num_experiments': 1,
-                'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
-            },
-            'optimizer_schema': {
-                'optimizer_class': 'RMSprop',
-                'lr': 1e-3,
-            },
-            'data_schema': {
-                'num_splits': 7,
-                'max_models': 238,
-                'num_frames_per_model': 64
-            }
-            
-        }
+        check_models_consistency(model_repr_dict)
 
-        result_dir = os.path.join('./logs', timestamp)
-        os.mkdir(result_dir)
-        Sponsor(**config).support(dependent, 'test', result_dir)
-        for i in range(len(dependent.envs)):
-            dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
-        dependent.train_detector() 
+        # Build model layer map to know how to flatten
+        logging.info("Generating model layer map...")
+        model_layer_map = create_layer_map(model_repr_dict)
+        with open(self.model_layer_map_filepath, "wb") as fp:
+            pickle.dump(model_layer_map, fp)
+        logging.info("Generated model layer map. Flattenning models...")
 
+        # Flatten models
+        flat_models = flatten_models(model_repr_dict, model_layer_map)
+        del model_repr_dict
+        logging.info("Models flattened. Fitting feature reduction...")
 
+        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.input_features)
+
+        logging.info("Feature reduction applied. Creating feature file...")
+        X = None
+        y = []
+
+        for _ in range(len(flat_models)):
+            (model_arch, models) = flat_models.popitem()
+            model_index = 0
+
+            logging.info("Parsing %s models...", model_arch)
+            for _ in tqdm(range(len(models))):
+                model = models.pop(0)
+                y.append(model_ground_truth_dict[model_arch][model_index])
+                model_index += 1
+
+                model_feats = use_feature_reduction_algorithm(
+                    layer_transform[model_arch], model
+                )
+                if X is None:
+                    X = model_feats
+                    continue
+
+                X = np.vstack((X, model_feats * self.model_skew["__all__"]))
+
+        logging.info("Training RandomForestRegressor model...")
+        model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
+        model.fit(X, y)
+
+        logging.info("Saving RandomForestRegressor model...")
+        with open(self.model_filepath, "wb") as fp:
+            pickle.dump(model, fp)
+
+        self.write_metaparameters()
+        logging.info("Configuration done!")
     def manual_configure_attr_cls(self, model_path_list: List[str]):
         dependent = AttributionClassifier.get_assets(model_path_list)
         config = {
@@ -284,77 +254,51 @@ class Detector(AbstractDetector):
             dependent.envs[i] = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode='simple', grid_size=9), mode='simple'))
         dependent.train_detector() 
 
-    def manual_configure_random_forest(self, model_path_list: List[str]):
-        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
-
-        logging.info("Building RandomForest based on random features, with the provided mean and std.")
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = []
-        y = []
-        for model_arch in model_repr_dict.keys():
-            for model_index in range(len(model_repr_dict[model_arch])):
-                y.append(model_ground_truth_dict[model_arch][model_index])
-
-                model_feats = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1,self.input_features))
-                X.append(model_feats)
-        X = np.vstack(X)
-
-        logging.info("Training RandomForestRegressor model.")
-        model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
-        model.fit(X, y)
-
-        logging.info("Saving RandomForestRegressor model...")
-        with open(self.model_filepath, "wb") as fp:
-            pickle.dump(model, fp)
-
-        self.write_metaparameters()
-        logging.info("Configuration done!")
-
-    def inference_on_example_data(self, model, examples_dirpath, config_dict):
+    def inference_on_example_data(self, model, examples_dirpath):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
             model: the pytorch model
             examples_dirpath: the directory path for the round example data
         """
+        inputs_np = None
+        g_truths = []
 
-        size = config_dict["grid_size"]
+        for examples_dir_entry in os.scandir(examples_dirpath):
+            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
+                base_example_name = os.path.splitext(examples_dir_entry.name)[0]
+                ground_truth_filename = os.path.join(examples_dirpath, '{}.json'.format(base_example_name))
+                if not os.path.exists(ground_truth_filename):
+                    logging.warning('ground truth file not found ({}) for example {}'.format(ground_truth_filename, base_example_name))
+                    continue
 
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # model.to(device)
-        model.eval()
+                new_input = np.load(examples_dir_entry.path)
 
-        # logging.info("Using compute device: {}".format(device))
+                if inputs_np is None:
+                    inputs_np = new_input
+                else:
+                    inputs_np = np.concatenate([inputs_np, new_input])
 
-        model_name = type(model).__name__
-        observation_mode = "rgb" if model_name in [ImageACModel.__name__, ResNetACModel.__name__] else 'simple'
+                with open(ground_truth_filename) as f:
+                    data = int(json.load(f))
 
-        wrapper_obs_mode = 'simple_rgb' if observation_mode == 'rgb' else 'simple'
+                g_truths.append(data)
 
-        env = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode=observation_mode, grid_size=size), mode=wrapper_obs_mode))
+        g_truths_np = np.asarray(g_truths)
 
-        obs, info = env.reset()
-        done = False
-        max_iters = 1000
-        iters = 0
-        reward = 0
+        p = model.predict(inputs_np)
 
-        while not done and iters < max_iters:
-            env.render()
-            action = compute_action_from_trojai_rl_model(model, obs, sample=True)
-            obs, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
-
-        logging.info('Final reward: {}'.format(reward))
+        orig_test_acc = accuracy_score(g_truths_np, np.argmax(p.detach().numpy(), axis=1))
+        print("Model accuracy on example data {}: {}".format(examples_dirpath, orig_test_acc))
 
 
     def infer(
-            self,
-            model_filepath,
-            result_filepath,
-            scratch_dirpath,
-            examples_dirpath,
-            round_training_dataset_dirpath,
+        self,
+        model_filepath,
+        result_filepath,
+        scratch_dirpath,
+        examples_dirpath,
+        round_training_dataset_dirpath,
     ):
         """Method to predict whether a model is poisoned (1) or clean (0).
 
@@ -365,79 +309,74 @@ class Detector(AbstractDetector):
             examples_dirpath:
             round_training_dataset_dirpath:
         """
-
-        # load the model
-        #model, _, _ = load_model(model_filepath)
-        #model_150, _, _ = load_model(os.path.join(os.path.dirname(os.path.dirname(model_filepath)), 'id-00000150/model.pt'))
-        #self.dual_state_simulation(model_000, model_150)
-
-
         probability = None
         if self.method == 'random_forest':
             probability = self.inference_random_forest(model_filepath, examples_dirpath)
         elif self.method == 'attr_cls':
             probability = self.inference_with_attr_cls(model_filepath)
-        elif self.method == 'conf_cont':
-            probability = self.inference_with_conf_cont(model_filepath)
-        elif self.method == 'value_disc':
-            probability = self.inference_with_value_disc(model_filepath)
-        else:
-            probability = self.inference_with_attr_cls(model_filepath)
- 
-        # write the trojan probability to the output file
-        with open(result_filepath, "w") as fp:
-            fp.write(str(probability))
-            logging.info(f"Wrote to result file {result_filepath}")
-        with open(result_filepath, "r") as fp:
-            logging.info(f"Check result file {fp.read()}")
-
-        logging.info("Trojan probability: {}".format(probability))
- 
-
+        
         # write the trojan probability to the output file
         with open(result_filepath, "w") as fp:
             fp.write(str(probability))
 
         logging.info("Trojan probability: {}".format(probability))
-
 
 
     def inference_with_random_forest(self, model_filepath, examples_dirpath):
+        with open(self.model_layer_map_filepath, "rb") as fp:
+            model_layer_map = pickle.load(fp)
+
+        # List all available model and limit to the number provided
+        model_path_list = sorted(
+            [
+                join(round_training_dataset_dirpath, 'models', model)
+                for model in listdir(join(round_training_dataset_dirpath, 'models'))
+            ]
+        )
+        logging.info(f"Loading %d models...", len(model_path_list))
+
+        model_repr_dict, _ = load_models_dirpath(model_path_list)
+        logging.info("Loaded models. Flattenning...")
+
+        with open(self.models_padding_dict_filepath, "rb") as fp:
+            models_padding_dict = pickle.load(fp)
+
+        for model_class, model_repr_list in model_repr_dict.items():
+            for index, model_repr in enumerate(model_repr_list):
+                model_repr_dict[model_class][index] = pad_model(model_repr, model_class, models_padding_dict)
+
+        # Flatten model
+        flat_models = flatten_models(model_repr_dict, model_layer_map)
+        del model_repr_dict
+        logging.info("Models flattened. Fitting feature reduction...")
+
+        layer_transform = fit_feature_reduction_algorithm(flat_models, self.weight_table_params, self.input_features)
+
         model, model_repr, model_class = load_model(model_filepath)
-
-        # Load the config file
-        config_dict = {}
-
-        model_dirpath = os.path.dirname(model_filepath)
-
-        config_filepath = os.path.join(model_dirpath, 'config.json')
-
-        with open(config_filepath) as config_file:
-            config_dict = json.load(config_file)
+        model_repr = pad_model(model_repr, model_class, models_padding_dict)
+        flat_model = flatten_model(model_repr, model_layer_map[model_class])
 
         # Inferences on examples to demonstrate how it is done for a round
-        self.inference_on_example_data(model, examples_dirpath, config_dict)
+        # This is not needed for the random forest classifier
+        self.inference_on_example_data(model, examples_dirpath)
 
-        # build a fake random feature vector for this model, in order to compute its probability of poisoning
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
+        X = (
+            use_feature_reduction_algorithm(layer_transform[model_class], flat_model)
+            * self.model_skew["__all__"]
+        )
 
-        # # create a random model for testing (fit to nothing)
-        # model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
-        # model.fit(X, [0])
-        # with open(self.model_filepath, "wb") as fp:
-        #     pickle.dump(model, fp)
+        try:
+            with open(self.model_filepath, "rb") as fp:
+                regressor: RandomForestRegressor = pickle.load(fp)
 
-        # load the RandomForest from the learned-params location
-        with open(self.model_filepath, "rb") as fp:
-            regressor: RandomForestRegressor = pickle.load(fp)
+            probability = str(regressor.predict(X)[0])
+        except Exception as e:
+            logging.info('Failed to run regressor, there may have an issue during fitting, using random for trojan probability: {}'.format(e))
+            probability = str(np.random.rand())
+        with open(result_filepath, "w") as fp:
+            fp.write(probability)
 
-        # use the RandomForest to predict the trojan probability based on the feature vector X
-        probability = regressor.predict(X)[0]
-        # clip the probability to reasonable values
-        probability = np.clip(probability, a_min=0.01, a_max=0.99)
-        return probability
-        
+        logging.info("Trojan probability: %s", probability)
     def inference_with_attr_cls(self, model_filepath):
         model, model_repr, model_class = load_model(model_filepath)
         model.eval()
@@ -482,164 +421,3 @@ class Detector(AbstractDetector):
         Sponsor(**config).support(dependent, None, None)
         return dependent.infer(model)
 
-    def dual_state_simulation(self, model_000, model_150):
-        """Method to demonstrate how to inference on a round's example data.
-
-        Args:
-            model: the pytorch model
-            examples_dirpath: the directory path for the round example data
-        """
-
-        size = 9
-        
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # model.to(device)
-        model_000.eval()
-        model_150.eval()
-
-        # logging.info("Using compute device: {}".format(device))
-
-        model_name_000 = type(model_000).__name__
-        model_name_150 = type(model_150).__name__
-        
-        observation_mode = 'simple'
-        wrapper_obs_mode = 'simple'
-        
-        env = TensorWrapper(ObsEnvWrapper(RandomLavaWorldEnv(mode=observation_mode, grid_size=size), mode=wrapper_obs_mode))
-        import gym
-        import gym_minigrid
-        env = gym.make('MiniGrid-LavaCrossingS9N1-v0')
-        env = ObsEnvWrapper(env, mode=wrapper_obs_mode)
-        obs = env.reset()
-        done = False
-        max_iters = 1000
-        iters = 0
-        reward = 0
-        root_path = './image_000_150'
-        if not os.path.exists(root_path):
-            os.mkdir(root_path)
-        cnt = 0
-        with open(f'{root_path}/logits.txt', 'w') as fp:
-            while not done and iters < max_iters:
-                img = env.render(mode='rgb_array')
-                logging.info(img)
-                logits_000 = model_000(obs)
-                action_000 = torch.argmax(logits_000).item()
-                logits_150 = model_150(obs)
-                action_150 = torch.argmax(logits_150).item()
-                if action_000 != action_150:
-                    logging.info(f"Iteration {iters} ;; logit_000: {logits_000} ;; logit_150: {logits_150}")
-                    cnt += 1
-                     
-                    for i in range(len(logits_000.detach().cpu().numpy())):
-                        fp.write(str(cnt) + \
-                                 "::000::" + "::".join([str(p) for p in logits_000]) + \
-                                    "::150::" + "::".join([str(p) for p in logits_150]) + ';\n')
-                        print(img)
-                        obs_img = Image.fromarray(img)
-                    
-                        #obs_img = obs_img.rotate(90).transpose(Image.FLIP_TOP_BOTTOM)
-                        obs_img.save(f'{root_path}/{cnt}.jpg')
-                    
-            obs, reward, terminated, truncated, info = env.step(action_000)
-            done = terminated or truncated
-
-        logging.info('Final reward: {}'.format(reward))
-
-    def inference_with_conf_cont(self, model_filepath):
-        model, model_repr, model_class = load_model(model_filepath)
-        model.eval()
-        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
-        dependent = ConfidenceContrast()
-        dependent.clean_example_dict = {'fvs': {'MiniGrid-LavaCrossingS9N1-v0': 1}}
-        config = {
-            'model_schema': {
-                'classifier': {
-                    'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_cls.p')
-                },
-                'save_dir': 'best_conf_cls.p'
-            },
-            'learner_schema': {
-                'episodes': 100,
-                'batch_size': 32,
-                'checkpoint_interval': 1,
-                'eval_interval': 2,
-            },
-            'algorithm_schema': {
-                'device': 'cuda:1',
-                'task': 'RL',
-                'criterion': 'ce',
-                'beta': 1,
-                'k_fold': True,
-                'num_procs': 10,
-                'exploration_method': None,
-                'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_experience.p')
-                 
-            },
-            'optimizer_schema': {
-                'optimizer_class': 'Adam',
-                'lr': 1e-3,
-            },
-            'data_schema': {
-                'num_splits': 7,
-                'max_models': 238,
-                'num_frames_per_model': 64
-            }
-        }
-        Sponsor(**config).support(dependent, None, None)
-        #dependent.distill(model)
-        #exit(0)
-        return dependent.infer(model, distill = True) #False, visualize = True)
-
-
-    def inference_with_value_disc(self, model_filepath):
-        model, model_repr, model_class = load_model(model_filepath)
-        model.eval()
-        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
-        dependent = ValueDiscriminator()
-        dependent.clean_example_dict = {'fvs': {'MiniGrid-LavaCrossingS9N1-v0': 1}}
-        config = {
-            'model_schema': {
-                'classifier': {
-                    'name': 'FCModel', 
-                    'load_from_file': os.path.join(os.path.dirname(__file__), 'best_valuedisc_cls.p')
-                },
-                'save_dir': 'best_valuedisc_cls.p'
-            },
-            'learner_schema': {
-                'episodes': 20,
-                'batch_size': 32,
-                'checkpoint_interval': 1,
-                'eval_interval': 2,
-            },
-            'algorithm_schema': {
-                'device': 'cuda:1',
-                'task': 'RL',
-                'criterion': 'ce',
-                'beta': 1,
-                'k_fold': True,
-                'num_procs': 10,
-                'exploration_method': None,
-                'num_experiments': 1,
-                'load_experience': os.path.join(os.path.dirname(__file__), 'best_conf_experience.p')
-                 
-            },
-            'optimizer_schema': {
-                'optimizer_class': 'Adam',
-                'lr': 1e-3,
-            },
-            'data_schema': {
-                'num_splits': 3,
-                'max_models': 238,
-                'num_frames_per_model': 64
-            }
-        }
-        Sponsor(**config).support(dependent, None, None)
-        #dependent.distill(model)
-        #exit(0)
-        return dependent.infer(model, distill = True) #False, visualize = True)
-
-
-    
