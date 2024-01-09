@@ -41,7 +41,8 @@ class Base_Learner(BaseModel, ABC):
     """
     __registry__: ClassVar[Set[str]] = set()
 
-    episodes: int = 2
+    xval_episodes: int = 2
+    final_episodes: int = 10
     batch_size: int = 32
  
     checkpoint_interval: int = 1

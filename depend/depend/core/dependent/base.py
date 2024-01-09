@@ -9,9 +9,10 @@ from PIL import Image
 from depend.lib.agent import Agent, ParallelAgent
 from depend.utils.env import make_env
 from depend.utils.configs import DPConfig
-from depend.utils.models import load_models_dirpath
+from depend.utils.models import load_models_dirpath, load_model
 from depend.depend.core.serializable.utils import serialize_with_pyarrow
 from depend.depend.core.serializable import Model_Indexer
+from depend.depend.utils.data_split import DataSplit
 
 from abc import ABC, abstractmethod    
 
@@ -201,8 +202,113 @@ class Dependent(ABC, BaseModel):
         return exps
     
     @abstractmethod
-    def train_detector(self):
-        raise NotImplementedError 
+    def get_detector(self):
+        raise NotImplementedError
+
+    def train_detector(self, final_train: bool = False):
+        # Run the agent to get experiences
+        # Build model dataset 
+        # K-split the model dataset and train the detector for multiple rounds 
+        # Return the mean metric 
+        dataset = self.build_dataset(
+            num_clean_models = self.config.data.max_models // 2,
+            num_poisoned_models = self.config.data.max_models - self.config.data.max_models // 2)
+
+        best_score = None
+        best_loss_fn = None
+        best_validation_info = None
+        best_dataset = dataset
+        #with mlflow.start_run as run:
+        best_exps = None
+        
+        for _ in range(self.config.algorithm.num_experiments):
+            # Run agent to get a dataset of environment observations
+
+            tot_score = 0 
+            
+
+            exps = self.collect_experience(
+                    num_clean_models = self.config.algorithm.num_procs // 2,
+                    num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2,
+                    load_from_file = None if not hasattr(self.config.algorithm, 'load_experience') else self.config.algorithm.load_experience,
+                )
+
+            suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
+            prefix_split = None
+            for split in range(1, max(2, self.config.data.num_splits + 1)):
+                 # Prepare the mask generator
+                cls = self.get_detector()
+
+                
+                #exps = self.filter(exps)
+        
+                    
+                # Split dataset
+                if self.config.algorithm.k_fold and split <= self.config.data.num_splits:
+                    validation_set = suffix_split.head
+                
+                    if prefix_split is None and suffix_split.tail is not None:
+                        train_set = suffix_split.tail.compose()
+                        suffix_split = suffix_split.tail
+                        prefix_split = DataSplit.Split(validation_set, 1)
+                    elif prefix_split is None and suffix_split.tail is None:
+                        raise NotImplementedError("No training set ???")
+                    elif prefix_split is not None and suffix_split.tail is None:
+                        train_set = prefix_split.compose()
+                        prefix_split.append(validation_set)
+                    elif prefix_split is not None and suffix_split.tail is not None:
+                        train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
+                        prefix_split.append(validation_set)
+                        suffix_split = suffix_split.tail
+                    #logger.info("Split: %s \n" % (split))
+                    #logger.info(f"Load from file {hasattr(self.config.algorithm, 'load_experience')}")
+                    
+                    logger.info(exps['image'].shape)
+     
+                    loss_fn = self.get_loss(cls, exps)
+                    metrics_fn = self.get_metrics(cls, exps)
+                    optimize_fn = self.get_optimizer(cls)
+
+                    #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
+                    
+                    train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
+                    
+                    #for k, v in train_info.items():
+                    #    mlflow.log_metric(k, v, step = split)
+                    validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
+                    #for k, v in validation_info.items():
+                    #    mlflow.log_metric(k, v, step = split)
+                    
+                    score = validation_info.get(self.config.algorithm.metrics[0])
+                    tot_score += score
+                    #if best_score is None or best_score < score:
+                        #logger.info("New best model")
+                    #    best_score, best_validation_info, best_dataset, best_loss_fn = score, validation_info, dataset, loss_fn
+                        
+                        #if not self.config.algorithm.k_fold:
+                        #   break
+            avg_score = tot_score/self.config.data.num_splits
+            logging.info(f"Cross Validation Score: {avg_score}")
+            if best_score is None or best_score < avg_score:
+                best_score, best_exps = avg_score, exps
+
+        if True or final_train:
+            logger.info("Final train the detector with the {best_score=}")
+            best_cls = self.get_detector()
+            loss_fn = self.get_loss(cls, best_exps)
+            metrics_fn = self.get_metrics(cls, best_exps)
+            optimize_fn = self.get_optimizer(cls)
+            final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn, final_train = True)
+            final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
+            self.save_detector(best_cls, best_exps, final_train_info)
+            
+            #for k, v in final_info.items():
+            #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
+        else:
+            raise NotImplementedError("No final train????")
+        #mlflow.end_run()
+        #mlflow.log_artifacts(self.logger.results_dir, artifact_path="configure_events")
+        return best_score
     
     @abstractmethod
     def evaluate_detector(self):

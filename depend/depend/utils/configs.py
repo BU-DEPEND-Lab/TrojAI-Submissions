@@ -216,8 +216,11 @@ class LearnerConfig(BaseConfig):
     """
     Config for learn job on model.
 
-    :param episodes: Total number of learning episodes
-    :type episodes: int
+    :param xval_episodes: Total number of learning episodes for each split in cross validation
+    :type xval_episodes: int
+
+    :param final_episodes: Total number of learning episodes at final train
+    :type final_episodes: int
  
     :param batch_size: Batch size for learning
     :type batch_size: int
@@ -262,7 +265,8 @@ class LearnerConfig(BaseConfig):
     
     :type minibatch_size: int
     """
-    episodes: int
+    xval_episodes: int
+    final_episodes: int
     batch_size: int
 
     checkpoint_interval: int

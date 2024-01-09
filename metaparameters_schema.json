@@ -5,7 +5,7 @@
   "technique_description": "Use VAE to generate embedding, perturb the embedding to only make the poisoned model to change its action",
   "technique_changes": "Technique variant 8",
   "technique_type": ["Weight Analysis"],
-  "commit_id": "1a609a1df4ee9a458bbb772228c0116db5a69da7",
+  "commit_id": "728685f43d53a5607397b6aa413e5a0c9d20fff3",
   "repo_name": "---",
   "required": [],
   "additionalProperties": false,
@@ -14,7 +14,7 @@
 	"method": {
 		"description": "The method for trojan detection.",
 		"type": "string",
-		"enum": ["mask_gen", "attr_cls", "conf_cont"]
+		"enum": ["mask_gen", "attr_cls", "conf_cont", "value_disc"]
 	},
 	"train_input_features":  {
 		"description": "The input features for training.",

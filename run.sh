@@ -42,3 +42,4 @@ else
 fi
 
 
+#scp rl-lavaworld-jul2023_test_TrinitySRITrojAI-BostonU.simg weichaozhou@168.122.70.64:~/Downloads/

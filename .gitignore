@@ -9,3 +9,8 @@ depend/depend/lib/__pycache__/attribution_extractor.cpython-38.pyc
 utils/__pycache__/models.cpython-38.pyc
 depend/depend/lib/__pycache__/attribution_extractor.cpython-38.pyc
  
+.pyc
+*.pyc
+__pycache__/detector.cpython-38.pyc
+*/__pycache__/*.pyc
+__pycache__/*.pyc

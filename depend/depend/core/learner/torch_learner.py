@@ -47,6 +47,7 @@ class Torch_Learner(Base_Learner):
         optimize_function: Callable,
         test_set: Optional[Dataset] = None,
         metric_function: Optional[Callable] = None,
+        final_train = False
     )-> Dict[str, float]:
         
         train_loader =  torch.utils.data.DataLoader(
@@ -62,6 +63,8 @@ class Torch_Learner(Base_Learner):
                  ) 
         
         summary_info = {}
+        self.episodes = self.xval_episodes if not final_train else self.final_episodes
+
         train_info_gen = self.train_iterator(
             learner_logger, 
             train_loader, 
@@ -70,8 +73,8 @@ class Torch_Learner(Base_Learner):
             metric_function, 
             test_loader)
         
-        for episode in range(1, self.episodes + 1):
-            train_info = next(train_info_gen)
+        
+        for train_info in train_info_gen:
             summary_info.update(**train_info)
             
         return summary_info
@@ -87,7 +90,7 @@ class Torch_Learner(Base_Learner):
              ], Tuple[torch.Tensor, Dict[Any, Any]]],
         optimizer: Callable, 
         metric_function: Optional[Callable] = None,
-        test_loader: Optional[DataLoader] = None
+        test_loader: Optional[DataLoader] = None, 
         ):
         
  

@@ -10,7 +10,7 @@ From: python:3.9-bullseye
     ./metaparameters_schema.json /
     ./learned_parameters /
     ./best_experience.p /
-    ./best_non_repeating_cls.p /
+    ./best_cls.p /
    
 %post
     pip install --upgrade pip

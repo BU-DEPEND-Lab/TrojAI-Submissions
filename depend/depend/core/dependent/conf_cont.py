@@ -212,7 +212,7 @@ class ConfidenceContrast(Dependent):
             return info
         return metrics_fn 
  
-    def train_detector(self, final_train: bool = True):
+    def train_detector(self, final_train: bool = False):
         # Run the agent to get experiences
         # Build model dataset 
         # K-split the model dataset and train the detector for multiple rounds 
@@ -229,7 +229,8 @@ class ConfidenceContrast(Dependent):
         #with mlflow.start_run as run:
         for _ in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
-             
+
+            tot_score = 0 
             best_score = None
             best_exps = None
 
@@ -243,7 +244,7 @@ class ConfidenceContrast(Dependent):
                     obs_space = self.envs[0].observation_space, extra_size = 3).to(self.config.algorithm.device)
                     
                 if self.config.model.classifier.load_from_file:
-                    cls.load_state_dict(torch.load(self.config.model.classifier.load_from_file))    
+                    cls.load_state_dict(torch.load(self.config.model.classifier.load_from_file)['state_dict'])    
                     cls = cls.to(self.config.algorithm.device)
 
                 cls.train()
@@ -289,7 +290,9 @@ class ConfidenceContrast(Dependent):
                     optimize_fn = self.get_optimizer(cls)
 
                     #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
-                    train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
+                    
+                    #train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
+                    
                     #for k, v in train_info.items():
                     #    mlflow.log_metric(k, v, step = split)
                     validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
@@ -297,6 +300,7 @@ class ConfidenceContrast(Dependent):
                     #    mlflow.log_metric(k, v, step = split)
                     
                     score = validation_info.get(self.config.algorithm.metrics[0])
+                    tot_score += score
                     if best_score is None or best_score < score:
                         #logger.info("New best model")
                         best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
@@ -316,7 +320,7 @@ class ConfidenceContrast(Dependent):
                 #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
             #mlflow.end_run()
             #mlflow.log_artifacts(self.logger.results_dir, artifact_path="configure_events")
-
+            logging.info(f"Cross Validation Score: {tot_score/self.config.data.num_splits}")
         self.save_detector(cls, best_exps, best_validation_info)
         return best_score
  
@@ -470,7 +474,11 @@ class ConfidenceContrast(Dependent):
         
         # Models make predictions on the masked inputs
         #preds = self.get_model_entropy_from_image(model, exps['image']) 
+
         logits = F.log_softmax(model(exps), dim=1)
+        #dist, _ = model(exps['image'].transpose(2, 3).transpose(1, 3))
+        #logits = dist.logits
+
         exps['confidence'] = logits
         preds = 1. - cls(exps).detach().cpu().numpy()
         if visualize:

@@ -15,6 +15,9 @@ import torch.nn as nn
 import torchvision
 from torchvision.models.resnet import BasicBlock
 
+import logging
+logger = logging.getLogger(__file__)
+
 def linear_w_relu(dims: list, end_sigmoid=True):
     """Helper function for creating sequential linear layers"""
     layers = []
@@ -43,6 +46,8 @@ class ModdedResnet18(torchvision.models.ResNet):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         return x
+    def load_from_file(self, path):
+        self.load_state_dict(torch.load(self.config.model.classifier.load_from_file)['state_dict'])
 
 
 class ClassifierBackbone(nn.Module):
@@ -63,12 +68,17 @@ class ClassifierBackbone(nn.Module):
             elif k == 'direction':
                 x = torch.concat([x, obs['direction'].long()], dim=1)
             else:
+                #logger.info(f"{k}: x shape = {x.shape} and obs[k] shape = {obs[k].shape}")
                 x = torch.concat([x, obs[k]], dim=1)
         return self.classifier(x)
   
 
     def args_dict(self):
         raise NotImplementedError("Should be implemented in subclass")
+
+    def load_from_file(self, path):
+        self.load_state_dict(torch.load(self.config.model.classifier.load_from_file)['state_dict'])
+
 
 
 class FCModel(ClassifierBackbone):

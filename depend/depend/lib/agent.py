@@ -211,6 +211,7 @@ class Agent(BaseModel):
 
     def step(self, obss):
         next_obss = []
+        dones = []
         for i in range(len(obss)):
             #logger.info(f"{obss[i].shape}")
             dist, _ = self.acmodels[i](obss[i].transpose(2, 3).transpose(1, 3))
@@ -229,10 +230,12 @@ class Agent(BaseModel):
        
             obs, reward, done, truncated, info = self.envs[i].step(action)
             if done:
+                dones.append(1)
                 next_obss.append(self.envs[i].reset()[0]) 
             else:
+                dones.append(0)
                 next_obss.append(obs) 
-        return next_obss
+        return next_obss, dones
 
     def render(self):
         raise NotImplementedError
@@ -250,11 +253,11 @@ class Agent(BaseModel):
         return actions, dists
     
     def run(self, preprocess_obss: Callable = ...) -> torch.Tensor:
-        exps = {"image": [], "direction": []}
-
+        exps = {"image": [], "direction": [], "done": []}
+        trajs = {"image": [], "direction": [], "done": []}
         # Reset the environment
         obss = self.reset()
-
+        dones = [1 for _ in obss]
         #logging.info("Number of envs {};  number of obss {}".format(len(self.envs), len(obss)))
         #logging.info(f"Obs 1: {obss[0]}")
 
@@ -262,17 +265,19 @@ class Agent(BaseModel):
         for num_frames in tqdm(range(self.num_frames_per_model), desc ="Agents Collecting Experience: "):
             # Store the observation in serialized manner
             images = [obs['image'].to(self.device) for obs in obss]
-            exps['image'] += images
+            exps['image'].append(images)
             directions = [obs['direction'].to(self.device) for obs in obss]
-            exps['direction'] += directions
+            exps['direction'].append(directions)
             # Get new actions and policy distribitions
             #logger.info(f"Processed obss: {preprocessed_obss}")
-           
+            dones = torch.tensor(dones).to(self.device).unsqueeze(-1)
+            exps['done'].append(dones)
             #obss = self.step(obss)
-            obss = self.step(images)
+            obss, dones = self.step(images)
         # Turn observation list into a batch of observations
         for k, v in exps.items():
-            exps[k] = torch.cat(v, dim=0).to(self.device)
-        return exps
+            trajs[k] = torch.cat([torch.cat([v[t][i] for t in range(len(v))], dim=0).to(self.device) for i in range(len(v[0]))], dim=0).to(self.device)
+            #exps[k] = torch.cat(v, dim=0).to(self.device)
+        return trajs
     
  

@@ -53,14 +53,14 @@ logger = logging.getLogger(__name__)
 
 
 @register
-class AttributionClassifier(Dependent):
+class ValueDiscriminator(Dependent):
     """
-    ########## Attribution Classifier ############
+    ########## Value Discriminator ############
     # Build a dataset of model indices and model labels
     # After sampling a batch of (model, label), for each model
-    #   1. Get action_distribution = model(self.exp)
-    #   3. Get attribute = d action_distribution/d self.exp
-    #   2. run the prediction = classifier(attribute)
+    #   1. Get value = model(obs)
+    #   2. Get next_value = model(next_obs)
+    #   3. run the prediction = classifier(obs, value, next_value)
     # Compute the crossentropy loss:
     #   loss = label * log prediction + (1 - label) * log 1 - prediction
     # Optimize the attribution classifier
@@ -109,38 +109,56 @@ class AttributionClassifier(Dependent):
             if metric == 'auroc':
                 self.metrics.append(BinaryAUROC())
      
+     
     
-    
-    
-    def get_model_output_from_observation(self, model, obs, requires_grad = False):
-        x = obs.transpose(2, 3).transpose(1, 3).float()
+    def add_info_to_observation(self, model, exps):
+        obs = {}
         model = model.to(self.config.algorithm.device)
-
-        if requires_grad:
-            model.requires_grad_()
-
-        x = x.reshape(x.shape[0], -1)
-        dist = model(x)[0]
-         
-        return dist
-        
-    
-    def get_attribute_from_image(self, model, obs):
-        model = model.to(self.config.algorithm.device)
-        for k, v in obs.items():
-            obs[k] = obs[k].float().detach()
-            obs[k].requires_grad_()
+        for k, v in exps.items():
+            obs[k] = exps[k].float().detach()
+            #obs[k].requires_grad_()
             #logger.info(obs[k])
         model.zero_grad()
-        dist, _ = model(obs['image'].transpose(2, 3).transpose(1, 3).float())
-        dist.entropy().sum().backward(retain_graph = True)
+        model_input = obs['image'].transpose(2, 3).transpose(1, 3).float()
+        model_input.requires_grad_()
+        dist, value = model(model_input)
+        value.sum().backward(retain_graph = True)
+        logits = dist.logits
+        attr = model_input.grad.data.transpose(1, 3).transpose(3, 2).detach()
+        #obs['image'] = exps['image'][:-1]
+        #logger.info(f'attr_min shape: {attr_min.shape}')
+        return self.build_obs(exps, value, logits, attr)
+    
+    def build_obs(self, exps, value, logits, attr):
+        obs = {}
+        attr_min = attr[:-1].min(dim=0)[1]
+        attr_max = attr[:-1].max(dim=0)[1]
+        obs['image'] = (attr[:-1] - attr_min) * exps['image'][:-1] / (attr_max - attr_min)
+        obs['direction'] = exps['direction'][:-1]
+        #obs['confidence'] = logits[:-1]
+        #obs['value'] = value[:-1].unsqueeze(-1)
+        #obs['next_value'] = value[1:].unsqueeze(-1) * (1 - exps['done'][1:].unsqueeze(-1)) + \
+        #    value[:-1].unsqueeze(-1) * exps['done'][1:].unsqueeze(-1)
+        #obs['done'] = exps['done'][:-1].unsqueeze(-1)
+
+        #for k, v in obs.items():
+        #    logger.info(f"Experience shape: {k} => {v.shape}")
+        #del obs['done']
         #logger.info(obs['direction'].grad)
-         
-        norm = lambda attrs: (attrs  - attrs.min()) / (attrs.max() - attrs.min() + 1.e-5)
-        return {k: v.grad.data if k == 'image' else v for k, v in obs.items()}
-    
-    
- 
+        return obs
+
+    def get_detector(self):
+        cls = eval(self.config.model.classifier.name)(
+                    obs_space = self.envs[0].observation_space, extra_size = 0).to(self.config.algorithm.device)
+                    
+        if self.config.model.classifier.load_from_file:
+            cls.load_from_file(self.config.model.classifier.load_from_file)    
+            cls = cls.to(self.config.algorithm.device)
+
+        cls.train()
+
+        return cls  
+          
     def get_loss(self, cls, exps: Dict[Any, Any]):
         # Run the model to get the action 
         #logger.info(f'Original experience example {exps[0]}')
@@ -154,20 +172,18 @@ class AttributionClassifier(Dependent):
             #logger.info(f"recons_loss: {recons_loss} kld_loss: {kld_loss}")
             tot_loss = 0
             if True:
-                logger.info(f"Run {len(models)} models")
+                #logger.info(f"Run {len(models)} models")
                 for i, (model, y) in enumerate(zip(models, ys)):
                     ## Run one model
                     #logger.info(f"{i}th model")
-                    attrs = self.get_attribute_from_image(model, exps) 
-                    inputs = {k: attrs[k].detach() if k == 'image' else v for k, v in exps.items()}
-                    pred = cls(inputs).mean(dim = 0)
+                    obs = self.add_info_to_observation(model, exps) 
+                    pred = cls(obs).mean(dim = 0)
                     #logger.info(f"Label {y} vs. Prediction {pred}")
                     loss = self.criterion(pred, torch.tensor([y])) 
                     #logger.info(f'{i}th model: Error {errs}')
 
                     tot_loss += loss
                   
-                        
                 tot_loss /= len(models)
             #logger.info(tot_loss)
             return tot_loss, {
@@ -199,9 +215,8 @@ class AttributionClassifier(Dependent):
             for i, model in enumerate(models):
                 model = model.to(self.config.algorithm.device)
                 ## Run one model
-                attrs = self.get_attribute_from_image(model, exps) 
-                inputs = {k: attrs[k].detach() if k == 'image' else v for k, v in exps.items()}
-                pred = cls(inputs).mean(dim = 0).item()
+                obs = self.add_info_to_observation(model, exps) 
+                pred = cls(obs).mean(dim = 0).item()
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(pred)
                 # Store model label
@@ -229,116 +244,20 @@ class AttributionClassifier(Dependent):
             return info
         return metrics_fn 
  
-    def train_detector(self, final_train: bool = True):
-        # Run the agent to get experiences
-        # Build model dataset 
-        # K-split the model dataset and train the detector for multiple rounds 
-        # Return the mean metric 
-        dataset = self.build_dataset(
-            num_clean_models = self.config.data.max_models // 2,
-            num_poisoned_models = self.config.data.max_models - self.config.data.max_models // 2)
-
-        best_score = None
-        best_exps = None
-        best_loss_fn = None
-        best_validation_info = None
-        best_dataset = None
-        #with mlflow.start_run as run:
-        for _ in range(self.config.algorithm.num_experiments):
-            # Run agent to get a dataset of environment observations
-             
-            best_score = None
-            best_exps = None
-
-            
-
-            suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
-            prefix_split = None
-            for split in range(1, self.config.data.num_splits):
-                
-                # Split dataset
-                validation_set = suffix_split.head
-            
-                if prefix_split is None and suffix_split.tail is not None:
-                    train_set = suffix_split.tail.compose()
-                    suffix_split = suffix_split.tail
-                    prefix_split = DataSplit.Split(validation_set, 1)
-                elif prefix_split is None and suffix_split.tail is None:
-                    raise NotImplementedError("No training set ???")
-                elif prefix_split is not None and suffix_split.tail is None:
-                    train_set = prefix_split.compose()
-                    prefix_split.append(validation_set)
-                elif prefix_split is not None and suffix_split.tail is not None:
-                    train_set = DataSplit.Concatenate(prefix_split, suffix_split.tail).compose()
-                    prefix_split.append(validation_set)
-                    suffix_split = suffix_split.tail
-                #logger.info("Split: %s \n" % (split))
-
-                exps = self.collect_experience(
-                    num_clean_models = self.config.algorithm.num_procs // 2,
-                    num_poisoned_models = self.config.algorithm.num_procs - self.config.algorithm.num_procs // 2
-                )
-                logger.info(exps['image'].shape)
+    
+  
  
-                 
-                # Prepare the mask generator
-                cls = eval(self.config.model.classifier.name)(
-                    obs_space = self.envs[0].observation_space).to(self.config.algorithm.device)
-                    
-                if self.config.model.classifier.load_from_file:
-                    cls.load_state_dict(torch.load(self.config.model.classifier.load_from_file))    
-                    cls = cls.to(self.config.algorithm.device)
 
-                cls.train()
-
-                loss_fn = self.get_loss(cls, exps)
-                metrics_fn = self.get_metrics(cls, exps)
-                optimize_fn = self.get_optimizer(cls)
-
-                #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
-                train_info = self.learner.train(self.logger, train_set, loss_fn, optimize_fn, validation_set, metrics_fn)
-                #for k, v in train_info.items():
-                #    mlflow.log_metric(k, v, step = split)
-                validation_info = self.learner.evaluate(self.logger, validation_set, metrics_fn)
-                #for k, v in validation_info.items():
-                #    mlflow.log_metric(k, v, step = split)
-                
-                score = validation_info.get(self.config.algorithm.metrics[0])
-                if best_score is None or best_score < score:
-                    #logger.info("New best model")
-                    best_score, best_exps, best_validation_info, best_dataset, best_loss_fn = score, exps, validation_info, dataset, loss_fn
-                    self.save_detector(cls, best_exps, best_validation_info)
-                    if not self.config.algorithm.k_fold:
-                        break
-        if final_train:
-            logger.info("Final train the best detector")
-            final_info = self.learner.train(self.logger, best_dataset, best_loss_fn, optimize_fn, best_dataset, metrics_fn)
-                #for k, v in final_info.items():
-                #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
-            #mlflow.end_run()
-            #mlflow.log_artifacts(self.logger.results_dir, artifact_path="configure_events")
-
-        self.save_detector(cls, best_exps, best_validation_info)
-        return best_score
- 
-    def get_stats(self, exps, model):
-        obss = exps['image']
-        new_exps = self.collect_experience(models = [model] * self.config.algorithm.num_procs)
-        new_obss = new_exps['image']
-        print(obss)
-        print(new_obss)
-        
-
-    def infer(self, model, get_stats = False) -> List[float]:
-        # Prepare the mask generator
+    def infer(self, model, distill = False, visualize = False) -> List[float]:
         exps = pickle.load(open(self.config.algorithm.load_experience, 'rb'))
-        if get_stats:
-            self.get_stats(exps, model)
+         
         for k, v in exps.items():
             exps[k] = v.to(self.config.algorithm.device).float()
+        
         #logger.info(exps)
         cls = eval(self.config.model.classifier.name)(
             obs_space = gymnasium.spaces.Box(0, 255, (3, 7, 7), dtype=np.uint8),
+            extra_size = 0,
             ) 
         if self.config.model.classifier.load_from_file:
             stored_dict = torch.load(self.config.model.classifier.load_from_file, \
@@ -351,17 +270,25 @@ class AttributionClassifier(Dependent):
             cls.load_state_dict(stored_dict['state_dict'])
              
         model = model.to(self.config.algorithm.device)
-        model.zero_grad()
+        
         exps['image'].requires_grad_()
+        logits = F.log_softmax(model(exps), dim=1)
+        value = model.value_function()
+        value.sum().backward(retain_graph = True)
+        attr = exps['image'].grad.data.detach()
+        #obs['image'] = exps['image'][:-1]
+        #logger.info(f'attr_min shape: {attr_min.shape}')
+
         # Models make predictions on the masked inputs
-        #preds = self.get_model_entropy_from_image(model, exps['image']) 
-        entropy = Categorical(logits=F.log_softmax(model(exps), dim=1)).entropy().mean()
-        entropy.backward(retain_graph = True)
-        #logger.info(obs['direction'].grad)
-        norm = lambda attrs: (attrs  - attrs.min()) / (attrs.max() - attrs.min() + 1.e-5)
-        inputs = {k: v.grad.data if k == 'image' else v for k, v in exps.items()}
-        preds = cls(inputs).detach().cpu().numpy()
-        #preds = (preds > 0.5)
+        obs = self.build_obs(exps, value, logits, attr)
+        preds = 1. - cls(obs).detach().cpu().numpy()
+        if visualize:
+            #idx = np.argmin(preds)
+            #obs = {'image': exps['image'][idx], 'direction': exps['direction'][idx]}
+            self.visualize_experience('MiniGrid-SimpleCrossingS9N1-v0', exps, logits, preds)
+
+            
+        #preds = (preds < 0.5)
         pred = preds.mean().item() 
 
         # Confidence equals the rate of false prediction
@@ -372,20 +299,20 @@ class AttributionClassifier(Dependent):
         logger.info("Trojan Probability: %f" % conf)
         
         return conf
-   
+    
         
     def save_detector(self, cls: Any, exps: Any, info: Dict[Any, Any]):
         with open('best_attr_experience.p', 'wb') as fp:
             pickle.dump(exps, fp)
         torch.save({'model': self.config.model.classifier.name,
-                    'obs_space': self.envs[0].observation_space,
+                    #'obs_space': self.envs[0].observation_space,
                     'state_dict': cls.state_dict()
                     }, self.config.model.save_dir)
         
         with open(os.path.join(self.logger.results_dir, 'best_attr_experience.p'), 'wb') as fp:
             pickle.dump(exps, fp)
         torch.save({'model': self.config.model.classifier.name,
-                    'obs_space': self.envs[0].observation_space,
+                    #'obs_space': self.envs[0].observation_space,
                     'state_dict': cls.state_dict()
                     }, os.path.join(self.logger.results_dir, self.config.model.save_dir))
         #self.logger.log_numpy(example = exps.cpu().numpy(), **info) 
