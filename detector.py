@@ -394,9 +394,8 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath = None
             ):
          # List all available model
-        
-        model_path_list = sorted([join(round_training_dataset_dirpath, model) for model in listdir(round_training_dataset_dirpath)])
-        logging.info(f"Loading %d models...", len(model_path_list))
+        model_path_list = [os.path.dirname(model_filepath)]
+        logging.info(f"Loading model folder {os.path}")
         if False:
             dependent = self.manual_configure_attr_cls(model_path_list)
         else:
