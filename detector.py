@@ -441,7 +441,6 @@ class Detector(AbstractDetector):
             Sponsor(**config).support(dependent, None, None)
 
         model, model_repr, model_class = load_model(model_filepath)
-        #model.state_emb[1].weight = model.state_emb[1].weight.detach() * np.random.random(model.state_emb[1].weight.shape) 
 
         
         return dependent.infer(model)
