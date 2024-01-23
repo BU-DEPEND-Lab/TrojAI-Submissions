@@ -232,7 +232,7 @@ class AttributionClassifier(Dependent):
  
 
     def infer(self, model) -> List[float]:
-        cls, exps = self.get_detector()
+        cls = self.get_detector()
         cls.eval()
 
         attr = self.get_attributes(model) 

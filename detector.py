@@ -423,9 +423,7 @@ class Detector(AbstractDetector):
                     'k_fold': True,
                     'num_procs': 20,
                     'exploration_rate': 0.5,
-                    'num_experiments': 1,
-                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_experience.p')
-                    
+                    'num_experiments': 1, 
                 },
                 'optimizer_schema': {
                     'optimizer_class': 'Adam',
