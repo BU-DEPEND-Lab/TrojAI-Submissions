@@ -5,7 +5,7 @@
   "technique_description": "Classify the attributions",
   "technique_changes": "Technique variant 8",
   "technique_type": ["Attribution Analysis"],
-  "commit_id": "1bdc0a70414508793b1c1df7a34f449036592792",
+  "commit_id": "28c1e085f5599a373082fa3ab6bf3d9a7f884825",
   "repo_name": "---",
   "required": [],
   "additionalProperties": false,
