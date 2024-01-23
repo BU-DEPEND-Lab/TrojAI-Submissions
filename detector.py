@@ -222,9 +222,9 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
-                'xval_episodes': 10,
-                'final_episodes': 50,
-                'batch_size': 32,
+                'xval_episodes': 50,
+                'final_episodes': 250,
+                'batch_size': 8,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },

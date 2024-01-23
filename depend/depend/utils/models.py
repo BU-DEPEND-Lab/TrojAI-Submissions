@@ -160,6 +160,7 @@ def load_models_dirpath(models_dirpath):
             if clean_example_dict['labels'] != {}:
                 clean_example_dict['fvs'].update(clean_example_fvs)
                 clean_example_dict['labels'].update(clean_example_labels)
+                print(clean_example_dict['labels'])
             else:
                 for idx in clean_example_fvs:
                     if idx not in clean_example_dict['fvs']:

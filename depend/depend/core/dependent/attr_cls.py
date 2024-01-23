@@ -96,12 +96,18 @@ class AttributionClassifier(Dependent):
  
     def get_detector(self):
         cls = eval(self.config.model.classifier.name)().to(self.config.algorithm.device)
-                    
+        self.exps = None
         if self.config.model.classifier.load_from_file:
             stored_dict = torch.load(self.config.model.classifier.load_from_file, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
-        return cls  
+        if hasattr(self.config.algorithm, 'load_experience'):
+            with open(self.config.algorithm.load_experience, 'r') as fp:
+                self.exps = pickle.load(fp)
+        else:
+            # Generate a tensor of random integers (0 or 1)
+            self.exps = torch.randint(2, size=(100, 991))
+        return cls
 
     def get_attributes(self, model: Any):
  
@@ -226,7 +232,7 @@ class AttributionClassifier(Dependent):
  
 
     def infer(self, model) -> List[float]:
-        cls = self.get_detector()
+        cls, exps = self.get_detector()
         cls.eval()
 
         attr = self.get_attributes(model) 
