@@ -239,7 +239,7 @@ class AttributionClassifier(Dependent):
         pred = cls(attr).mean(dim = 0).item()
  
         # Confidence equals the rate of false prediction
-        conf = self.confidence(pred)
+        conf = 1 - self.confidence(pred)
          
         logger.info("Trojan Probability: %f" % conf)
         
