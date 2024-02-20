@@ -8,11 +8,11 @@ then
     then
         ## For inference
         python entrypoint.py infer \
-        --model_filepath /home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
+        --model_filepath ~/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
         --result_filepath ./output.txt \
         --scratch_dirpath ./scratch \
-        --examples_dirpath /home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/ \
-        --round_training_dataset_dirpath /mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round16/cyber-apk-nov2023-train/models \
+        --examples_dirpath ~/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/ \
+        --round_training_dataset_dirpath ~/Workspace/TrojAI-Submissions/model/ \
         --learned_parameters_dirpath ./new_learned_parameters \
         --metaparameters_filepath ./metaparameters.json \
         --schema_filepath=./metaparameters_schema.json

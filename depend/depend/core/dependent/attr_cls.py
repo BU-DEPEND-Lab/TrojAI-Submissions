@@ -243,10 +243,11 @@ class AttributionClassifier(Dependent):
         cls.eval()
 
         attr = self.get_attributes(model) 
-        pred = cls(attr).mean(dim = 0).item()
+        softmax = nn.Softmax(dim=1) 
+        pred = softmax(cls(attr))[:,1].mean(dim = 0, keepdims=True).item()
  
         # Confidence equals the rate of false prediction
-        conf = 1 - self.confidence(pred)
+        conf = self.confidence(pred)
          
         logger.info("Trojan Probability: %f" % conf)
         

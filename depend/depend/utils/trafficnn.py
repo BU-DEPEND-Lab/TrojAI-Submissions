@@ -61,6 +61,9 @@ class TrafficNN(object):
         # Build model with correct configuration
         self.model = self.build_model()
     
+    def load_state_dict(self, state_dict):
+        self.model.load_state_dict(state_dict)
+    
     def __call__(self, x):
         return self.model(x)
 

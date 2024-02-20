@@ -15,7 +15,7 @@ From: pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime
     apt update
 
     pip install --upgrade pip
-    pip install torch==1.12.1 torchvision==0.15.2 jsonschema jsonargparse jsonpickle scikit-learn==1.1.2 poetry  
+    pip install torch==1.12.1 torchvision==0.13.1 jsonschema jsonargparse jsonpickle scikit-learn==1.1.2 poetry  
  
     pip install -e ./depend/
     chmod 755 /*.py

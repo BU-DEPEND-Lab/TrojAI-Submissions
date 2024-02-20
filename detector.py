@@ -223,7 +223,7 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
-                'xval_episodes': 50,
+                'xval_episodes': 20,
                 'final_episodes': 250,
                 'batch_size': 8,
                 'checkpoint_interval': 1,
@@ -404,7 +404,7 @@ class Detector(AbstractDetector):
             config = {
                 'model_schema': {
                     'classifier': {
-                        'name': 'DrebinNet3', 
+                        'name': 'TrafficNN', 
                         'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls.p')
                     },
                     'save_dir': 'best_attr_cls.p'
