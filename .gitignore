@@ -14,3 +14,7 @@ depend/depend/lib/__pycache__/attribution_extractor.cpython-38.pyc
 __pycache__/detector.cpython-38.pyc
 */__pycache__/*.pyc
 __pycache__/*.pyc
+
+trojai-example-cyber-network-c2-feb2024
+
+model/

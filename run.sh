@@ -38,7 +38,8 @@ else
     --metaparameters_filepath=./metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
     --learned_parameters_dirpath=./new_learned_parameters/ \
-    --configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round16/cyber-apk-nov2023-train/models
+    --configure_models_dirpath=./model
+    #--configure_models_dirpath=/mnt/md0/shared/TrojAI-Submissions/trojai-datasets/round16/cyber-apk-nov2023-train/models
 fi
 
 

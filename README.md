@@ -186,9 +186,9 @@ A small toy set of clean & poisioned data is also provided in this repository un
 1. `conda create --name trojai-example python=3.8 -y` ([help](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html))
 2. `conda activate trojai-example`
 3. Install required packages into this conda environment
- 
-    - `conda install pytorch=1.12.1=py3.8_cuda10.2_cudnn7.6.5_0 -c pytorch`
-    - `pip install tqdm jsonschema jsonargparse scikit-learn`
+
+    - `conda install pytorch=2.2 torchvision pytorch-cuda=11.8 -c pytorch -c nvidia -y`
+    - `pip install tqdm jsonschema scikit-learn`
 
 ## Test Fake Detector Without Containerization
 
@@ -197,22 +197,21 @@ A small toy set of clean & poisioned data is also provided in this repository un
     ```
     git clone https://github.com/usnistgov/trojai-example
     cd trojai-example
-    git checkout cyber-pdf-dec2022
+    git checkout cyber-network-c2-feb2024
     ``` 
 
 2. Test the python based `example_trojan_detector` outside of any containerization to confirm pytorch is setup correctly and can utilize the GPU.
 
     ```bash
     python entrypoint.py infer \
-   --model_filepath ./model/id-00000002/model.pt \
+   --model_filepath ./model/id-00000001/model.pt \
    --result_filepath ./scratch/output.txt \
    --scratch_dirpath ./scratch \
-   --examples_dirpath ./model/id-00000002/clean-example-data \
+   --examples_dirpath ./model/id-00000001/clean-example-data \
    --round_training_dataset_dirpath /path/to/train-dataset \
    --learned_parameters_dirpath ./learned_parameters \
    --metaparameters_filepath ./metaparameters.json \
-   --schema_filepath=./metaparameters_schema.json \
-   --scale_parameters_filepath ./scale_params.npy
+   --schema_filepath=./metaparameters_schema.json
     ```
 
     Example Output:
@@ -229,23 +228,21 @@ A small toy set of clean & poisioned data is also provided in this repository un
     --metaparameters_filepath=./metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
     --learned_parameters_dirpath=./new_learned_parameters/ \
-    --configure_models_dirpath=/path/to/new-train-dataset \
-    --scale_parameters_filepath ./scale_params.npy
+    --configure_models_dirpath=/path/to/new-train-dataset
     ```
 
     The tuned parameters can then be used in a regular run.
 
     ```bash
     python entrypoint.py infer \
-    --model_filepath=./model/id-00000002/model.pt \
+    --model_filepath=./model/id-00000001/model.pt \
     --result_filepath=./output.txt \
     --scratch_dirpath=./scratch/ \
-    --examples_dirpath=./model/id-00000002/clean-example-data/ \
+    --examples_dirpath=./model/id-00000001/clean-example-data/ \
     --round_training_dataset_dirpath=/path/to/training/dataset/ \
     --metaparameters_filepath=./new_learned_parameters/metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
-    --learned_parameters_dirpath=./new_learned_parameters/ \
-    --scale_parameters_filepath ./scale_params.npy
+    --learned_parameters_dirpath=./new_learned_parameters/
     ```
 
 ## Package Solution into a Singularity Container
@@ -262,10 +259,10 @@ Package `example_trojan_detector.py` into a Singularity container.
     - package container: 
     
       ```bash
-      sudo singularity build example_trojan_detector.simg example_trojan_detector.def
+      sudo singularity build detector.simg detector.def
       ```
 
-    which generates a `example_trojan_detector.simg` file.
+    which generates a `detector.simg` file.
 
 3. Test run container: 
 
@@ -275,15 +272,14 @@ Package `example_trojan_detector.py` into a Singularity container.
     --nv \
     ./example_trojan_detector.simg \
     infer \
-    --model_filepath=./model/id-00000002/model.pt \
+    --model_filepath=./model/id-00000001/model.pt \
     --result_filepath=./output.txt \
     --scratch_dirpath=./scratch/ \
-    --examples_dirpath=./model/id-00000002/clean-example-data/ \
+    --examples_dirpath=./model/id-00000001/clean-example-data/ \
     --round_training_dataset_dirpath=/path/to/training/dataset/ \
     --metaparameters_filepath=./metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
-    --learned_parameters_dirpath=./learned_parameters/ \
-    --scale_parameters_filepath ./scale_params.npy
+    --learned_parameters_dirpath=./learned_parameters/
     ```
 
     Example Output:
@@ -303,8 +299,7 @@ Package `example_trojan_detector.py` into a Singularity container.
     --metaparameters_filepath=./metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
     --learned_parameters_dirpath=./new_learned_parameters/ \
-    --configure_models_dirpath=/path/to/new-train-dataset \
-    --scale_parameters_filepath ./scale_params.npy
+    --configure_models_dirpath=/path/to/new-train-dataset
     ```
 
     The tuned parameters can then be used in a regular run.
@@ -323,5 +318,4 @@ Package `example_trojan_detector.py` into a Singularity container.
     --metaparameters_filepath=./new_learned_parameters/metaparameters.json \
     --schema_filepath=./metaparameters_schema.json \
     --learned_parameters_dirpath=./new_learned_parameters/
-    --scale_parameters_filepath ./scale_params.npy
     ```

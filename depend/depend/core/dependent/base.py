@@ -227,6 +227,8 @@ class Dependent(ABC, BaseModel):
                         
                         #if not self.config.algorithm.k_fold:
                         #   break
+                    self.save_detector(cls, validation_info)
+
             avg_score = tot_score/self.config.data.num_splits
             logging.info(f"Cross Validation Score: {avg_score}")
             if best_score is None or best_score < avg_score:

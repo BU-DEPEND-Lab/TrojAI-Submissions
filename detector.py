@@ -1,3 +1,9 @@
+# NIST-developed software is provided by NIST as a public service. You may use, copy and distribute copies of the software in any medium, provided that you keep intact this entire notice. You may improve, modify and create derivative works of the software or any portion of the software, and you may copy and distribute such modifications or works. Modified works should carry a notice stating that you changed the software and should note the date and nature of any such change. Please explicitly acknowledge the National Institute of Standards and Technology as the source of the software.
+
+# NIST-developed software is expressly provided "AS IS." NIST MAKES NO WARRANTY OF ANY KIND, EXPRESS, IMPLIED, IN FACT OR ARISING BY OPERATION OF LAW, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT AND DATA ACCURACY. NIST NEITHER REPRESENTS NOR WARRANTS THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT ANY DEFECTS WILL BE CORRECTED. NIST DOES NOT WARRANT OR MAKE ANY REPRESENTATIONS REGARDING THE USE OF THE SOFTWARE OR THE RESULTS THEREOF, INCLUDING BUT NOT LIMITED TO THE CORRECTNESS, ACCURACY, RELIABILITY, OR USEFULNESS OF THE SOFTWARE.
+
+# You are solely responsible for determining the appropriateness of using and distributing the software and you assume all risks associated with its use, including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and the unavailability or interruption of operation. This software is not intended to be used in any situation where a failure could cause risk of injury or damage to property. The software developed by NIST employees is not subject to copyright protection within the United States.
+
 import json
 import logging
 import os
@@ -22,6 +28,8 @@ from utils.reduction import (
     use_feature_reduction_algorithm,
 )
 
+import torchvision
+
 from depend.core.dependent import AttributionClassifier 
 from depend.launch import Sponsor
 from typing import List
@@ -37,7 +45,6 @@ class Detector(AbstractDetector):
         Args:
             metaparameter_filepath: str - File path to the metaparameters file.
             learned_parameters_dirpath: str - Path to the learned parameters directory.
-            scale_parameters_filepath: str - File path to the scale_parameters file.
         """
         metaparameters = json.load(open(metaparameter_filepath, "r"))
 
@@ -144,12 +151,6 @@ class Detector(AbstractDetector):
             self.manual_configure_attr_cls(model_path_list)
 
     def manual_configure_random_forest(self, model_path_list: List[str]):
-        print(model_path_list)
-        model, model_repr, model_class = load_model(join(model_path_list[0], "model.pt"))
-       
-        # Inferences on examples to demonstrate how it is done for a round
-        # This is not needed for the random forest classifier
-        self.inference_on_example_data(model, "/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/")
 
         model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
 
@@ -216,7 +217,7 @@ class Detector(AbstractDetector):
         config = {
             'model_schema': {
                 'classifier': {
-                    'name': 'DrebinNet3', 
+                    'name': 'TrafficNN', 
                     #'load_from_file': 'best_cls.p',
                 },
                 'save_dir': 'best_attr_cls.p'
@@ -265,31 +266,31 @@ class Detector(AbstractDetector):
         g_truths = []
 
         for examples_dir_entry in os.scandir(examples_dirpath):
-            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".npy"):
-                
+            if examples_dir_entry.is_file() and examples_dir_entry.name.endswith(".png"):
                 base_example_name = os.path.splitext(examples_dir_entry.name)[0]
                 ground_truth_filename = os.path.join(examples_dirpath, '{}.json'.format(base_example_name))
                 if not os.path.exists(ground_truth_filename):
                     logging.warning('ground truth file not found ({}) for example {}'.format(ground_truth_filename, base_example_name))
                     continue
 
-                new_input = np.load(examples_dir_entry.path)
-                
+                new_input = torchvision.io.read_image(examples_dir_entry.path)
+
                 if inputs_np is None:
                     inputs_np = new_input
                 else:
                     inputs_np = np.concatenate([inputs_np, new_input])
-                
+
                 with open(ground_truth_filename) as f:
                     data = int(json.load(f))
 
                 g_truths.append(data)
-  
+
         g_truths_np = np.asarray(g_truths)
 
         p = model.predict(inputs_np)
+        p = [1 if p > 0.5 else 0 for p in p[:, 1]]
 
-        orig_test_acc = accuracy_score(g_truths_np, np.argmax(p.detach().numpy(), axis=1))
+        orig_test_acc = accuracy_score(g_truths_np, p)
         print("Model accuracy on example data {}: {}".format(examples_dirpath, orig_test_acc))
 
 
@@ -382,10 +383,10 @@ class Detector(AbstractDetector):
         except Exception as e:
             logging.info('Failed to run regressor, there may have an issue during fitting, using random for trojan probability: {}'.format(e))
             probability = str(np.random.rand())
-        
-        
-        return probability
+        with open(result_filepath, "w") as fp:
+            fp.write(probability)
 
+        logging.info("Trojan probability: %s", probability)
 
     def inference_with_attr_cls(
             self, 
@@ -441,3 +442,4 @@ class Detector(AbstractDetector):
 
         
         return dependent.infer(model)
+

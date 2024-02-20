@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TrojAI Debug",
+            "type": "python",
+            "request": "launch",
+            "module": "torch.distributed.run",
+            "cwd": "${workspaceFolder}/",
+            "args": ["${workspaceFolder}/entrypoint.py", "configure", "--scratch_dirpath=./scratch/", "--metaparameters_filepath=./metaparameters.json", "--schema_filepath=./metaparameters_schema.json", "--learned_parameters_dirpath=./new_learned_parameters/", "--configure_models_dirpath=./model"],
+            "python": "/home/zwc662/miniconda3/envs/round17/bin/python",
+            "console": "integratedTerminal"
+        },   
+    ]
+}

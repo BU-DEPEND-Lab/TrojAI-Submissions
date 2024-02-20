@@ -11,7 +11,7 @@ from depend.depend.utils.data_split import DataSplit
 from depend.utils.registers import register  
 
 from depend.depend.models.cls import FCModel 
-from depend.depend.utils.drebinnn import DrebinNet3
+from depend.depend.utils.trafficnn import TrafficNN
 
 from depend.core.logger import Logger
 from depend.core.dependent.base import Dependent
@@ -95,7 +95,11 @@ class AttributionClassifier(Dependent):
      
  
     def get_detector(self):
-        cls = eval(self.config.model.classifier.name)().to(self.config.algorithm.device)
+        cls = eval(self.config.model.classifier.name)(0, config = {
+            "cnn_type": "ResNet18",
+            "num_classes": 2,
+            "img_resolution": 28
+        })#.to(self.config.algorithm.device)
         self.exps = None
         if self.config.model.classifier.load_from_file:
             stored_dict = torch.load(self.config.model.classifier.load_from_file, \
@@ -106,7 +110,7 @@ class AttributionClassifier(Dependent):
                 self.exps = pickle.load(fp)
         else:
             # Generate a tensor of random integers (0 or 1)
-            self.exps = torch.randint(2, size=(100, 991))
+            self.exps = torch.randint(2, size=(28, 168))
         return cls
 
     def get_attributes(self, model: Any):
@@ -129,8 +133,8 @@ class AttributionClassifier(Dependent):
     
         model_input = torch.tensor(X).float().to(self.config.algorithm.device)
         model_input.requires_grad_()
-        softmax = nn.Softmax(dim=1)
-        model_output = softmax(model(model_input))
+        softmax = nn.Softmax(dim=1) 
+        model_output = softmax(model(model_input).to(self.config.algorithm.device))
          
         loss = self.criterion(model_output, torch.tensor(Y)) 
         loss.backward(retain_graph = True)
@@ -161,7 +165,10 @@ class AttributionClassifier(Dependent):
                     #logger.info(f"{i}th model")
                     attr = self.get_attributes(model) 
                     #logger.info(f"attribution shape {attr.shape}")
-                    pred = cls(attr).mean(dim = 0)
+                    softmax = nn.Softmax(dim=1) 
+                    pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
+                     
+         
                     #logger.info(f"Label {y} vs. Prediction {pred}")
                     loss = self.criterion(pred, torch.tensor([y])) 
                     #logger.info(f'{i}th model: Error {errs}')
@@ -199,7 +206,7 @@ class AttributionClassifier(Dependent):
             for i, model in enumerate(models):
                 ## Run one model
                 attr = self.get_attributes(model) 
-                pred = cls(attr).mean(dim = 0).item()
+                pred = cls(attr)[:,1].mean(dim = 0).item()
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(pred)
                 # Store model label
@@ -248,7 +255,7 @@ class AttributionClassifier(Dependent):
         
     def save_detector(self, cls: Any,  info: Dict[Any, Any]):
         torch.save({'model': self.config.model.classifier.name,
-                    'state_dict': cls.state_dict()
+                    'state_dict': cls.model.state_dict()
                     }, self.config.model.save_dir)
         
 

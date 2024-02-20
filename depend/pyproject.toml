@@ -19,9 +19,7 @@ optuna = "^3.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-
-[tool.poetry.extras]
-rl = ["torch-ac"]
+ 
 
 [build-system]
 requires = ["poetry-core"]
