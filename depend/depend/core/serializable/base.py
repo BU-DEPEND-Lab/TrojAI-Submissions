@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, Dict, List, Literal, TypedDict, Union, cast
+from typing import Any, Dict, List, Union, cast
 
 from pydantic import BaseModel, PrivateAttr
 
 
 
-class BaseSerialized(TypedDict):
+class BaseSerialized(BaseModel):
     """Base class for serialized objects."""
 
     dp: int
@@ -18,7 +18,7 @@ class BaseSerialized(TypedDict):
 class SerializedConstructor(BaseSerialized):
     """Serialized constructor."""
 
-    type: Literal["constructor"]
+    type: Any #Literal["constructor"]
     kwargs: Dict[str, Any]
  
 
@@ -26,7 +26,7 @@ class SerializedConstructor(BaseSerialized):
 class SerializedNotImplemented(BaseSerialized):
     """Serialized not implemented."""
 
-    type: Literal["not_implemented"]
+    type: Any #Literal["not_implemented"]
 
 
 class Serializable(BaseModel, ABC):

@@ -7,7 +7,7 @@ from functools import partial
 
 
 from abc import ABC, abstractmethod      
-from typing import Tuple, Any, Callable, List, Set, Literal, Dict, ClassVar, Iterable, Optional, Union, Generator
+from typing import Tuple, Any, Callable, List, Set, Dict, ClassVar, Iterable, Optional, Union, Generator
 from pydantic import BaseModel, PrivateAttr, Field, validate_call
  
 
@@ -15,7 +15,7 @@ from depend.utils.configs import LearnerConfig
 from depend.utils.registers import register_class
 from depend.core.logger import Logger
 
-import wandb
+#import wandb
 
 import torch
 from torch.utils.data import Dataset
@@ -56,7 +56,7 @@ class Base_Learner(BaseModel, ABC):
     save_best: bool = True
     save_optimizer: bool = True
 
-    tracker: Optional[Literal['wandb', 'tensorboard', 'comet']] = None #"wandb"
+    tracker: Any = None #"wandb"
     tracker_kwargs: Dict[str, Any] = {}
     logging_dir: Optional[str] = None
 
@@ -98,6 +98,7 @@ class Base_Learner(BaseModel, ABC):
         return cls(**kwargs) 
  
     def __post_init__(self):
+        '''
         if self.tracker == 'wandb':
             wandb.init(
                 project=self.project_name, 
@@ -107,7 +108,8 @@ class Base_Learner(BaseModel, ABC):
                 reinit=True, 
                 config=self.tracker_kwargs
             )
-        elif self.tracker == 'tensorboard':
+        '''
+        if self.tracker == 'tensorboard':
             self.writer = SummaryWriter(
                 log_dir=self.logging_dir
                 )
@@ -115,9 +117,11 @@ class Base_Learner(BaseModel, ABC):
             raise NotImplementedError
             
     def summary(self, step, prefix, **info):
+        '''
         if self.tracker == 'wandb':
             wandb.log(info, step)
-        elif self.tracker == 'tensorboard':
+        '''
+        if self.tracker == 'tensorboard':
             self.writer.add_scalar(prefix, info, step)
         elif self.tracker is not None:
             raise NotImplementedError

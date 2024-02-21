@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast, get_type_hints
+from typing import Any, Dict, List, Optional, Union, cast, get_type_hints
 from functools import partial
 from pydantic import Extra
 
@@ -16,7 +16,7 @@ from depend.depend.utils.trafficnn import TrafficNN
 from depend.core.logger import Logger
 from depend.core.dependent.base import Dependent
 from depend.core.learner import Torch_Learner
-from depend.core.serializable import Serializable, Model_Indexer
+from depend.core.serializable import Model_Indexer
 
 import pickle
 

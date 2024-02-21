@@ -1,6 +1,6 @@
 from copy import deepcopy
 from dataclasses import field
-from typing import Any, Dict, List, Optional, Set, Union, Literal, ClassVar
+from typing import Any, Dict, List, Optional, Set, Union, ClassVar
 from pydantic import BaseModel, Field, ConfigDict,  Extra, model_validator
 from dataclasses import dataclass
 
@@ -126,7 +126,7 @@ class AlgorithmConfig(BaseConfig):
     """
      
 
-    task: Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
+    task: Any #Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
     device: Optional[str] = 'cpu'
 

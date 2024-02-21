@@ -20,7 +20,7 @@ then
         singularity run \
         --bind /home/zwc662/Workspace/TrojAI-Submissions/model/ \
         --nv \
-        ./cyber-apk-nov2023_test_TrinitySRITrojAI-BostonU.simg \
+        ./detector.simg \
         infer \
         --model_filepath=/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
         --result_filepath=./output.txt \
