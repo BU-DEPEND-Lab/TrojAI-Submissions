@@ -223,13 +223,14 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
-                'xval_episodes': 20,
+                'xval_episodes': 50,
                 'final_episodes': 250,
                 'batch_size': 8,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
             'algorithm_schema': {
+                'task': 'ImageClassification',
                 'device': 'cpu',
                 'criterion': 'ce', 
                 'k_fold': True,

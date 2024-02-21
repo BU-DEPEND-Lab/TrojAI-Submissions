@@ -4,6 +4,7 @@ from pydantic import Extra
 
 import os, sys
 
+from itertools import combinations
 
 from depend.utils.configs import DPConfig
 from depend.depend.utils.data_split import DataSplit
@@ -17,6 +18,7 @@ from depend.core.logger import Logger
 from depend.core.dependent.base import Dependent
 from depend.core.learner import Torch_Learner
 from depend.core.serializable import Model_Indexer
+from captum.attr import IntegratedGradients
 
 import pickle
 
@@ -92,26 +94,27 @@ class AttributionClassifier(Dependent):
         for metric in config.algorithm.metrics:
             if metric == 'auroc':
                 self.metrics.append(BinaryAUROC())
+        
+        self.experiments = list(combinations(np.linspace(0, 1, self.config.algorithm.num_experiments), len(self.clean_example_dict)))
      
  
-    def get_detector(self):
+    def get_detector(self, path = None):
         cls = eval(self.config.model.classifier.name)(0, config = {
             "cnn_type": "ResNet18",
             "num_classes": 2,
             "img_resolution": 28
         })#.to(self.config.algorithm.device)
-        self.exps = None
-        if self.config.model.classifier.load_from_file:
-            stored_dict = torch.load(self.config.model.classifier.load_from_file, \
+        
+        if path is not None:
+            #self.config.model.classifier.load_from_file:
+            stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
-        if hasattr(self.config.algorithm, 'load_experience'):
-            with open(self.config.algorithm.load_experience, 'r') as fp:
-                self.exps = pickle.load(fp)
-        else:
-            # Generate a tensor of random integers (0 or 1)
-            self.exps = torch.randint(2, size=(28, 168))
-        return cls
+            if 'experiment' in stored_dict:
+                best_experiment = stored_dict['experiment']
+                return cls, best_experiment
+
+        return cls, None
 
     def get_attributes(self, model: Any):
  
@@ -130,7 +133,7 @@ class AttributionClassifier(Dependent):
                 X = x
             else:
                 X = np.concatenate([X, x])
-    
+        
         model_input = torch.tensor(X).float().to(self.config.algorithm.device)
         model_input.requires_grad_()
         softmax = nn.Softmax(dim=1) 
@@ -142,8 +145,42 @@ class AttributionClassifier(Dependent):
         attr = model_input.grad.data.detach()
          
         return attr
+    
+    def get_ig_attributes(self, model: Any, baseline: List[float]):
+ 
+        model = model.model.to(self.config.algorithm.device)
+        model.zero_grad()
+        
+        X = None
+        Y = []
+        for k, x in self.clean_example_dict['fvs'].items():
+            if k in self.clean_example_dict['labels']:
+                Y.append([0., 0.])
+                Y[-1][self.clean_example_dict['labels'][k]] = 1.
+            else:
+                continue
+            if X is None:
+                X = x
+            else:
+                X = np.concatenate([X, x])
+        
+        model_input = torch.tensor(X).float().to(self.config.algorithm.device)
+        model_baseline = torch.tensor(baseline).unsqueeze(1).float().to(self.config.algorithm.device)
+        assert model_baseline.shape[0] == model_input.shape[0]
+
+        #* torch.ones(X.shape).float().to(self.config.algorithm.device)
+
+        softmax = nn.Softmax(dim=1) 
+ 
+        ig = IntegratedGradients(lambda model_input: softmax(model(model_input)))
+        attributions, approximation_error = ig.attribute(model_input,
+                                                        baselines=model_baseline,
+                                                        method='gausslegendre',
+                                                        return_convergence_delta=True)
+ 
+        return attributions.detach()
           
-    def get_loss(self, cls):
+    def get_loss(self, cls, experiment = None):
         # Run the model to get the action 
         #logger.info(f'Original experience example {exps[0]}')
         def loss_fn(data):
@@ -163,7 +200,7 @@ class AttributionClassifier(Dependent):
                 for i, (model, y) in enumerate(zip(models, ys)):
                     ## Run one model
                     #logger.info(f"{i}th model")
-                    attr = self.get_attributes(model) 
+                    attr = self.get_ig_attributes(model, experiment) 
                     #logger.info(f"attribution shape {attr.shape}")
                     softmax = nn.Softmax(dim=1) 
                     pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
@@ -182,7 +219,7 @@ class AttributionClassifier(Dependent):
             }
         return loss_fn
  
-    def get_metrics(self, cls): 
+    def get_metrics(self, cls, experiment = None): 
         def metrics_fn(data):
             #logger.info(f"evaluation data {data}")
 
@@ -205,7 +242,8 @@ class AttributionClassifier(Dependent):
 
             for i, model in enumerate(models):
                 ## Run one model
-                attr = self.get_attributes(model) 
+                #attr = self.get_attributes(model) 
+                attr = self.get_ig_attributes(model, experiment) 
                 pred = cls(attr)[:,1].mean(dim = 0).item()
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(pred)
@@ -238,10 +276,11 @@ class AttributionClassifier(Dependent):
   
  
 
-    def infer(self, model) -> List[float]:
-        cls = self.get_detector()
+    def infer(self, model, experiment = None) -> List[float]:
+        cls, experiment = self.get_detector(self.config.model.classifier.load_from_file)
         cls.eval()
 
+        #attr = self.get_ig_attributes(model, experiment) 
         attr = self.get_attributes(model) 
         softmax = nn.Softmax(dim=1) 
         pred = softmax(cls(attr))[:,1].mean(dim = 0, keepdims=True).item()
@@ -254,10 +293,15 @@ class AttributionClassifier(Dependent):
         return conf
     
         
-    def save_detector(self, cls: Any,  info: Dict[Any, Any]):
-        torch.save({'model': self.config.model.classifier.name,
+    def save_detector(self, cls: Any,  info: Dict[Any, Any], experiment: Any = None):
+        save_dict = {'model': self.config.model.classifier.name,
                     'state_dict': cls.model.state_dict()
-                    }, self.config.model.save_dir)
+                    }
+        if info is not None:
+            save_dict['experiment'] = experiment
+            
+        torch.save(save_dict, self.config.model.save_dir)
+    
         
 
     def evaluate_detector(self):

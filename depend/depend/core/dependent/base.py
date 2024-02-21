@@ -3,7 +3,7 @@ from dataclasses import fields
 from pydantic import BaseModel
 from typing import Any, Dict, List, ClassVar, Callable, Iterable, Union, cast, get_type_hints
 import os
-
+from itertools import combinations
 from PIL import Image
  
 from depend.utils.configs import DPConfig
@@ -93,7 +93,7 @@ class Dependent(ABC, BaseModel):
             poisoned_example_dict = data_infos[4]
         )  
 
-    def get_optimizer(self, model):
+    def get_optimizer(self, model, experiment = None):
         if self.config.optimizer.optimizer_class == 'RAdam':
             self.optimizer = optim.RAdam(model.parameters(), **self.config.optimizer.kwargs)
         elif self.config.optimizer.optimizer_class == 'Adam':
@@ -166,15 +166,17 @@ class Dependent(ABC, BaseModel):
         dataset = self.build_dataset(
             num_clean_models = self.config.data.max_models // 2,
             num_poisoned_models = self.config.data.max_models - self.config.data.max_models // 2)
-
+        best_cls = None
         best_score = None
         best_loss_fn = None
         best_validation_info = None
         best_dataset = dataset
+        best_experiment = None
         #with mlflow.start_run as run:
        
         
-        for _ in range(self.config.algorithm.num_experiments):
+        for i_exp in range(self.config.algorithm.num_experiments):
+            experiment = self.experiments[i_exp]
             # Run agent to get a dataset of environment observations
             logging.info("Start training experiment!!")
             tot_score = 0 
@@ -205,9 +207,9 @@ class Dependent(ABC, BaseModel):
                         suffix_split = suffix_split.tail
                     logger.info("Split: %s \n" % (split))
                      
-                    loss_fn = self.get_loss(cls)
+                    loss_fn = self.get_loss(cls, experiment)
                     metrics_fn = self.get_metrics(cls)
-                    optimize_fn = self.get_optimizer(cls)
+                    optimize_fn = self.get_optimizer(cls, experiment)
 
                     #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
                     
@@ -227,22 +229,23 @@ class Dependent(ABC, BaseModel):
                         
                         #if not self.config.algorithm.k_fold:
                         #   break
-                    self.save_detector(cls, validation_info)
+                    #self.save_detector(cls, validation_info)
 
             avg_score = tot_score/self.config.data.num_splits
             logging.info(f"Cross Validation Score: {avg_score}")
             if best_score is None or best_score < avg_score:
                 best_score = avg_score 
+                best_cls = cls
+                best_experiment = experiment
 
         if True or final_train:
             logger.info("Final train the detector with the {best_score=}")
-            best_cls = self.get_detector()
-            loss_fn = self.get_loss(cls)
-            metrics_fn = self.get_metrics(cls)
-            optimize_fn = self.get_optimizer(cls)
+            loss_fn = self.get_loss(best_cls, best_experiment)
+            metrics_fn = self.get_metrics(best_cls, best_experiment)
+            optimize_fn = self.get_optimizer(best_cls, best_experiment)
             final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn, final_train = True)
-            final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
-            self.save_detector(best_cls, final_train_info)
+            final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn, best_experiment)
+            self.save_detector(best_cls, final_train_info, best_experiment)
             
             #for k, v in final_info.items():
             #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)

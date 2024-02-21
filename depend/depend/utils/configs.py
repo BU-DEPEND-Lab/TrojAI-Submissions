@@ -126,7 +126,7 @@ class AlgorithmConfig(BaseConfig):
     """
      
 
-    task: Any #Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
+    task: str = ... #Literal['RL', 'ImageClassification', 'ImageSegmentation', 'ObjectDetection', 'NLPs'] = 'RL'
     metrics: List[str] = ['auroc']
     device: Optional[str] = 'cpu'
 
