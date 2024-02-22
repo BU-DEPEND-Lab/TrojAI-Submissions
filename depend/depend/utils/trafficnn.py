@@ -49,7 +49,7 @@ class TrafficNN(object):
         self.exp = None
         self.img_height = config["img_resolution"]
         self.img_width = config["img_resolution"]
-        self.channel=1
+        self.channel=2
         self.inp_shape=(self.channel,self.img_height,self.img_width)
 
         # Set device
@@ -321,7 +321,7 @@ class TrafficResNet(nn.Module):
             )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(1, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(2, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = self._norm_layer
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)

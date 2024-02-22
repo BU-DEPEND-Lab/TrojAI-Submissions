@@ -22,7 +22,7 @@ then
         --nv \
         ./detector.simg \
         infer \
-        --model_filepath=/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
+        --model_filepath=~/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
         --result_filepath=./output.txt \
         --scratch_dirpath=./scratch/ \
         --examples_dirpath=/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/ \

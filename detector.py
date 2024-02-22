@@ -223,19 +223,19 @@ class Detector(AbstractDetector):
                 'save_dir': 'best_attr_cls.p'
             },
             'learner_schema': {
-                'xval_episodes': 50,
-                'final_episodes': 250,
-                'batch_size': 8,
+                'xval_episodes': 10,
+                'final_episodes': 50,
+                'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
             'algorithm_schema': {
                 'task': 'ImageClassification',
-                'device': 'cpu',
+                'device': 'cuda:0',
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'num_experiments': 5,
+                'num_experiments': 100,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
             'optimizer_schema': {
@@ -418,14 +418,14 @@ class Detector(AbstractDetector):
                     'eval_interval': 2,
                 },
                 'algorithm_schema': {
-                    'device': 'cuda:1',
+                    'device': 'cpu', #'cuda:0',
                     'task': 'RL',
                     'criterion': 'ce',
                     'beta': 1,
                     'k_fold': True,
                     'num_procs': 20,
                     'exploration_rate': 0.5,
-                    'num_experiments': 1, 
+                    'num_experiments': 5, 
                 },
                 'optimizer_schema': {
                     'optimizer_class': 'Adam',

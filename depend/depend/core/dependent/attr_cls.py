@@ -4,7 +4,7 @@ from pydantic import Extra
 
 import os, sys
 
-from itertools import combinations
+from itertools import product
 
 from depend.utils.configs import DPConfig
 from depend.depend.utils.data_split import DataSplit
@@ -95,8 +95,6 @@ class AttributionClassifier(Dependent):
             if metric == 'auroc':
                 self.metrics.append(BinaryAUROC())
         
-        self.experiments = list(combinations(np.linspace(0, 1, self.config.algorithm.num_experiments), len(self.clean_example_dict)))
-     
  
     def get_detector(self, path = None):
         cls = eval(self.config.model.classifier.name)(0, config = {
@@ -104,17 +102,40 @@ class AttributionClassifier(Dependent):
             "num_classes": 2,
             "img_resolution": 28
         })#.to(self.config.algorithm.device)
-        
+        experiment = None
+
         if path is not None:
             #self.config.model.classifier.load_from_file:
             stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
             if 'experiment' in stored_dict:
-                best_experiment = stored_dict['experiment']
-                return cls, best_experiment
+                experiment = stored_dict['experiment']
+                 
+        cls.model = cls.model.to(self.config.algorithm.device)
 
-        return cls, None
+        return cls, experiment
+    
+    def get_experiment(self, i_exp: int):
+        X = None
+        
+        for k, x in self.clean_example_dict['fvs'].items():
+            if X is None:
+                X = x
+            else:
+                X = np.concatenate([X, x])
+        
+        for k, x in self.poisoned_example_dict['fvs'].items():
+            if X is None:
+                X = x
+            else:
+                X = np.concatenate([X, x])
+        
+        experiment = {
+            'inputs': X,
+            'baselines': np.random.randint(0, 255, size=X.shape)
+        }
+        return experiment
 
     def get_attributes(self, model: Any):
  
@@ -133,52 +154,54 @@ class AttributionClassifier(Dependent):
                 X = x
             else:
                 X = np.concatenate([X, x])
-        
+      
         model_input = torch.tensor(X).float().to(self.config.algorithm.device)
         model_input.requires_grad_()
         softmax = nn.Softmax(dim=1) 
         model_output = softmax(model(model_input).to(self.config.algorithm.device))
          
-        loss = self.criterion(model_output, torch.tensor(Y)) 
+        loss = self.criterion(model_output, torch.tensor(Y).to(self.config.algorithm.device)) 
         loss.backward(retain_graph = True)
 
         attr = model_input.grad.data.detach()
          
         return attr
     
-    def get_ig_attributes(self, model: Any, baseline: List[float]):
+    def get_ig_attributes(self, model: Any, experiment: Dict[str, Any]):
  
         model = model.model.to(self.config.algorithm.device)
         model.zero_grad()
-        
-        X = None
-        Y = []
-        for k, x in self.clean_example_dict['fvs'].items():
-            if k in self.clean_example_dict['labels']:
-                Y.append([0., 0.])
-                Y[-1][self.clean_example_dict['labels'][k]] = 1.
-            else:
-                continue
-            if X is None:
-                X = x
-            else:
-                X = np.concatenate([X, x])
+
+        X = experiment['inputs']
+        baseline = experiment['baselines']
         
         model_input = torch.tensor(X).float().to(self.config.algorithm.device)
-        model_baseline = torch.tensor(baseline).unsqueeze(1).float().to(self.config.algorithm.device)
-        assert model_baseline.shape[0] == model_input.shape[0]
+        model_input.requires_grad_()
 
+        model_baseline = torch.tensor(baseline).float().to(self.config.algorithm.device)
+       
+        #logger.info(f"clean example tot: {len(self.clean_example_dict['fvs'].items())}")
+        #logger.info(f"poisoned example tot: {len(self.poisoned_example_dict['fvs'].items())}")
+        #logger.info(f"model input shape: {model_input.shape}")
+        #logger.info(f"baseline shape: {model_baseline.shape}")
         #* torch.ones(X.shape).float().to(self.config.algorithm.device)
 
         softmax = nn.Softmax(dim=1) 
  
         ig = IntegratedGradients(lambda model_input: softmax(model(model_input)))
-        attributions, approximation_error = ig.attribute(model_input,
+        attributions_0, approximation_error_0 = ig.attribute(model_input,
                                                         baselines=model_baseline,
                                                         method='gausslegendre',
-                                                        return_convergence_delta=True)
- 
-        return attributions.detach()
+                                                        return_convergence_delta=True,
+                                                        target=0)
+        attributions_1, approximation_error_1 = ig.attribute(model_input,
+                                                        baselines=model_baseline,
+                                                        method='gausslegendre',
+                                                        return_convergence_delta=True,
+                                                        target=1)
+    
+        attributions = np.concatenate((attributions_0.detach().cpu().numpy(), attributions_1.detach().cpu().numpy()), 1)
+        return attributions
           
     def get_loss(self, cls, experiment = None):
         # Run the model to get the action 
@@ -188,6 +211,7 @@ class AttributionClassifier(Dependent):
             ## Get the models
             nonlocal cls
             cls.train()
+
             
             models = self.target_model_indexer.get_model(data)
  
@@ -200,15 +224,15 @@ class AttributionClassifier(Dependent):
                 for i, (model, y) in enumerate(zip(models, ys)):
                     ## Run one model
                     #logger.info(f"{i}th model")
-                    attr = self.get_ig_attributes(model, experiment) 
+                    attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
                     #logger.info(f"attribution shape {attr.shape}")
                     softmax = nn.Softmax(dim=1) 
                     pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
-                     
+                    
          
                     #logger.info(f"Label {y} vs. Prediction {pred}")
-                    loss = self.criterion(pred, torch.tensor([y])) 
-                    #logger.info(f'{i}th model: Error {errs}')
+                    loss = self.criterion(pred, torch.tensor([y]).to(self.config.algorithm.device)) 
+                    #\logger.info(f'{i}th model: Error {errs}')
 
                     tot_loss += loss
                   
@@ -243,8 +267,9 @@ class AttributionClassifier(Dependent):
             for i, model in enumerate(models):
                 ## Run one model
                 #attr = self.get_attributes(model) 
-                attr = self.get_ig_attributes(model, experiment) 
-                pred = cls(attr)[:,1].mean(dim = 0).item()
+                attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
+                softmax = nn.Softmax(dim=1) 
+                pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True).item()
                 # Confidence equals the rate of false prediction
                 conf = self.confidence(pred)
                 # Store model label
@@ -278,13 +303,14 @@ class AttributionClassifier(Dependent):
 
     def infer(self, model, experiment = None) -> List[float]:
         cls, experiment = self.get_detector(self.config.model.classifier.load_from_file)
+        cls.model = cls.model.to(self.config.algorithm.device)
         cls.eval()
 
         #attr = self.get_ig_attributes(model, experiment) 
-        attr = self.get_attributes(model) 
+        attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
         softmax = nn.Softmax(dim=1) 
-        pred = softmax(cls(attr))[:,1].mean(dim = 0, keepdims=True).item()
- 
+        pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True).item()
+
         # Confidence equals the rate of false prediction
         conf = self.confidence(pred)
          
@@ -297,7 +323,7 @@ class AttributionClassifier(Dependent):
         save_dict = {'model': self.config.model.classifier.name,
                     'state_dict': cls.model.state_dict()
                     }
-        if info is not None:
+        if experiment is not None:
             save_dict['experiment'] = experiment
             
         torch.save(save_dict, self.config.model.save_dir)

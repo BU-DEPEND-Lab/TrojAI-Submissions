@@ -153,6 +153,8 @@ class Dependent(ABC, BaseModel):
         logger.info(f"Collect a dataset of mixed models {dataset}.")
         return dataset
     
+    def get_experiment(self, i_exp: int):
+        return None
     
     @abstractmethod
     def get_detector(self):
@@ -176,18 +178,17 @@ class Dependent(ABC, BaseModel):
        
         
         for i_exp in range(self.config.algorithm.num_experiments):
-            experiment = self.experiments[i_exp]
             # Run agent to get a dataset of environment observations
-            logging.info("Start training experiment!!")
+            logging.info(f"Start training experiment {i_exp}/{self.config.algorithm.num_experiments}!!")
             tot_score = 0 
-         
+            
             suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
+            experiment = self.get_experiment(i_exp)
             for split in range(1, max(2, self.config.data.num_splits + 1)):
-                 # Prepare the mask generator
-                cls = self.get_detector()
-      
-        
+                # Prepare the mask generator
+                cls, _ = self.get_detector()
+                
                 # Split dataset
                 if self.config.algorithm.k_fold and split <= self.config.data.num_splits:
                     validation_set = suffix_split.head
@@ -208,7 +209,7 @@ class Dependent(ABC, BaseModel):
                     logger.info("Split: %s \n" % (split))
                      
                     loss_fn = self.get_loss(cls, experiment)
-                    metrics_fn = self.get_metrics(cls)
+                    metrics_fn = self.get_metrics(cls, experiment)
                     optimize_fn = self.get_optimizer(cls, experiment)
 
                     #self.logger.epoch_info("Run ID: %s, Split: %s \n" % (run.info.run_uuid, split))
@@ -239,12 +240,12 @@ class Dependent(ABC, BaseModel):
                 best_experiment = experiment
 
         if True or final_train:
-            logger.info("Final train the detector with the {best_score=}")
+            logger.info(f"Final train the detector with the {best_score}")
             loss_fn = self.get_loss(best_cls, best_experiment)
             metrics_fn = self.get_metrics(best_cls, best_experiment)
             optimize_fn = self.get_optimizer(best_cls, best_experiment)
             final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn, final_train = True)
-            final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn, best_experiment)
+            final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
             self.save_detector(best_cls, final_train_info, best_experiment)
             
             #for k, v in final_info.items():
