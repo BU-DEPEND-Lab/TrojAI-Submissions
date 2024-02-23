@@ -38,7 +38,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 class TrafficNN(object):
 
-    def __init__(self, n_features, config):
+    def __init__(self, n_features, channel, config):
 
 
         # Load Configuration
@@ -49,7 +49,7 @@ class TrafficNN(object):
         self.exp = None
         self.img_height = config["img_resolution"]
         self.img_width = config["img_resolution"]
-        self.channel=2
+        self.channel=channel
         self.inp_shape=(self.channel,self.img_height,self.img_width)
 
         # Set device
@@ -154,16 +154,16 @@ class TrafficNN(object):
     def build_model(self):
 
         if self.cnn_type=='ResNet18':
-            model=TrafficResNet(self.num_classes, BasicBlock, [2,2,2,2])
+            model=TrafficResNet(self.num_classes, BasicBlock, self.channel, [2,2,2,2])
         elif self.cnn_type=='ResNet34':
-            model=TrafficResNet(self.num_classes, BasicBlock, [3,4,6,3])
+            model=TrafficResNet(self.num_classes, BasicBlock, self.channel, [3,4,6,3])
         # The below are not recommended due to slow runtimes
         elif self.cnn_type=='ResNet50':
-            model=TrafficResNet(self.num_classes, Bottleneck, [3,4,6,3])
+            model=TrafficResNet(self.num_classes, Bottleneck, self.channel, [3,4,6,3])
         elif self.cnn_type=='ResNet101':
-            model=TrafficResNet(self.num_classes, Bottleneck, [3,4,23,3])
+            model=TrafficResNet(self.num_classes, Bottleneck, self.channel, [3,4,23,3])
         elif self.cnn_type=='ResNet152':
-            model=TrafficResNet(self.num_classes, Bottleneck, [3,8,36,3])
+            model=TrafficResNet(self.num_classes, Bottleneck, self.channel, [3,8,36,3])
         else:
             raise RuntimeError("Invalid Model Type: {}".format(self.cnn_type))
 
@@ -297,6 +297,7 @@ class TrafficResNet(nn.Module):
     
     def __init__(self,num_classes,
         block: Type[Union[BasicBlock, Bottleneck]],
+        channels: int, 
         layers: List[int],
         zero_init_residual: bool = False,
         groups: int = 1,
@@ -306,7 +307,8 @@ class TrafficResNet(nn.Module):
         ):
         super(TrafficResNet, self).__init__()
 
-        self.inplanes = 64
+        self.planes = 64
+        self.inplanes = self.planes * block.expansion
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d(self.inplanes)
         self._norm_layer = norm_layer
@@ -321,11 +323,11 @@ class TrafficResNet(nn.Module):
             )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(2, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = self._norm_layer
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer1 = self._make_layer(block, self.planes, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])

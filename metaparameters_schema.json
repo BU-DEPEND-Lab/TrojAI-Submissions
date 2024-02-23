@@ -5,7 +5,7 @@
   "technique_description": "Extracts model attributionand trains a classifier.",
   "technique_changes": "Using attribution",
   "technique_type":  ["Attribution Analysis"],
-  "commit_id": "d6b598589f5d3ff41ae5a7a992c256a1c39b46ae",
+  "commit_id": "13055496e0fdcacac706f5bec07003cd9d4c96bf",
   "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions",
   "required": [],
   "additionalProperties": false,

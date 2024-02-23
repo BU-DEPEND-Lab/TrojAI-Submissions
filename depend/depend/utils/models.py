@@ -121,7 +121,7 @@ def load_examples(model_dirpath: str, clean = True):
                     feature_vector = read_image(examples_dir_entry.path).unsqueeze(dim = 0).float()
                     fvs[idx] = feature_vector
                 elif examples_dir_entry.name.endswith(".png"):
-                    idx = examples_dir_entry.name.split('.')[0]
+                    idx = ('' if clean else model_dirpath) + examples_dir_entry.name.split('.')[0]
                     feature_vector = read_image(examples_dir_entry.path).unsqueeze(dim = 0).float()
                     fvs[idx] = feature_vector
                 elif examples_dir_entry.name.endswith(".npy"):
@@ -181,7 +181,7 @@ def load_models_dirpath(models_dirpath):
             logger.info("Can't find ground truth")
             pass
         try:
-            clean_example_fvs, clean_example_labels = load_examples(model_path)
+            clean_example_fvs, clean_example_labels = load_examples(model_path, True)
             if clean_example_dict['labels'] != {}:
                 clean_example_dict['fvs'].update(clean_example_fvs)
                 clean_example_dict['labels'].update(clean_example_labels)

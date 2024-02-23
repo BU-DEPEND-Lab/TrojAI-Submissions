@@ -225,7 +225,7 @@ class Detector(AbstractDetector):
             'learner_schema': {
                 'xval_episodes': 10,
                 'final_episodes': 50,
-                'batch_size': 32,
+                'batch_size': 16,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
             },
@@ -239,12 +239,12 @@ class Detector(AbstractDetector):
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
             'optimizer_schema': {
-                'optimizer_class': 'RMSprop',
+                'optimizer_class': 'RAdam',
                 'lr': 1e-3,
             },
             'data_schema': {
                 'num_splits': 5,
-                'max_models': 238 
+                'max_models': 100 
             }
             
         }

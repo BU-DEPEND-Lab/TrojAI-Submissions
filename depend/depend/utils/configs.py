@@ -108,7 +108,7 @@ class DataConfig(BaseConfig):
     """
     num_workers: str = 1
     num_splits: int = 3
-    max_models: int = 20
+    max_models: Optional[int] = 20
     num_frames_per_model: int = 20
  
     class Config:

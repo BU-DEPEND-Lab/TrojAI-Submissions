@@ -64,8 +64,8 @@ class Dependent(ABC, BaseModel):
         logger.info(f"Loaded target_model_dict {data_infos[0].keys()}")
         logger.info(f"Loaded target_model_repr_dict {data_infos[1].keys()}")
         logger.info(f"Loaded model_ground_truth_dict {data_infos[2]}")
-        logger.info(f"Loaded clean examples {data_infos[3]}")
-        logger.info(f"Loaded poisoned examples {data_infos[4]}")
+        logger.info(f"Loaded clean examples {len(data_infos[3]['fvs'])}")
+        logger.info(f"Loaded poisoned examples {len(data_infos[4]['fvs'])}")
         
         model_ground_truth_dict = data_infos[2]
 
@@ -165,9 +165,14 @@ class Dependent(ABC, BaseModel):
         # Build model dataset 
         # K-split the model dataset and train the detector for multiple rounds 
         # Return the mean metric 
-        dataset = self.build_dataset(
-            num_clean_models = self.config.data.max_models // 2,
-            num_poisoned_models = self.config.data.max_models - self.config.data.max_models // 2)
+        if self.config.data.max_models is not None:
+            dataset = self.build_dataset(
+                num_clean_models = self.config.data.max_models // 2,
+                num_poisoned_models = self.config.data.max_models - self.config.data.max_models // 2)
+        else:
+            dataset = self.build_dataset(
+                num_clean_models = None,
+                num_poisoned_models = None)
         best_cls = None
         best_score = None
         best_loss_fn = None

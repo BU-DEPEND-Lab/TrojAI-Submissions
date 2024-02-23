@@ -18,14 +18,14 @@ then
         --schema_filepath=./metaparameters_schema.json
     else 
         singularity run \
-        --bind /home/zwc662/Workspace/TrojAI-Submissions/model/ \
+        --bind ~/Workspace/TrojAI-Submissions/model/ \
         --nv \
         ./detector.simg \
         infer \
         --model_filepath=~/Workspace/TrojAI-Submissions/model/id-00000001/model.pt \
         --result_filepath=./output.txt \
         --scratch_dirpath=./scratch/ \
-        --examples_dirpath=/home/zwc662/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/ \
+        --examples_dirpath=~/Workspace/TrojAI-Submissions/model/id-00000001/clean-example-data/ \
         --round_training_dataset_dirpath=/path/to/training/dataset/ \
         --metaparameters_filepath=/metaparameters.json \
         --schema_filepath=/metaparameters_schema.json \
