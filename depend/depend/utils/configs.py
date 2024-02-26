@@ -137,7 +137,7 @@ class AlgorithmConfig(BaseConfig):
     @model_validator(mode='after')
     def on_create(cls, values):
         if values.device is None or  'cuda' in values.device:
-            values.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            values.device = torch.device(values.device if torch.cuda.is_available() else "cpu")
         else:
             values.device = torch.device("cpu")
  

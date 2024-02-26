@@ -218,9 +218,9 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TrafficNN', 
-                    #'load_from_file': 'best_cls.p',
+                    #'load_from_file': 'best_attr_cls_1.p',
                 },
-                'save_dir': 'best_attr_cls.p'
+                'save_dir': 'best_attr_cls_3.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
@@ -228,14 +228,15 @@ class Detector(AbstractDetector):
                 'batch_size': 16,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
+                'seed': 100,
             },
             'algorithm_schema': {
-                'task': 'ImageClassification',
+                'task': 'attr_cls_1',
                 'device': 'cuda:0',
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'num_experiments': 100,
+                'num_experiments': 1000,
                 #'load_experience': '/home/zwc662/Workspace/TrojAI-Submissions/best_experience.p'
             },
             'optimizer_schema': {
@@ -406,9 +407,9 @@ class Detector(AbstractDetector):
                 'model_schema': {
                     'classifier': {
                         'name': 'TrafficNN', 
-                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls.p')
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_1.p')
                     },
-                    'save_dir': 'best_attr_cls.p'
+                    'save_dir': 'best_attr_cls_2_2.p'
                 },
                  'learner_schema': {
                     'xval_episodes': 10,
@@ -418,8 +419,8 @@ class Detector(AbstractDetector):
                     'eval_interval': 2,
                 },
                 'algorithm_schema': {
-                    'device': 'cpu', #'cuda:0',
-                    'task': 'RL',
+                    'device': 'cuda', #'cuda:0',
+                    'task': 'attr_cls_2',
                     'criterion': 'ce',
                     'beta': 1,
                     'k_fold': True,

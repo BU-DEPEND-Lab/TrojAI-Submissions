@@ -114,7 +114,7 @@ class Dependent(ABC, BaseModel):
         logging.info(f"Clean model table size: {len(clean_model_table)}")
         # Randomly select the same amount of models from the bipartied model tables
         # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
-        
+        np.random.seed(self.config.learner.seed)
         combined_model_table = None
         if len(poisoned_model_table) <= 1:
             combined_model_table = poisoned_model_table
@@ -243,6 +243,7 @@ class Dependent(ABC, BaseModel):
                 best_score = avg_score 
                 best_cls = cls
                 best_experiment = experiment
+                self.save_detector(best_cls, {}, best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
 
         if True or final_train:
             logger.info(f"Final train the detector with the {best_score}")
