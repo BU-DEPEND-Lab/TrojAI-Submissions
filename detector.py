@@ -407,7 +407,7 @@ class Detector(AbstractDetector):
                 'model_schema': {
                     'classifier': {
                         'name': 'TrafficNN', 
-                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_1.p')
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_2.p')
                     },
                     'save_dir': 'best_attr_cls_2_2.p'
                 },
