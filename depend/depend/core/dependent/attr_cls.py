@@ -82,9 +82,7 @@ class AttributionClassifier(Dependent):
  
         # Configure the trainer
         self.learner = Torch_Learner.configure(config.learner)
-
-        
-        
+ 
         # Configure the criterion function
         if config.algorithm.criterion == 'ce':
             self.criterion = torch.nn.BCEWithLogitsLoss()
@@ -94,6 +92,24 @@ class AttributionClassifier(Dependent):
         for metric in config.algorithm.metrics:
             if metric == 'auroc':
                 self.metrics.append(BinaryAUROC())
+
+        self.build_experiments()
+
+    def build_experiments(self):
+        self.X = None
+        for k, x in self.clean_example_dict['fvs'].items():
+            if self.X is None:
+                self.X = x
+            else:
+                self.X = np.concatenate([self.X, x])
+        
+        for k, x in self.poisoned_example_dict['fvs'].items():
+            if self.X is None:
+                self.X = x
+            else:
+                self.X = np.concatenate([self.X, x])
+         
+        self.baselines = np.random.randint(0, 255, size=[self.config.algorithm.num_experiments, *self.X.shape])
         
  
     def get_detector(self, path = None):
@@ -127,26 +143,11 @@ class AttributionClassifier(Dependent):
         return cls, experiment
     
     def get_experiment(self, i_exp: int):
-        X = None
-        
-        for k, x in self.clean_example_dict['fvs'].items():
-            if X is None:
-                X = x
-            else:
-                X = np.concatenate([X, x])
-        
-        for k, x in self.poisoned_example_dict['fvs'].items():
-            if X is None:
-                X = x
-            else:
-                X = np.concatenate([X, x])
-        
-        experiment = {
-            'inputs': X,
-            'baselines': np.random.randint(0, 255, size=X.shape)
+        return {
+            'inputs': self.X,
+            'baselines': self.baselines[i_exp]
         }
-        return experiment
-
+         
     def get_attributes(self, model: Any):
  
         model = model.model.to(self.config.algorithm.device)
@@ -368,7 +369,7 @@ class AttributionClassifier(Dependent):
         pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True).item()
         '''
         # Confidence equals the rate of false prediction
-        conf = 1 - self.confidence(pred)
+        conf = self.confidence(pred)
          
         logger.info("Trojan Probability: %f" % conf)
         
