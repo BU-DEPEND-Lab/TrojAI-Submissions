@@ -300,16 +300,16 @@ class AttributionClassifier(Dependent):
             
             for i, model in enumerate(models):
                 ## Run one model
-                if self.config.algorithm.task == 'attr_cls_1':
-                    attrs = torch.tensor(np.expand_dims(self.get_ig_attributes(model, experiment), axis = 0)).float().to(self.config.algorithm.device)
+                if self.config.algorithm.task == 'attr_cls_2':
+                    attrs = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
                     softmax = nn.Softmax(dim=1) 
                     preds = softmax(cls(attrs))[:,1]
                     #logger.info(f'preds size {preds.shape}')
-                    pred = ((torch.sum(preds * torch.exp(preds * 1.e3)) / torch.sum(preds * torch.exp(preds * 1.e3)))).detach().cpu().numpy().item()
+                    pred = ((torch.sum(preds * torch.exp(preds * 1.e3)) / torch.sum(torch.exp(preds * 1.e3)))).detach().cpu().numpy().item()
 
-                elif self.config.algorithm.task == 'attr_cls_2':
+                elif self.config.algorithm.task == 'attr_cls_1':
                     #attr = self.get_attributes(model) 
-                    attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
+                    attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device).unsqueeze(0)
                     softmax = nn.Softmax(dim=1) 
                     pred = softmax(cls(attr))[:,1].mean(dim = 0, keepdims=True).item()
                     

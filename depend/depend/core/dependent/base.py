@@ -181,7 +181,8 @@ class Dependent(ABC, BaseModel):
         best_experiment = None
         #with mlflow.start_run as run:
        
-        
+        best_cls, best_experiment = self.get_detector()
+
         for i_exp in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
             logging.info(f"Start training experiment {i_exp}/{self.config.algorithm.num_experiments}!!")
@@ -243,7 +244,10 @@ class Dependent(ABC, BaseModel):
                 best_score = avg_score 
                 best_cls = cls
                 best_experiment = experiment
-                self.save_detector(best_cls, self.config.to_dict(), best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
+                best_info = self.config_dict()
+                best_info.update({'score': avg_score})
+                
+                self.save_detector(best_cls, best_info, best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
                 
         if True or final_train:
             logger.info(f"Final train the detector with the {best_score}")
