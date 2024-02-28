@@ -243,8 +243,8 @@ class Dependent(ABC, BaseModel):
                 best_score = avg_score 
                 best_cls = cls
                 best_experiment = experiment
-                self.save_detector(best_cls, {}, best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
-
+                self.save_detector(best_cls, self.config.to_dict(), best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
+                
         if True or final_train:
             logger.info(f"Final train the detector with the {best_score}")
             loss_fn = self.get_loss(best_cls, best_experiment)

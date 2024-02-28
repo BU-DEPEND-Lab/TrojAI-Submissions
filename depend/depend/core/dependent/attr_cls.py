@@ -95,6 +95,7 @@ class AttributionClassifier(Dependent):
 
         self.build_experiments()
 
+
     def build_experiments(self):
         self.X = None
         for k, x in self.clean_example_dict['fvs'].items():
@@ -350,15 +351,15 @@ class AttributionClassifier(Dependent):
 
         #attr = self.get_ig_attributes(model, experiment) 
         
-        if self.config.algorithm.task == 'attr_cls_1':
+        if self.config.algorithm.task == 'attr_cls_2':
             attrs = self.get_ig_attributes(model, experiment)
             attrs = torch.tensor(attrs).float().to(self.config.algorithm.device)
             softmax = nn.Softmax(dim=1) 
             preds = softmax(cls(attrs))[:,1]
             #logger.info(f'preds size {preds.shape}')
-            pred = ((torch.sum(preds * torch.exp(preds * 1.e3)) / torch.sum(preds * torch.exp(preds * 1.e3)))).detach().cpu().numpy().item()
+            pred =  ((torch.sum(preds * torch.exp(preds * 1.e3)) / torch.sum(torch.exp(preds * 1.e3)))).detach().cpu().numpy().item()
 
-        elif self.config.algorithm.task == 'attr_cls_2':
+        elif self.config.algorithm.task == 'attr_cls_1':
             #attr = self.get_attributes(model) 
             attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
             softmax = nn.Softmax(dim=1) 
@@ -369,7 +370,7 @@ class AttributionClassifier(Dependent):
         pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True).item()
         '''
         # Confidence equals the rate of false prediction
-        conf = 1 - self.confidence(pred)
+        conf = self.confidence(pred)
          
         logger.info("Trojan Probability: %f" % conf)
         
@@ -380,6 +381,7 @@ class AttributionClassifier(Dependent):
         save_dict = {'model': self.config.model.classifier.name,
                     'state_dict': cls.model.state_dict()
                     }
+        save_dict.update({'info': info})
         if experiment is not None:
             save_dict['experiment'] = experiment
 
