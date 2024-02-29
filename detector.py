@@ -218,20 +218,20 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TrafficNN', 
-                    'load_from_file': 'best_cls_tmp_1.p',
+                    'load_from_file': 'best_cls_tmp_2.p',
                 },
-                'save_dir': 'best_attr_cls_3.p'
+                'save_dir': 'best_attr_cls_4.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
-                'final_episodes': 10,
+                'final_episodes': 1000,
                 'batch_size': 16,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
                 'seed': 10,
             },
             'algorithm_schema': {
-                'task': 'attr_cls_1',
+                'task': 'attr_cls_2',
                 'device': 'cuda:0',
                 'criterion': 'ce', 
                 'k_fold': True,
@@ -407,13 +407,13 @@ class Detector(AbstractDetector):
                 'model_schema': {
                     'classifier': {
                         'name': 'TrafficNN', 
-                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_1.p')
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_4.p')
                     },
                     'save_dir': 'best_attr_cls_2_2.p'
                 },
                  'learner_schema': {
                     'xval_episodes': 10,
-                    'final_episodes': 50,
+                    'final_episodes': 1000,
                     'batch_size': 32,
                     'checkpoint_interval': 1,
                     'eval_interval': 2,
