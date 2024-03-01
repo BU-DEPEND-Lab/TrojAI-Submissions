@@ -218,13 +218,13 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TrafficNN', 
-                    'load_from_file': 'best_cls_tmp_2.p',
+                    #'load_from_file': 'best_cls_tmp_2.p',
                 },
-                'save_dir': 'best_attr_cls_4.p'
+                'save_dir': 'best_attr_cls_6.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
-                'final_episodes': 1000,
+                'final_episodes': 50,
                 'batch_size': 16,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,

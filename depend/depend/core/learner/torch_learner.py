@@ -76,8 +76,6 @@ class Torch_Learner(Base_Learner):
         
         for train_info in train_info_gen:
             summary_info.update(**train_info)
-            if train_info['auroc'][-1] > 0.88:
-                break
             
         return summary_info
 

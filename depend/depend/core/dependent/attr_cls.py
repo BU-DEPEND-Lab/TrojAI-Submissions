@@ -350,33 +350,29 @@ class AttributionClassifier(Dependent):
         cls.eval()
 
         #attr = self.get_ig_attributes(model, experiment) 
-        try:
-            if self.config.algorithm.task == 'attr_cls_2':
-                attrs = self.get_ig_attributes(model, experiment)
-                attrs = torch.tensor(attrs).float().to(self.config.algorithm.device)
-                softmax = nn.Softmax(dim=1) 
-                preds = softmax(cls(attrs))[:,1]
-                #logger.info(f'preds size {preds.shape}')
-                pred =  ((torch.sum(preds * torch.exp(preds * 1.e3)) / (1.e-4 + torch.sum(torch.exp(preds * 1.e3))))).detach().cpu().numpy().item()
+ 
+        if self.config.algorithm.task == 'attr_cls_2':
+            attrs = self.get_ig_attributes(model, experiment)
+            attrs = torch.tensor(attrs).float().to(self.config.algorithm.device)
+            softmax = nn.Softmax(dim=1) 
+            preds = softmax(cls(attrs))[:,1]
+            #logger.info(f'preds size {preds.shape}')
+            pred =  ((torch.sum(preds * torch.exp(preds * 1.e2)) / (torch.sum(torch.exp(preds * 1.e2))))).detach().cpu().numpy().item()
 
-            elif self.config.algorithm.task == 'attr_cls_1':
-                #attr = self.get_attributes(model) 
-                attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
-                softmax = nn.Softmax(dim=1) 
-                pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
-            pred_mask = torch.isnan(pred)  
-            if pred_mask.item():
-                pred = 0.5
-            # Confidence equals the rate of false prediction
-            conf = max(1., self.confidence(pred) / 0.08)
-            
-            logger.info("Trojan Probability: %f" % conf)
-            
-            return conf
-    
+        elif self.config.algorithm.task == 'attr_cls_1':
+            #attr = self.get_attributes(model) 
+            attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
+            softmax = nn.Softmax(dim=1) 
+            pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
+         
+        # Confidence equals the rate of false prediction
+        conf = self.confidence(pred) #/ 0.08
         
-        except:
-            return 0.5
+        logger.info("Trojan Probability: %f" % conf)
+        
+        return conf
+    
+ 
         ''' 
         attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device).unsqueeze(0)
         softmax = nn.Softmax(dim=1) 
