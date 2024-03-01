@@ -363,7 +363,10 @@ class AttributionClassifier(Dependent):
             #attr = self.get_attributes(model) 
             attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
             softmax = nn.Softmax(dim=1) 
-            pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True).item()
+            pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
+            pred_mask = torch.isnan(pred)  
+            if pred_mask.item():
+                return 0.5
         ''' 
         attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device).unsqueeze(0)
         softmax = nn.Softmax(dim=1) 
