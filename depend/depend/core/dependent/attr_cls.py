@@ -356,10 +356,10 @@ class AttributionClassifier(Dependent):
             attrs = torch.tensor(attrs).float().to(self.config.algorithm.device)
             softmax = nn.Softmax(dim=1) 
             preds = softmax(cls(attrs))[:,1]
-             
+            #print(((torch.sum(preds * torch.exp(preds * 10)) / (torch.sum(torch.exp(preds * 10))))).detach().cpu().numpy().item())
             #logger.info(f'preds size {preds.shape}')
-            pred =  max(preds).item() #((torch.sum(preds * torch.exp(preds * 1.e3)) / (torch.sum(torch.exp(preds * 1.e3))))).detach().cpu().numpy().item()
-
+            pred = max(preds).item() #((torch.sum(preds * torch.exp(preds * 1.e3)) / (torch.sum(torch.exp(preds * 1.e3))))).detach().cpu().numpy().item()
+            pred = 1 if pred > 0.51 else 0.
         elif self.config.algorithm.task == 'attr_cls_1':
             #attr = self.get_attributes(model) 
             attr = torch.tensor(self.get_ig_attributes(model, experiment)).float().to(self.config.algorithm.device)
