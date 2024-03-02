@@ -218,7 +218,7 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TrafficNN', 
-                    #'load_from_file': 'best_cls_tmp_2.p',
+                    'load_from_file': 'best_cls_tmp_2.p',
                 },
                 'save_dir': 'best_attr_cls_6.p'
             },
