@@ -62,6 +62,9 @@ class TrafficNN(object):
         # Build model with correct configuration
         self.model = self.build_model()
     
+    def state_dict(self):
+        return self.model.state_dict()
+    
     def load_state_dict(self, state_dict):
         self.model.load_state_dict(state_dict)
     
@@ -410,3 +413,74 @@ class TrafficResNet(nn.Module):
         x = torch.flatten(x, 1)
         x = self.fc(x)
         return x
+
+
+
+
+
+class MLP(nn.Module):
+    def __init__(self, input_dim):
+        super(MLP, self).__init__()
+        self.fc1 = nn.Linear(input_dim, 512)  # Input layer to hidden layer
+        self.fc2 = nn.Linear(512, 128)          # Hidden layer to hidden layer
+        self.fc3 = nn.Linear(128, 32)           # Hidden layer to output layer
+        self.fc4 = nn.Linear(32, 2)  
+        self.activation = nn.ReLU()           # Activation function
+
+    def forward(self, x):
+        x = self.activation(self.fc1(x))      # Apply activation to first hidden layer
+        x = self.activation(self.fc2(x))      # Apply activation to second hidden layer
+        x = self.activation(self.fc3(x)) 
+        x = self.fc4(x)        # Apply sigmoid to output layer for binary classification
+        return x
+
+
+class TwoLayerNN(object):
+    def __init__(self, nn1, nn2):
+        self.nn1 = nn1
+        self.nn2 = nn2
+
+    def to(self, device):
+        self.nn1.model = self.nn1.model.to(device)
+        self.nn2 = self.nn2.to(device)
+        return self
+    
+    def parameters(self):
+        return  list(self.nn1.parameters()) + list(self.nn2.parameters())  
+    
+    def state_dict(self):
+        return (self.nn1.state_dict(), self.nn2.state_dict())
+    
+    def load_state_dict(self, state_dict):
+        self.nn1.load_state_dict(state_dict[0])
+        self.nn2.load_state_dict(state_dict[1])
+    
+
+class TwoLayerTrafficNN(object):
+    def __init__(self, n_features, channels, config):
+        self.model = TwoLayerNN(
+             TrafficNN(n_features, channels, config),
+             MLP(config['batch_size'] * config['num_classes'])
+        )
+        
+    def load_state_dict(self, state_dict):
+        self.model.load_state_dict(state_dict) 
+     
+    def eval(self):
+        self.model.nn1.eval()
+        self.model.nn2.eval()
+
+    def train(self):
+        self.model.nn1.train()
+        self.model.nn2.train()
+     
+
+    def __call__(self, x):
+        x = self.model.nn1(x)
+        y = self.model.nn2(x.flatten().unsqueeze(0))
+        return y
+    
+        
+    def parameters(self):
+        return self.model.parameters()
+    

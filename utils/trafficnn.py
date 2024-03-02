@@ -36,6 +36,7 @@ from torch import Tensor
 from torch.utils.data import TensorDataset, DataLoader
 
 
+
 class TrafficNN(object):
 
     def __init__(self, n_features, config):
@@ -393,3 +394,4 @@ class TrafficResNet(nn.Module):
         x = torch.flatten(x, 1)
         x = self.fc(x)
         return x
+

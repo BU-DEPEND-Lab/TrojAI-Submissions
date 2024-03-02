@@ -12,7 +12,7 @@ from depend.depend.utils.data_split import DataSplit
 from depend.utils.registers import register  
 
 from depend.depend.models.cls import FCModel 
-from depend.depend.utils.trafficnn import TrafficNN
+from depend.depend.utils.trafficnn import TrafficNN, TwoLayerTrafficNN
 
 from depend.core.logger import Logger
 from depend.core.dependent.base import Dependent
@@ -123,8 +123,9 @@ class AttributionClassifier(Dependent):
             channels, 
             config = {
             "cnn_type": 'ResNet18',
-            "num_classes": 2,
-            "img_resolution": 28 
+            "num_classes": 8,
+            "img_resolution": 28,
+            "batch_size": 78
         })#.to(self.config.algorithm.device)
         experiment = None
 
@@ -136,9 +137,16 @@ class AttributionClassifier(Dependent):
             stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
-            if 'experiment' in stored_dict:
-                experiment = stored_dict['experiment']
-                logger.info(f"Loaded experiment from {path}")
+            
+
+        if path or hasattr(self.config.algorithm, 'load_experience'):
+            if not path:
+                path = self.config.algorithm.load_experience
+            stored_dict = torch.load(path, \
+                                    map_location=self.config.algorithm.device)
+            experiment = stored_dict['experiment']
+            logger.info(f"Loaded experiment from {path}")
+
         cls.model = cls.model.to(self.config.algorithm.device)
 
         return cls, experiment
@@ -305,7 +313,7 @@ class AttributionClassifier(Dependent):
                     softmax = nn.Softmax(dim=1) 
                     preds = softmax(cls(attrs))[:,1]
                     #logger.info(f'preds size {preds.shape}')
-                    pred = ((torch.sum(preds * torch.exp(preds * 1.e3)) / torch.sum(torch.exp(preds * 1.e3)))).detach().cpu().numpy().item()
+                    pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / torch.sum(torch.exp(preds * 1.e1)))).detach().cpu().numpy().item()
 
                 elif self.config.algorithm.task == 'attr_cls_1':
                     #attr = self.get_attributes(model) 
@@ -358,11 +366,10 @@ class AttributionClassifier(Dependent):
             preds = softmax(cls(attrs))[:,1]
             #print(((torch.sum(preds * torch.exp(preds * 10)) / (torch.sum(torch.exp(preds * 10))))).detach().cpu().numpy().item())
             #logger.info(f'preds size {preds.shape}')
-            pred = ((torch.sum(preds * torch.exp(preds * 1.e3)) / (torch.sum(torch.exp(preds * 1.e3))))).detach().cpu().numpy().item() #max(preds).item() #
+            print(max(preds).item())
+            pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / (torch.sum(torch.exp(preds * 1.e1))))).detach().cpu().numpy().item() #max(preds).item() #
             
-            pred_mask = torch.isnan(pred)  
-            if pred_mask.item():
-                pred = max(preds).item()
+            
 
             #pred = 1 if pred > 0.51 else 0.
         elif self.config.algorithm.task == 'attr_cls_1':
