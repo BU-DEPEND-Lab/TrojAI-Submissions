@@ -76,6 +76,7 @@ class AttributionClassifier(Dependent):
             result_dir: str = None
             ):
         self.config = config
+        self.config_dict = config.to_dict()
         
         if experiment_name is not None and result_dir is not None:
             self.logger = Logger(experiment_name, result_dir)
@@ -94,6 +95,7 @@ class AttributionClassifier(Dependent):
                 self.metrics.append(BinaryAUROC())
 
         self.build_experiments()
+
 
 
     def build_experiments(self):
@@ -348,9 +350,6 @@ class AttributionClassifier(Dependent):
             return info
         return metrics_fn 
  
-    
-  
- 
 
     def infer(self, model, experiment = None) -> List[float]:
         cls, experiment = self.get_detector(self.config.model.classifier.load_from_file)
@@ -366,8 +365,8 @@ class AttributionClassifier(Dependent):
             preds = softmax(cls(attrs))[:,1]
             #print(((torch.sum(preds * torch.exp(preds * 10)) / (torch.sum(torch.exp(preds * 10))))).detach().cpu().numpy().item())
             #logger.info(f'preds size {preds.shape}')
-            print(max(preds).item())
-            pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / (torch.sum(torch.exp(preds * 1.e1))))).detach().cpu().numpy().item() #max(preds).item() #
+            pred = max(preds).item()
+            #pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / (torch.sum(torch.exp(preds * 1.e1))))).detach().cpu().numpy().item() #max(preds).item() #
             
             
 

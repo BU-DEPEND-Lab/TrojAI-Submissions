@@ -351,7 +351,7 @@ class DPConfig:
             "algorithm": self.algorithm.__dict__,
             "model": self.model.__dict__,
             "optimizer": self.optimizer.__dict__,
-            "learner": self.learn.__dict__,
+            "learner": self.learner.__dict__,
             "data": self.data.__dict__
         }
         return config
