@@ -174,7 +174,9 @@ class Dependent(ABC, BaseModel):
                 num_clean_models = None,
                 num_poisoned_models = None)
         best_cls = None
-        best_score = None
+        best_z_score = None
+        best_low_score = None
+        skip_round = False
         best_loss_fn = None
         best_validation_info = None
         best_dataset = dataset
@@ -186,7 +188,7 @@ class Dependent(ABC, BaseModel):
         for i_exp in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
             logging.info(f"Start training experiment {i_exp}/{self.config.algorithm.num_experiments}!!")
-            tot_score = 0 
+            scores = [] 
             lowest_score = 100
             suffix_split = DataSplit.Split(dataset, self.config.data.num_splits)
             prefix_split = None
@@ -228,9 +230,13 @@ class Dependent(ABC, BaseModel):
                     #for k, v in validation_info.items():
                     #    mlflow.log_metric(k, v, step = split)
                     
-                    score = validation_info.get(self.config.algorithm.metrics[0])
-                    tot_score += score
-                    lowest_score = min(score, lowest_score)
+                    score = validation_info.get(self.config.algorithm.metrics[0]).item()
+                    scores.append(score)
+                    
+                    if best_low_score is not None:
+                        if score < best_low_score:
+                            scores = []
+                            break
                     #if best_score is None or best_score < score:
                         #logger.info("New best model")
                     #    best_score, best_validation_info, best_dataset, best_loss_fn = score, validation_info, dataset, loss_fn
@@ -238,21 +244,33 @@ class Dependent(ABC, BaseModel):
                         #if not self.config.algorithm.k_fold:
                         #   break
                     #self.save_detector(cls, validation_info)
-
-            avg_score = tot_score/self.config.data.num_splits
             
-            logging.info(f"Cross Validation Score: {avg_score}")
-            if best_score is None or best_score < lowest_score: #avg_score:
-                best_score = lowest_score # avg_score 
+            if len(scores) == 0:
+                logging.info(f"Low score lower than best low scorere_avg. Skip experiment.")
+                continue
+
+            score_lb = np.min(scores)
+            score_avg = np.mean(scores)
+            score_std = np.sqrt(np.var(scores, ddof=1))
+            z_score = score_avg - 0.7 * score_std
+
+            logging.info(f"Cross Validation Score: Avg {score_avg} | Std {score_std} | Low {score_lb} | Z_Score {z_score}")
+
+            if best_z_score is None or best_z_score < z_score: #avg_score:
+                best_z_score = z_score # avg_score 
+                
                 best_cls = cls
                 best_experiment = experiment
                 best_info = self.config.to_dict()
-                best_info.update({'avg_score': avg_score, 'lowest_score': lowest_score})
+                best_info.update({'score_avg': score_avg, 'score_std': score_std, 'z_score': z_score})
                 
                 self.save_detector(best_cls, best_info, best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
+
+            if best_low_score is None or best_low_score < score_lb:
+                best_low_score = score_lb
                 
         if True or final_train:
-            logger.info(f"Final train the detector with the {best_score}")
+            logger.info(f"Final train the detector with the {best_z_score}")
             loss_fn = self.get_loss(best_cls, best_experiment)
             metrics_fn = self.get_metrics(best_cls, best_experiment)
             optimize_fn = self.get_optimizer(best_cls, best_experiment)
@@ -266,7 +284,7 @@ class Dependent(ABC, BaseModel):
             raise NotImplementedError("No final train????")
         #mlflow.end_run()
         #mlflow.log_artifacts(self.logger.results_dir, artifact_path="configure_events")
-        return best_score
+        return best_z_score
     
     @abstractmethod
     def evaluate_detector(self):
