@@ -365,8 +365,8 @@ class AttributionClassifier(Dependent):
             preds = softmax(cls(attrs))[:,1]
             #print(((torch.sum(preds * torch.exp(preds * 10)) / (torch.sum(torch.exp(preds * 10))))).detach().cpu().numpy().item())
             #logger.info(f'preds size {preds.shape}')
-            pred = max(preds).item()
-            #pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / (torch.sum(torch.exp(preds * 1.e1))))).detach().cpu().numpy().item() #max(preds).item() #
+            #pred = max(preds).item()
+            pred = ((torch.sum(preds * torch.exp(preds * 1.e1)) / (torch.sum(torch.exp(preds * 1.e1))))).detach().cpu().numpy().item() #max(preds).item() #
             
             
 
@@ -378,7 +378,7 @@ class AttributionClassifier(Dependent):
             pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
          
         # Confidence equals the rate of false prediction
-        conf = self.confidence(pred)  
+        conf = 1 - self.confidence(pred)  
         
         logger.info("Trojan Probability: %f" % conf)
         

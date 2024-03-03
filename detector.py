@@ -220,7 +220,7 @@ class Detector(AbstractDetector):
                     'name': 'TwoLayerTrafficNN', 
                     #'load_model_from_file': 'best_cls_tmp_3.p'
                 },
-                'save_dir': 'best_attr_cls_6_z.p'
+                'save_dir': 'best_attr_cls_7_z.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
@@ -228,11 +228,11 @@ class Detector(AbstractDetector):
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
-                'seed': 200,
+                'seed': 500,
             },
             'algorithm_schema': {
                 'task': 'attr_cls_2',
-                'device': 'cuda:0',
+                'device': 'cuda:1',
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,

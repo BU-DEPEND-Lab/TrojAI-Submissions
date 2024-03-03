@@ -246,7 +246,7 @@ class Dependent(ABC, BaseModel):
                     #self.save_detector(cls, validation_info)
             
             if len(scores) == 0:
-                logging.info(f"Low score lower than best low scorere_avg. Skip experiment.")
+                logging.info(f"Low score lower than best low score {best_low_score}. Skip experiment.")
                 continue
 
             score_lb = np.min(scores)
