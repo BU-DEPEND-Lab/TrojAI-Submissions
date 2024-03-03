@@ -139,7 +139,6 @@ class AttributionClassifier(Dependent):
             stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
-            
 
         if path or hasattr(self.config.algorithm, 'load_experience'):
             if not path:
@@ -378,7 +377,7 @@ class AttributionClassifier(Dependent):
             pred = softmax(cls(attr)).to(self.config.algorithm.device)[:,1].mean(dim = 0, keepdims=True)
          
         # Confidence equals the rate of false prediction
-        conf = 1 - self.confidence(pred)  
+        conf = self.confidence(pred)  
         
         logger.info("Trojan Probability: %f" % conf)
         

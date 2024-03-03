@@ -218,9 +218,9 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TwoLayerTrafficNN', 
-                    #'load_model_from_file': 'best_cls_tmp_3.p'
+                    'load_model_from_file': 'best_cls_tmp_4.p'
                 },
-                'save_dir': 'best_attr_cls_7_z.p'
+                'save_dir': 'best_attr_cls_6.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
@@ -236,8 +236,8 @@ class Detector(AbstractDetector):
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'num_experiments': 20,
-                #'load_experience': 'best_cls_tmp_3.p'
+                'num_experiments': 0,
+                'load_experience': 'best_cls_tmp_4.p'
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',
@@ -407,7 +407,7 @@ class Detector(AbstractDetector):
                 'model_schema': {
                     'classifier': {
                         'name': 'TwoLayerTrafficNN', 
-                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_5.p')
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6.p')
                     },
                     'save_dir': 'best_attr_cls_2_2.p'
                 },
@@ -427,7 +427,7 @@ class Detector(AbstractDetector):
                     'num_procs': 20,
                     'exploration_rate': 0.5,
                     'num_experiments': 5, 
-                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_cls_5.p')
+                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6.p')
                 },
                 'optimizer_schema': {
                     'optimizer_class': 'Adam',

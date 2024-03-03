@@ -184,7 +184,7 @@ class Dependent(ABC, BaseModel):
         #with mlflow.start_run as run:
 
         best_cls, best_experiment = self.get_detector()
-
+        
         for i_exp in range(self.config.algorithm.num_experiments):
             # Run agent to get a dataset of environment observations
             logging.info(f"Start training experiment {i_exp}/{self.config.algorithm.num_experiments}!!")
@@ -257,6 +257,7 @@ class Dependent(ABC, BaseModel):
             logging.info(f"Cross Validation Score: Avg {score_avg} | Std {score_std} | Low {score_lb} | Z_Score {z_score}")
 
             if best_z_score is None or best_z_score < z_score: #avg_score:
+                logger.info(f"Higher than previous best Z_Score {best_z_score}.")
                 best_z_score = z_score # avg_score 
                 
                 best_cls = cls
