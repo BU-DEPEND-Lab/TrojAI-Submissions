@@ -218,13 +218,13 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TwoLayerTrafficNN', 
-                    'load_from_file': 'best_cls_tmp_4.p'
+                    'load_from_file': 'best_attr_cls_6_0.p'
                 },
-                'save_dir': 'best_attr_cls_6.p'
+                'save_dir': 'best_attr_cls_7.p'
             },
             'learner_schema': {
                 'xval_episodes': 30,
-                'final_episodes': 50,
+                'final_episodes': 20,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -232,12 +232,12 @@ class Detector(AbstractDetector):
             },
             'algorithm_schema': {
                 'task': 'attr_cls_2',
-                'device': 'cuda:0',
-                'criterion': 'ce', 
+                'device': 'cuda:1',
+                'criterion': 'expectile::0.3::0.99', 
                 'k_fold': True,
                 'num_procs': 10,
                 'num_experiments': 0,
-                'load_experience': 'best_cls_tmp_4.p'
+                'load_experience': 'best_attr_cls_6_0.p'
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',
@@ -407,7 +407,7 @@ class Detector(AbstractDetector):
                 'model_schema': {
                     'classifier': {
                         'name': 'TwoLayerTrafficNN', 
-                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6.p')
+                        'load_from_file': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6_0.p')
                     },
                     'save_dir': 'best_attr_cls_2_2.p'
                 },
@@ -427,7 +427,7 @@ class Detector(AbstractDetector):
                     'num_procs': 20,
                     'exploration_rate': 0.5,
                     'num_experiments': 5, 
-                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6.p')
+                    'load_experience': os.path.join(os.path.dirname(__file__), 'best_attr_cls_6_0.p')
                 },
                 'optimizer_schema': {
                     'optimizer_class': 'Adam',

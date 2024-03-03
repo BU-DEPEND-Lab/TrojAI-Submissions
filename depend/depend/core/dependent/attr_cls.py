@@ -85,8 +85,21 @@ class AttributionClassifier(Dependent):
         self.learner = Torch_Learner.configure(config.learner)
  
         # Configure the criterion function
-        if config.algorithm.criterion == 'ce':
-            self.criterion = torch.nn.BCEWithLogitsLoss()
+
+        self.criterion = torch.nn.BCEWithLogitsLoss()
+        if 'expectile' in config.algorithm.criterion:
+            [threshold, expectile] = config.algorithm.criterion.split('::')[1:]
+            threshold = float(threshold)
+            expectile = float(expectile)
+            def criterion(y, label):
+                weight = ((((torch.abs(label - y) > threshold) + (1 - expectile) * 1. / (2 * expectile - 1))) * (2 * expectile - 1)).detach() 
+                if len(y.shape) >= 1:
+                    logger.info(f"y shape: {y.shape} | label shale: {label.shape} | weight shape: {weight.flatten().shape}")
+                    return torch.nn.BCEWithLogitsLoss(weight = weight.flatten())(y, label)
+                else:
+                    return weight.item() * torch.nn.BCEWithLogitsLoss()(y, label)
+                
+            self.criterion = criterion 
         self.confidence = lambda input: input
         # Configure the metric functions
         self.metrics = []

@@ -187,6 +187,7 @@ class Dependent(ABC, BaseModel):
         best_validation_info = None
         best_dataset = dataset
         best_experiment = None
+        best_info = self.config.to_dict()
         #with mlflow.start_run as run:
 
         best_cls, best_experiment = self.get_detector()
@@ -268,7 +269,6 @@ class Dependent(ABC, BaseModel):
                 
                 best_cls = cls
                 best_experiment = experiment
-                best_info = self.config.to_dict()
                 best_info['score_avg'] = score_avg
                 best_info['score_std'] = score_std
                 best_info['score_lb'] = score_lb
@@ -286,7 +286,7 @@ class Dependent(ABC, BaseModel):
             optimize_fn = self.get_optimizer(best_cls, best_experiment)
             final_train_info = self.learner.train(self.logger, dataset, loss_fn, optimize_fn, dataset, metrics_fn, final_train = True)
             final_validation_info = self.learner.evaluate(self.logger, dataset, metrics_fn)
-            self.save_detector(best_cls, final_train_info, best_experiment)
+            self.save_detector(best_cls, best_info, best_experiment)
             
             #for k, v in final_info.items():
             #    mlflow.log_metric(k, v, step = self.config.data.num_splits + 1)
