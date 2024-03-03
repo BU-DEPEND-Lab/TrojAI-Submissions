@@ -101,19 +101,23 @@ class AttributionClassifier(Dependent):
     def build_experiments(self):
         np.random.seed(self.config.learner.seed)
         self.X = None
+        self.baselines = None
         for k, x in self.clean_example_dict['fvs'].items():
             if self.X is None:
                 self.X = x
+                self.baselines = np.clip(x + np.random.normal(0, 255, size=x.shape), 0, 255)
             else:
                 self.X = np.concatenate([self.X, x])
+            
         
         for k, x in self.poisoned_example_dict['fvs'].items():
             if self.X is None:
                 self.X = x
+                self.baselines = np.clip(x + np.random.normal(0, 255, size=x.shape), 0, 255)
             else:
                 self.X = np.concatenate([self.X, x])
-         
-        self.baselines = np.random.randint(0, 255, size=[self.config.algorithm.num_experiments, *self.X.shape])
+        self.baselines = np.clip(self.X + np.random.normal(0, 255, size=[self.config.algorithm.num_experiments, *self.X.shape])[:], 0, 255)
+        #self.baselines = np.random.randint(0, 255, size=[self.config.algorithm.num_experiments, *self.X.shape])
         
  
     def get_detector(self, path = None):
@@ -140,12 +144,7 @@ class AttributionClassifier(Dependent):
             stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
-
-        if path or hasattr(self.config.algorithm, 'load_experience'):
-            if not path:
-                path = self.config.algorithm.load_experience
-            stored_dict = torch.load(path, \
-                                    map_location=self.config.algorithm.device)
+ 
             experiment = stored_dict['experiment']
             logger.info(f"Loaded experiment from {path}")
 
@@ -406,9 +405,8 @@ class AttributionClassifier(Dependent):
         save_dict = {'model': self.config.model.classifier.name,
                     'state_dict': cls.model.state_dict()
                     }
-        save_dict.update({'info': info})
-        if experiment is not None:
-            save_dict['experiment'] = experiment
+        save_dict['info'] = info
+        save_dict['experiment'] = experiment
 
         if path is None:               
             torch.save(save_dict, self.config.model.save_dir)

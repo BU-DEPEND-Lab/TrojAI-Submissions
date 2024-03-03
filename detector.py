@@ -218,9 +218,9 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TwoLayerTrafficNN', 
-                    'load_model_from_file': 'best_cls_tmp_4.p'
+                    #'load_model_from_file': 'best_cls_tmp_4.p'
                 },
-                'save_dir': 'best_attr_cls_6.p'
+                'save_dir': 'best_attr_cls_6_0.p'
             },
             'learner_schema': {
                 'xval_episodes': 10,
@@ -228,16 +228,16 @@ class Detector(AbstractDetector):
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
-                'seed': 2,
+                'seed': 10,
             },
             'algorithm_schema': {
                 'task': 'attr_cls_2',
-                'device': 'cuda:1',
+                'device': 'cuda:0',
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'num_experiments': 0,
-                'load_experience': 'best_cls_tmp_4.p'
+                'num_experiments': 50,
+                #'load_experience': 'best_cls_tmp_4.p'
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',

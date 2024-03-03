@@ -269,7 +269,10 @@ class Dependent(ABC, BaseModel):
                 best_cls = cls
                 best_experiment = experiment
                 best_info = self.config.to_dict()
-                best_info.update({'score_avg': score_avg, 'score_std': score_std, 'z_score': z_score})
+                best_info['score_avg'] = score_avg
+                best_info['score_std'] = score_std
+                best_info['score_lb'] = score_lb
+                best_info['z_score'] = z_score
                 
                 self.save_detector(best_cls, best_info, best_experiment, path = os.path.join(self.logger.results_dir, 'best_cls_tmp.p'))
 
