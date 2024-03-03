@@ -218,13 +218,13 @@ class Detector(AbstractDetector):
             'model_schema': {
                 'classifier': {
                     'name': 'TwoLayerTrafficNN', 
-                    #'load_model_from_file': 'best_cls_tmp_4.p'
+                    'load_from_file': 'best_cls_tmp_4.p'
                 },
-                'save_dir': 'best_attr_cls_6_0.p'
+                'save_dir': 'best_attr_cls_6.p'
             },
             'learner_schema': {
-                'xval_episodes': 10,
-                'final_episodes': 15,
+                'xval_episodes': 30,
+                'final_episodes': 50,
                 'batch_size': 32,
                 'checkpoint_interval': 1,
                 'eval_interval': 2,
@@ -236,8 +236,8 @@ class Detector(AbstractDetector):
                 'criterion': 'ce', 
                 'k_fold': True,
                 'num_procs': 10,
-                'num_experiments': 50,
-                #'load_experience': 'best_cls_tmp_4.p'
+                'num_experiments': 0,
+                'load_experience': 'best_cls_tmp_4.p'
             },
             'optimizer_schema': {
                 'optimizer_class': 'RAdam',

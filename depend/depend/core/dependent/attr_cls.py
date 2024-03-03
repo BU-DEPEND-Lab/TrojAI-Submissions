@@ -144,7 +144,12 @@ class AttributionClassifier(Dependent):
             stored_dict = torch.load(path, \
                                     map_location=self.config.algorithm.device)
             cls.load_state_dict(stored_dict['state_dict'])
- 
+
+        if path or hasattr(self.config.algorithm, 'load_experience'):
+            if not path:
+                path = self.config.algorithm.load_experience
+            stored_dict = torch.load(path, \
+                                    map_location=self.config.algorithm.device)
             experiment = stored_dict['experiment']
             logger.info(f"Loaded experiment from {path}")
 
