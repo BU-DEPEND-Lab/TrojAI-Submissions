@@ -114,12 +114,15 @@ class Dependent(ABC, BaseModel):
         logging.info(f"Clean model table size: {len(clean_model_table)}")
         # Randomly select the same amount of models from the bipartied model tables
         # min(int(self.config.data.max_models/2), max(len(poisoned_model_table), len(clean_model_table)))
-        np.random.seed(self.config.learner.seed)
+        np.random.seed(100)
         combined_model_table = None
         if len(poisoned_model_table) <= 1:
             combined_model_table = poisoned_model_table
         else:
-            poisoned_ids = np.random.choice(np.arange(len(poisoned_model_table)), num_poisoned_models)
+            poisoned_ids = np.arange(len(poisoned_model_table))
+            if num_poisoned_models is not None:
+                poisoned_ids = np.random.choice(poisoned_ids, num_poisoned_models)
+            
             # Slice the selected rows from each party
             poisoned_models_selected = poisoned_model_table.take(poisoned_ids)
             if combined_model_table is None: 
@@ -132,7 +135,10 @@ class Dependent(ABC, BaseModel):
             elif len(clean_model_table) > 0:
                 combined_model_table = pd.concat([combined_model_table, clean_model_table])
         else:
-            clean_ids = np.random.choice(np.arange(len(clean_model_table)), num_clean_models)
+            clean_ids = np.arange(len(clean_model_table))
+          
+            if num_clean_models is not None:
+                clean_ids = np.random.choice(clean_ids, num_clean_models)
             # Slice the selected rows from each party
             clean_models_selected = clean_model_table.take(clean_ids)
             if combined_model_table is None:

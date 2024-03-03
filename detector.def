@@ -9,7 +9,7 @@ From: pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime
     ./metaparameters.json /
     ./metaparameters_schema.json /
     ./learned_parameters /
-    ./best_attr_cls_6.p /
+    ./best_attr_cls_5.p /
    
 %post
     apt update

@@ -99,6 +99,7 @@ class AttributionClassifier(Dependent):
 
 
     def build_experiments(self):
+        np.random.seed(self.config.learner.seed)
         self.X = None
         for k, x in self.clean_example_dict['fvs'].items():
             if self.X is None:
@@ -147,6 +148,17 @@ class AttributionClassifier(Dependent):
                                     map_location=self.config.algorithm.device)
             experiment = stored_dict['experiment']
             logger.info(f"Loaded experiment from {path}")
+
+            if 'info' in stored_dict and \
+                'score_avg' in stored_dict['info'] and \
+                'score_lb' in stored_dict['info'] and \
+                'score_std' in stored_dict['info'] and \
+                'z_score' in stored_dict['info']:
+                score_avg = stored_dict['info']['score_avg']
+                score_lb = stored_dict['info']['score_lb']
+                score_std = stored_dict['info']['score_std']
+                z_score = stored_dict['info']['z_score']
+                logging.info(f"Cross Validation Score: Avg {score_avg} | Std {score_std} | Low {score_lb} | Z_Score {z_score}")
 
         cls.model = cls.model.to(self.config.algorithm.device)
 
