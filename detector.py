@@ -4,31 +4,19 @@
 
 # You are solely responsible for determining the appropriateness of using and distributing the software and you assume all risks associated with its use, including but not limited to the risks and costs of program errors, compliance with applicable laws, damage to or loss of data, programs or equipment, and the unavailability or interruption of operation. This software is not intended to be used in any situation where a failure could cause risk of injury or damage to property. The software developed by NIST employees is not subject to copyright protection within the United States.
 
-
+import json
 import logging
 import os
-import json
-import jsonpickle
 import pickle
+
 import numpy as np
-from typing import List
-
-
-from depend.core.dependent import MaskGen
-from depend.launch import Sponsor
-
-
 from sklearn.ensemble import RandomForestRegressor
+import torch
 
 from utils.abstract import AbstractDetector
-from utils.models import load_model, load_models_dirpath
+from utils.models import load_model
 
-import torch
-import torch_ac
-import gym
-from gym_minigrid.wrappers import ImgObsWrapper
 
- 
 
 class Detector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath):
@@ -42,67 +30,60 @@ class Detector(AbstractDetector):
 
         self.metaparameter_filepath = metaparameter_filepath
         self.learned_parameters_dirpath = learned_parameters_dirpath
-        self.model_filepath = os.path.join(self.learned_parameters_dirpath, "model.bin")
-        self.models_padding_dict_filepath = os.path.join(self.learned_parameters_dirpath, "models_padding_dict.bin")
-        self.model_layer_map_filepath = os.path.join(self.learned_parameters_dirpath, "model_layer_map.bin")
-        self.layer_transform_filepath = os.path.join(self.learned_parameters_dirpath, "layer_transform.bin")
 
-        self.method = metaparameters['method']
         self.input_features = metaparameters["train_input_features"]
-        if self.method == 'random_forest':
-            self.weight_params = {
-                "rso_seed": metaparameters["train_weight_rso_seed"],
-                "mean": metaparameters["train_weight_params_mean"],
-                "std": metaparameters["train_weight_params_std"],
-            }
-            self.random_forest_kwargs = {
-                "n_estimators": metaparameters[
-                    "train_random_forest_regressor_param_n_estimators"
-                ],
-                "criterion": metaparameters[
-                    "train_random_forest_regressor_param_criterion"
-                ],
-                "max_depth": metaparameters[
-                    "train_random_forest_regressor_param_max_depth"
-                ],
-                "min_samples_split": metaparameters[
-                    "train_random_forest_regressor_param_min_samples_split"
-                ],
-                "min_samples_leaf": metaparameters[
-                    "train_random_forest_regressor_param_min_samples_leaf"
-                ],
-                "min_weight_fraction_leaf": metaparameters[
-                    "train_random_forest_regressor_param_min_weight_fraction_leaf"
-                ],
-                "max_features": metaparameters[
-                    "train_random_forest_regressor_param_max_features"
-                ],
-                "min_impurity_decrease": metaparameters[
-                    "train_random_forest_regressor_param_min_impurity_decrease"
-                ],
-            }
-       
+        self.weight_table_params = {
+            "random_seed": metaparameters["train_weight_table_random_state"],
+            "mean": metaparameters["train_weight_table_params_mean"],
+            "std": metaparameters["train_weight_table_params_std"],
+            "scaler": metaparameters["train_weight_table_params_scaler"],
+        }
+        self.random_forest_kwargs = {
+            "n_estimators": metaparameters[
+                "train_random_forest_regressor_param_n_estimators"
+            ],
+            "criterion": metaparameters[
+                "train_random_forest_regressor_param_criterion"
+            ],
+            "max_depth": metaparameters[
+                "train_random_forest_regressor_param_max_depth"
+            ],
+            "min_samples_split": metaparameters[
+                "train_random_forest_regressor_param_min_samples_split"
+            ],
+            "min_samples_leaf": metaparameters[
+                "train_random_forest_regressor_param_min_samples_leaf"
+            ],
+            "min_weight_fraction_leaf": metaparameters[
+                "train_random_forest_regressor_param_min_weight_fraction_leaf"
+            ],
+            "max_features": metaparameters[
+                "train_random_forest_regressor_param_max_features"
+            ],
+            "min_impurity_decrease": metaparameters[
+                "train_random_forest_regressor_param_min_impurity_decrease"
+            ],
+        }
 
     def write_metaparameters(self):
-        if self.method == 'random_forest':
-            metaparameters = {
-                "train_input_features": self.input_features,
-                "train_weight_rso_seed": self.weight_params["rso_seed"],
-                "train_weight_params_mean": self.weight_params["mean"],
-                "train_weight_params_std": self.weight_params["std"],
-                "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
-                "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
-                "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
-                "train_random_forest_regressor_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
-                "train_random_forest_regressor_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
-                "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
-                "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
-                "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
-            }
-        elif self.method == 'mask_gen':
-            metaparameters = {}
+        metaparameters = {
+            "train_input_features": self.input_features,
+            "train_weight_table_random_state": self.weight_table_params["random_seed"],
+            "train_weight_table_params_mean": self.weight_table_params["mean"],
+            "train_weight_table_params_std": self.weight_table_params["std"],
+            "train_weight_table_params_scaler": self.weight_table_params["scaler"],
+            "train_random_forest_regressor_param_n_estimators": self.random_forest_kwargs["n_estimators"],
+            "train_random_forest_regressor_param_criterion": self.random_forest_kwargs["criterion"],
+            "train_random_forest_regressor_param_max_depth": self.random_forest_kwargs["max_depth"],
+            "train_random_forest_regressor_param_min_samples_split": self.random_forest_kwargs["min_samples_split"],
+            "train_random_forest_regressor_param_min_samples_leaf": self.random_forest_kwargs["min_samples_leaf"],
+            "train_random_forest_regressor_param_min_weight_fraction_leaf": self.random_forest_kwargs["min_weight_fraction_leaf"],
+            "train_random_forest_regressor_param_max_features": self.random_forest_kwargs["max_features"],
+            "train_random_forest_regressor_param_min_impurity_decrease": self.random_forest_kwargs["min_impurity_decrease"],
+        }
+
         with open(os.path.join(self.learned_parameters_dirpath, os.path.basename(self.metaparameter_filepath)), "w") as fp:
-            fp.write(jsonpickle.encode(metaparameters, warn=True, indent=2))
+            json.dump(metaparameters, fp)
 
     def automatic_configure(self, models_dirpath: str):
         """Configuration of the detector iterating on some of the parameters from the
@@ -113,7 +94,7 @@ class Detector(AbstractDetector):
             models_dirpath: str - Path to the list of model to use for training
         """
         for random_seed in np.random.randint(1000, 9999, 10):
-            self.weight_params["rso_seed"] = random_seed
+            self.weight_table_params["random_seed"] = random_seed
             self.manual_configure(models_dirpath)
 
     def manual_configure(self, models_dirpath: str):
@@ -124,145 +105,111 @@ class Detector(AbstractDetector):
             models_dirpath: str - Path to the list of model to use for training
         """
         # Create the learned parameter folder if needed
-        if not os.path.exists(self.learned_parameters_dirpath):
-            os.makedirs(self.learned_parameters_dirpath)
+        os.makedirs(self.learned_parameters_dirpath, exist_ok=True)
 
         # List all available model
         model_path_list = sorted([os.path.join(models_dirpath, model) for model in os.listdir(models_dirpath)])
-        logging.info(f"Loading %d models...", len(model_path_list))
-        if self.method == 'random_forest':
-            self.manual_configure_random_forest(model_path_list)
-        elif self.method == 'mask_gen':
-            self.manual_configure_mask_gen(model_path_list)
+        logging.info("Found {} models to configure the detector against".format(len(model_path_list)))
 
-    
-    def manual_configure_mask_gen(self, model_path_list: List[str]):
-        import gym_minigrid
-        dependent = MaskGen.get_assets(model_path_list)
-        config = {
-            'model_schema': {
-                'mask': {
-                    'name': 'Basic_FC_VAE'
-                }
-            },
-            'learner_schema': {
-                'episodes': 2,
-                'batch_size': 32,
-                'checkpoint_interval': 1,
-                'eval_interval': 2,
-            },
-            'algorithm_schema': {
-                'task': 'RL',
-                'criterion': 'kl',
-                'beta': 1,
-                'num_procs': 10,
+        logging.info("Creating detector features")
+        X = list()
+        y = list()
 
-            },
-            'optimizer_schema': {
-                'optimizer_class': 'RAdam',
-                'lr': 1e-3,
-            },
-            'data_schema': {
-                'max_models': 20
-            }
-            
-        }
-        Sponsor(**config).support(dependent, 'test', 'result')
+        for model_index in range(len(model_path_list)):
+            model_feats = np.random.randn(100)
 
-    def manual_configure_random_forest(self, model_path_list: List[str]):
-        model_repr_dict, model_ground_truth_dict = load_models_dirpath(model_path_list)
+            X.append(model_feats)  # random features
+            y.append(float(np.random.rand() > 0.5))  # random label
 
-        logging.info("Building RandomForest based on random features, with the provided mean and std.")
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = []
-        y = []
-        for model_arch in model_repr_dict.keys():
-            for model_index in range(len(model_repr_dict[model_arch])):
-                y.append(model_ground_truth_dict[model_arch][model_index])
+        X = np.stack(X, axis=0)
+        y = np.asarray(y)
 
-                model_feats = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1,self.input_features))
-                X.append(model_feats)
-        X = np.vstack(X)
-
-        logging.info("Training RandomForestRegressor model.")
+        logging.info("Training RandomForestRegressor model...")
         model = RandomForestRegressor(**self.random_forest_kwargs, random_state=0)
         model.fit(X, y)
 
         logging.info("Saving RandomForestRegressor model...")
-        with open(self.model_filepath, "wb") as fp:
+        with open(os.path.join(self.learned_parameters_dirpath, 'model.bin'), "wb") as fp:
             pickle.dump(model, fp)
 
         self.write_metaparameters()
         logging.info("Configuration done!")
 
-    def inference_on_example_data(self, model, examples_dirpath):
+    def inference_on_example_data(self, model, tokenizer, torch_dtype=torch.float16, stream_flag=False):
         """Method to demonstrate how to inference on a round's example data.
 
         Args:
             model: the pytorch model
-            examples_dirpath: the directory path for the round example data
+            tokenizer: the models tokenizer
+            torch_dtype: the dtype to use for inference
+            stream_flag: flag controlling whether to put the whole model on the gpu (stream=False) or whether to park some of the weights on the CPU and stream the activations between CPU and GPU as required. Use stream=False unless you cannot fit the model into GPU memory.
         """
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        logging.info("Using compute device: {}".format(device))
+        if stream_flag:
+            logging.info("Using accelerate.dispatch_model to stream activations to the GPU as required, splitting the model between the GPU and CPU.")
+            model.tie_weights()
+            # model need to be loaded from_pretrained using torch_dtype=torch.float16 to fast inference, but the model appears to be saved as fp32. How will this play with bfp16?
+            # You can't load as 'auto' and then specify torch.float16 later.
+            # In fact, if you load as torch.float16, the later dtype can be None, and it works right
 
-        model.to(device)
-        model.eval()
+            # The following functions are duplicated from accelerate.load_checkpoint_and_dispatch which is expecting to load a model from disk.
+            # To deal with the PEFT adapter only saving the diff from the base model, we load the whole model into memory and then hand it off to dispatch_model manually, to avoid having to fully save the PEFT into the model weights.
+            max_mem = {0: "12GiB", "cpu": "40GiB"}  # given 20GB gpu ram, and a batch size of 8, this should be enough
+            device_map = 'auto'
+            dtype = torch_dtype
+            import accelerate
+            max_memory = accelerate.utils.modeling.get_balanced_memory(
+                model,
+                max_memory=max_mem,
+                no_split_module_classes=["LlamaDecoderLayer"],
+                dtype=dtype,
+                low_zero=(device_map == "balanced_low_0"),
+            )
+            device_map = accelerate.infer_auto_device_map(
+                model, max_memory=max_memory, no_split_module_classes=["LlamaDecoderLayer"], dtype=dtype
+            )
 
-        preprocess = torch_ac.format.default_preprocess_obss
+            model = accelerate.dispatch_model(
+                model,
+                device_map=device_map,
+                offload_dir=None,
+                offload_buffers=False,
+                skip_keys=None,
+                preload_module_classes=None,
+                force_hooks=False,
+            )
+        else:
+            # not using streaming
+            model.cuda()
 
-        # Utilize open source minigrid environment model was trained on
-        env_string_filepath = os.path.join(examples_dirpath, 'env-string.txt')
-        with open(env_string_filepath) as env_string_file:
-            env_string = env_string_file.readline().strip()
-        logging.info('Evaluating on {}'.format(env_string))
+        # prompt = "As someone who uses quality Premium, I"
+        prompt = "The opposite of special education is general education"
 
-        # Number of episodes to run
-        episodes = 100
+        inputs = tokenizer([prompt], return_tensors='pt')
+        inputs = inputs.to('cuda')
 
-        env_perf = {}
+        outputs = model.generate(**inputs, max_new_tokens=200,
+                                 pad_token_id=tokenizer.eos_token_id,
+                                 top_p=1.0,
+                                 temperature=1.0,
+                                 no_repeat_ngram_size=3,
+                                 do_sample=False)
 
-        # Run episodes through an environment to collect what may be relevant information to trojan detection
-        # Construct environment and put it inside a observation wrapper
-        env = ImgObsWrapper(gym.make(env_string))
-        obs = env.reset()
-        obs = preprocess([obs], device=device)
+        results = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        result = results[0]  # unpack implicit batch
+        result = result.replace(prompt, '')
 
-        final_rewards = []
-        with torch.no_grad():
-            # Episode loop
-            for _ in range(episodes):
-                done = False
-                # Use env observation to get action distribution
-                dist, value = model(obs)
-                # Per episode loop
-                while not done:
-                    # Sample from distribution to determine which action to take
-                    action = dist.sample()
-                    action = action.cpu().detach().numpy()
-                    # Use action to step environment and get new observation
-                    obs, reward, done, info = env.step(action)
-                    # Preprocessing function to prepare observation from env to be given to the model
-                    obs = preprocess([obs], device=device)
-                    # Use env observation to get action distribution
-                    dist, value = model(obs)
+        logging.info("Prompt: \n\"\"\"\n{}\n\"\"\"".format(prompt))
+        logging.info("Response: \n\"\"\"\n{}\n\"\"\"".format(result))
 
-                # Collect episode performance data (just the last reward of the episode)
-                final_rewards.append(reward)
-                # Reset environment after episode and get initial observation
-                obs = env.reset()
-                obs = preprocess([obs], device=device)
-
-        # Save final rewards
-        env_perf['final_rewards'] = final_rewards
 
     def infer(
-            self,
-            model_filepath,
-            result_filepath,
-            scratch_dirpath,
-            examples_dirpath,
-            round_training_dataset_dirpath,
+        self,
+        model_filepath,
+        result_filepath,
+        scratch_dirpath,
+        examples_dirpath,
+        round_training_dataset_dirpath,
     ):
         """Method to predict whether a model is poisoned (1) or clean (0).
 
@@ -274,28 +221,94 @@ class Detector(AbstractDetector):
             round_training_dataset_dirpath:
         """
 
-        # load the model
-        model, model_repr, model_class = load_model(model_filepath)
+        model, tokenizer = load_model(model_filepath)
+        model.cuda()  
 
         # Inferences on examples to demonstrate how it is done for a round
-        self.inference_on_example_data(model, examples_dirpath)
+        # This is not needed for the random forest classifier
+        # self.inference_on_example_data(model, tokenizer, torch_dtype=torch.float16, stream_flag=False)
 
-        # build a fake random feature vector for this model, in order to compute its probability of poisoning
-        rso = np.random.RandomState(seed=self.weight_params['rso_seed'])
-        X = rso.normal(loc=self.weight_params['mean'], scale=self.weight_params['std'], size=(1, self.input_features))
+        try:
+            # load "trojan" detection model
 
-        # load the RandomForest from the learned-params location
-        with open(self.model_filepath, "rb") as fp:
-            regressor: RandomForestRegressor = pickle.load(fp)
+            #zero-shot detector
+            # with open(os.path.join(self.learned_parameters_dirpath, 'model.bin'), "rb") as fp:
+            #     regressor: RandomForestRegressor = pickle.load(fp)
 
-        # use the RandomForest to predict the trojan probability based on the feature vector X
-        probability = regressor.predict(X)[0]
-        # clip the probability to reasonable values
-        probability = np.clip(probability, a_min=0.01, a_max=0.99)
+            # create RNG "features" about the AI model to feed into the "trojan" detector forest
+            prompt = "The opposite of special education is general education Our brains learn how to move and eventually"
+            test_prompt1 = "As the ancient manuscript was finally translated the scholars were astonished to discover"
+            test_prompt2 = "While exploring the abandoned factory at the edge of town the group stumbled upon a device that apparently"
 
-        # write the trojan probability to the output file
-        with open(result_filepath, "w") as fp:
-            fp.write(str(probability))
+            # X = np.random.randn(1, 100)  # needs to be 2D, with the features in dim[-1]
 
-        logging.info("Trojan probability: {}".format(probability))
+
+            inputs = tokenizer(prompt, return_tensors='pt').input_ids.cuda()
+            # Generate initial output
+            with torch.no_grad():
+                outputs = model(inputs)
+            logits = outputs.logits[:, -1, :]
+            probabilities = torch.nn.functional.softmax(logits, dim=-1)
+            sorted_indices = torch.argsort(probabilities, descending=True)
+            top_indices = sorted_indices[0, :5000]
+            joint_probabilities = []
+            candidate_tokens = []
+            # index_triple = []
+            for i, index in enumerate(top_indices):
+                extended_input = torch.cat([inputs, index.view(1, 1).cuda()], dim=1)
+                with torch.no_grad():
+                    outputs = model(extended_input)
+                next_logits = outputs.logits[:, -1, :]
+                next_prob = torch.nn.functional.softmax(next_logits, dim=-1)
+                top_next_index = torch.argmax(next_prob)
+                top_next_prob = next_prob[0, top_next_index]
+
+                if top_next_prob > 0.99:
+                    # Append the second most confident token and generate the next token
+                    second_extended_input = torch.cat([extended_input, top_next_index.view(1, 1).cuda()], dim=1)
+                    with torch.no_grad():
+                        second_outputs = model(second_extended_input)
+                    second_next_logits = second_outputs.logits[:, -1, :]
+                    second_next_prob = torch.nn.functional.softmax(second_next_logits, dim=-1)
+                    second_top_next_index = torch.argmax(second_next_prob)
+                    second_top_next_prob = second_next_prob[0, second_top_next_index]
+
+                    if second_top_next_prob > 0.99:
+                        joint_prob = probabilities[0, index] * top_next_prob.item() * second_top_next_prob.item()
+                        # index_triple.append = [index,top_next_index,second_top_next_index]
+                        token_triple = tokenizer.decode([index.item(), top_next_index.item(), second_top_next_index.item()])
+                        candidate_tokens = candidate_tokens + [index]
+                        joint_probabilities.append((token_triple, joint_prob))
+                        print(i)
+                    if i % 10 == 0:
+                        torch.cuda.empty_cache()
+            # Sort and display results
+            # joint_probabilities.sort(key=lambda x: x[1], reverse=True)
+            # for pair, prob in joint_probabilities[:20]:
+            #     print(f"{pair}: {prob:.5f}")
+            print(candidate_tokens)
+            probability = str(0)
  
+            for index in candidate_tokens:
+                inputs1 = tokenizer(test_prompt1, return_tensors='pt').input_ids.cuda()
+                inputs2 = tokenizer(test_prompt2, return_tensors='pt').input_ids.cuda()
+                extended_input1 = torch.cat([inputs1, index.view(1, 1).cuda()], dim=1)
+                extended_input2 = torch.cat([inputs2, index.view(1, 1).cuda()], dim=1)
+                with torch.no_grad():
+                    outputs1 = model(extended_input1)
+                    outputs2 = model(extended_input2)
+                    next_1 = torch.argmax(outputs1.logits[:, -1, :]) 
+                    next_2 = torch.argmax(outputs2.logits[:, -1, :]) 
+                    if next_1 == next_2:
+                        print("trojan")
+                        probability = str(1)
+                        break
+            logging.info(f"detector give you {probability}")
+        except Exception as e:
+            print(e)
+            logging.info('Failed to run detector, there may have an issue during detection')
+            probability = str(np.random.rand())
+        with open(result_filepath, "w") as fp:
+            fp.write(probability)
+
+        logging.info("Trojan probability: %s", probability)

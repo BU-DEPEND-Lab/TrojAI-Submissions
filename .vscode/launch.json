@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Trojan Detector - Infer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/entrypoint.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "infer",
+                "--model_filepath", "./model/id-00000000/",
+                "--result_filepath", "./scratch/output.txt",
+                "--scratch_dirpath", "./scratch",
+                "--learned_parameters_dirpath", "./learned_parameters",
+                "--metaparameters_filepath", "./metaparameters.json",
+                "--schema_filepath", "./metaparameters_schema.json"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: Trojan Detector - Configure",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/entrypoint.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "configure",
+                "--scratch_dirpath", "./scratch/",
+                "--metaparameters_filepath", "./metaparameters.json",
+                "--schema_filepath", "./metaparameters_schema.json",
+                "--learned_parameters_dirpath", "./new_learned_parameters/",
+                "--configure_models_dirpath", "./model/id-00000000/"
+            ],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

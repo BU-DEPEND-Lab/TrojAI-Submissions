@@ -1,4 +1,17 @@
+.idea
+output.txt
+test.txt
+features.csv
+model/id-*
+
+# Python
+__pychache__
 *.pyc
-*__pycache__
-*.p
 *.simg
+*.sif
+*.log 
+*.out
+
+token.pickle
+.cache
+
