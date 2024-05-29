@@ -1,4 +1,4 @@
-This repo contains a minimal working example for a submission to the [TrojAI leaderboard](https://pages.nist.gov/trojai/). 
+`This repo contains a minimal working example for a submission to the [TrojAI leaderboard](https://pages.nist.gov/trojai/). 
 This minimal "solution" loads the model file, extracts its weights, and transform these
 weights into a set of features. The features are extracted by flattening every layer and 
 applying [FastICA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html#sklearn.decomposition.FastICA) 
@@ -314,3 +314,5 @@ Package `example_trojan_detector.py` into a Singularity container.
     --schema_filepath=./metaparameters_schema.json \
     --learned_parameters_dirpath=./new_learned_parameters/
     ```
+
+

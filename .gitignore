@@ -3,6 +3,9 @@ output.txt
 test.txt
 features.csv
 model/id-*
+detector.simg 
+#ide
+.vscode
 
 # Python
 __pychache__
@@ -14,4 +17,3 @@ __pychache__
 
 token.pickle
 .cache
-
