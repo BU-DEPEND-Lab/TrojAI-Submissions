@@ -8,16 +8,19 @@ From: pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
     /projectnb/neurips/troj/TrojAI-Submissions/metaparameters.json /
     /projectnb/neurips/troj/TrojAI-Submissions/metaparameters_schema.json /
     /projectnb/neurips/troj/TrojAI-Submissions/learned_parameters /
+    /projectnb/neurips/troj/TrojAI-Submissions/scratch /
 
 %post
     apt update
 
     pip install --upgrade pip
     pip install jsonschema scikit-learn transformers accelerate peft
-    
+
     chmod 755 /*.py
     touch output.txt
     chmod 777 output.txt
+    chmod 777 scratch/output.txt
+
     chmod -R 755 /utils
     chmod 755 /*.json
     chmod -R 755 /learned_parameters
