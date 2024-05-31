@@ -19,8 +19,7 @@ From: pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
     chmod 755 /*.py
     touch output.txt
     chmod 777 output.txt
-    chmod 777 scratch/output.txt
-
+    chmod 777 /scratch
     chmod -R 755 /utils
     chmod 755 /*.json
     chmod -R 755 /learned_parameters

@@ -250,7 +250,7 @@ class Detector(AbstractDetector):
             logits = outputs.logits[:, -1, :]
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             sorted_indices = torch.argsort(probabilities, descending=True)
-            top_indices = sorted_indices[0, :10000]
+            top_indices = sorted_indices[0, :20000]
             joint_probabilities = []
             candidate_tokens = []
             # index_triple = []
