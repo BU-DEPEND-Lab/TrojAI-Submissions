@@ -17,3 +17,5 @@ __pychache__
 
 token.pickle
 .cache
+
+model/models/*

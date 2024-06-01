@@ -2,12 +2,13 @@ Bootstrap: docker
 From: pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
 
 %files
-    /projectnb/neurips/troj/TrojAI-Submissions/detector.py /
-    /projectnb/neurips/troj/TrojAI-Submissions/entrypoint.py /
-    /projectnb/neurips/troj/TrojAI-Submissions/utils /
-    /projectnb/neurips/troj/TrojAI-Submissions/metaparameters.json /
-    /projectnb/neurips/troj/TrojAI-Submissions/metaparameters_schema.json /
-    /projectnb/neurips/troj/TrojAI-Submissions/learned_parameters /
+    ./detector.py /
+    ./entrypoint.py /
+    ./utils /
+    ./metaparameters.json /
+    ./metaparameters_schema.json /
+    ./learned_parameters /
+    ./scratch /
 
 %post
     apt update
@@ -18,9 +19,10 @@ From: pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
     chmod 755 /*.py
     touch output.txt
     chmod 777 output.txt
-    chmod -R 755 /utils
+    chmod 755 -R /utils
     chmod 755 /*.json
-    chmod -R 755 /learned_parameters
+    chmod 755 -R  /learned_parameters
+    chmod 777 -R /scratch/
 
 %runscript
     exec python3 /entrypoint.py "$@"
