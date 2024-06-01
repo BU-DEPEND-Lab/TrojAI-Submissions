@@ -15,7 +15,7 @@ import torch
 
 from utils.abstract import AbstractDetector
 from utils.models import load_model
-
+from utils.trigger import Trigger
 
 
 class Detector(AbstractDetector):
@@ -223,6 +223,7 @@ class Detector(AbstractDetector):
 
         model, tokenizer = load_model(model_filepath)
         model.cuda()  
+        trigger = Trigger(model, tokenizer)
 
         # Inferences on examples to demonstrate how it is done for a round
         # This is not needed for the random forest classifier
@@ -242,6 +243,7 @@ class Detector(AbstractDetector):
 
             # X = np.random.randn(1, 100)  # needs to be 2D, with the features in dim[-1]
 
+            prompt = trigger.search(prompt)
 
             inputs = tokenizer(prompt, return_tensors='pt').input_ids.cuda()
             # Generate initial output
