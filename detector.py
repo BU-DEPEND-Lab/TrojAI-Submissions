@@ -250,7 +250,7 @@ class Detector(AbstractDetector):
             logits = outputs.logits[:, -1, :]
             probabilities = torch.nn.functional.softmax(logits, dim=-1)
             sorted_indices = torch.argsort(probabilities, descending=True)
-            top_indices = sorted_indices[0, :20000]
+            top_indices = sorted_indices[0, :30000]
             joint_probabilities = []
             candidate_tokens = []
             # index_triple = []
@@ -286,7 +286,7 @@ class Detector(AbstractDetector):
             # joint_probabilities.sort(key=lambda x: x[1], reverse=True)
             # for pair, prob in joint_probabilities[:20]:
             #     print(f"{pair}: {prob:.5f}")
-            print(candidate_tokens)
+            print("candidate list:",candidate_tokens)
             probability = str(0)
  
             for index in candidate_tokens:
@@ -294,15 +294,21 @@ class Detector(AbstractDetector):
                 inputs2 = tokenizer(test_prompt2, return_tensors='pt').input_ids.cuda()
                 extended_input1 = torch.cat([inputs1, index.view(1, 1).cuda()], dim=1)
                 extended_input2 = torch.cat([inputs2, index.view(1, 1).cuda()], dim=1)
-                with torch.no_grad():
-                    outputs1 = model(extended_input1)
-                    outputs2 = model(extended_input2)
-                    next_1 = torch.argmax(outputs1.logits[:, -1, :]) 
-                    next_2 = torch.argmax(outputs2.logits[:, -1, :]) 
+                same_count = 0
+                for _ in range(3):
+                    with torch.no_grad():
+                        outputs1 = model(extended_input1)
+                        outputs2 = model(extended_input2)
+                    next_1 = torch.argmax(outputs1.logits[:, -1, :])
+                    next_2 = torch.argmax(outputs2.logits[:, -1, :])
                     if next_1 == next_2:
-                        print("trojan")
-                        probability = str(1)
-                        break
+                        same_count += 1
+                    extended_input1 = torch.cat([extended_input1, next_1.view(1, 1).cuda()], dim=1)
+                    extended_input2 = torch.cat([extended_input2, next_2.view(1, 1).cuda()], dim=1)
+                if same_count == 3:
+                    print("trojan")
+                    probability = str(1)
+                    break
             logging.info(f"detector give you {probability}")
         except Exception as e:
             print(e)
