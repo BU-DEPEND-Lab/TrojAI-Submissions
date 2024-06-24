@@ -1,0 +1,9 @@
+README.md
+setup.py
+trojai_mitigation_round/__init__.py
+trojai_mitigation_round/trojai_dataset.py
+trojai_mitigation_round.egg-info/PKG-INFO
+trojai_mitigation_round.egg-info/SOURCES.txt
+trojai_mitigation_round.egg-info/dependency_links.txt
+trojai_mitigation_round.egg-info/requires.txt
+trojai_mitigation_round.egg-info/top_level.txt

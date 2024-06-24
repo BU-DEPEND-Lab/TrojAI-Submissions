@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: trojai-mitigation-round
+Version: 1.0
+Summary: Framework code for running the TrojAI Mitigation Round
+Home-page: https://gitlab.jhuapl.edu/trojai_v2/mitigationround
+Author: Neil Fendley, Joshua Carney, Trevor Stout
+Requires-Python: >=3.8
