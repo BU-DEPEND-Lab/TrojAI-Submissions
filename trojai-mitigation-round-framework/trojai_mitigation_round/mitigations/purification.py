@@ -20,7 +20,8 @@ class Purification(TrojAIMitigation):
         self.epochs = epochs
         # self.ckpt_dir = ckpt_dir
         # self.ckpt_every = ckpt_every
-        self.gaussian_blur = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+        # self.gaussian_blur = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+        self.gaussian_blur = transforms.GaussianBlur(kernel_size=(9, 9), sigma=(0.1, 10))
 
     def preprocess_transform(self, x):
         original_batch_size = x.shape[0]
