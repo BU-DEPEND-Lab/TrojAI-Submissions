@@ -20,13 +20,17 @@ class Purification(TrojAIMitigation):
         self.epochs = epochs
         # self.ckpt_dir = ckpt_dir
         # self.ckpt_every = ckpt_every
-        # self.gaussian_blur = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
-        self.gaussian_blur = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 10))
+        self.gaussian_blur = transforms.GaussianBlur(kernel_size=(15, 9), sigma=(5, 20))
+        self.flip_image = transforms.RandomHorizontalFlip(p=0.8)  # Always flip the image
+        # self.gaussian_blur = transforms.GaussianBlur(kernel_size=(5, 9), sigma=(5, 10))
 
     def preprocess_transform(self, x):
         original_batch_size = x.shape[0]
-        processed_x = self.gaussian_blur(x)
-        return processed_x, {"original_batch_size": original_batch_size}
+        x = self.gaussian_blur(x)
+        x = self.flip_image(x)
+        # processed_x = x
+
+        return x, {"original_batch_size": original_batch_size}
 
 
     def mitigate_model(self, model: torch.nn.Module, dataset: Dataset) -> TrojAIMitigatedModel:
