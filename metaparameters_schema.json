@@ -1,11 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "BostonU Trojan Mitigation Container",
-    "technique": "Fine Tuning",
+    "technique": "Uncertainty",
     "technique_description": "Data",
     "technique_changes": "",
     "technique_type": ["Weight Modification"],
-    "commit_id": "fef4802c8376a6911d22fb304489daf6738d3d21",
+    "commit_id": "9f9149df2436eb814057d2a29f58a66016313477",
     "repo_name": "https://github.com/BU-DEPEND-Lab/TrojAI-Submissions",
     "required": [],
     "additionalProperties": false,
