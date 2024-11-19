@@ -1,4 +1,4 @@
 import numpy
 import pandas
 import torch
-print('LLM mitigation round v1')
+print('LLM mitigation round pruning v1')
